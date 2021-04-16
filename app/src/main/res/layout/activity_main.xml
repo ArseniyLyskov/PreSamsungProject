@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+        xmlns:custom="http://schemas.android.com/apk/res-auto"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical"
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:id="@+id/activity_main">
+
+
+    <!--<com.example.presamsungproject.DrawView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/draw_view"
+    />-->
+
+    <!--<io.github.controlwear.virtual.joystick.android.JoystickView
+            android:layout_gravity="bottom|left"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            custom:JV_buttonColor="#41000000"
+            custom:JV_buttonSizeRatio="35%"
+            custom:JV_backgroundSizeRatio="60%"
+            custom:JV_borderColor="#808080"
+            custom:JV_backgroundColor="#25000000"
+            custom:JV_borderWidth="4dp"
+            custom:JV_fixedCenter="true"
+            android:id="@+id/jstickL"
+    />
+
+    <io.github.controlwear.virtual.joystick.android.JoystickView
+            android:layout_gravity="bottom|right"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            custom:JV_buttonColor="#41000000"
+            custom:JV_buttonSizeRatio="35%"
+            custom:JV_backgroundSizeRatio="60%"
+            custom:JV_borderColor="#808080"
+            custom:JV_backgroundColor="#25000000"
+            custom:JV_borderWidth="4dp"
+            custom:JV_fixedCenter="true"
+            android:id="@+id/jstickR"
+    />
+
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/tv"
+    />-->
+
+</FrameLayout>
