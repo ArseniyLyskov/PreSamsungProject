@@ -5,6 +5,7 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.widget.TextView;
 
 import java.util.HashSet;
 
@@ -17,6 +18,8 @@ public class Game {
     public HashSet<Tank> enemyTanks = new HashSet<>();
     public HashSet<Tank> allyTanks = new HashSet<>();
     public double lJangle, lJstrength, rJangle, rJstrength;
+    public int fps;
+    public TextView fps_tv;
 
     public void start(Context context){
         bmp_greenHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.green_hp);
@@ -33,7 +36,7 @@ public class Game {
         //enemyTanks.add(new Tank(1,1000,300,1,36,-87,"SecondGuy",1));
 
         myTank = new MyTank(1,0,0,2,0,
-                0,0,15, bmp_greenHp, bmp_greenTp);
+                0,0,800, bmp_greenHp, bmp_greenTp);
 
     }
 

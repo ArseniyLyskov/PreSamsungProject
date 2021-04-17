@@ -2,8 +2,10 @@ package com.example.presamsungproject;
 
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.FrameLayout;
+import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import io.github.controlwear.virtual.joystick.android.JoystickView;
@@ -18,6 +20,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         //setContentView(new DrawView(this));
+
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
         game.start(getApplicationContext());
@@ -64,8 +67,14 @@ public class MainActivity extends AppCompatActivity {
         jstickR.setBorderWidth(5);
         jstickR.setFixedCenter(true);
 
+        TextView fps_tv = new TextView(this);
+        fps_tv.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,
+                FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.RIGHT | Gravity.TOP));
+        game.fps_tv = fps_tv;
+
         frameLayout.addView(new DrawView(this, game));
         frameLayout.addView(jstickL);
         frameLayout.addView(jstickR);
+        frameLayout.addView(fps_tv);
     }
 }
