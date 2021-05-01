@@ -1,14 +1,15 @@
-package com.example.presamsungproject;
+package com.example.presamsungproject.GameObjects;
 
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
+import com.example.presamsungproject.Game;
 
-public class MyTank extends Tank{
-    double speed, current_speed;
-    Bitmap hull, tower;
-    Game game;
+public class MyTank extends Tank {
+    private double speed, current_speed;
+    private Bitmap hull, tower;
+    private Game game;
 
     {
         myPaint.setColor(Color.GREEN);
@@ -27,40 +28,40 @@ public class MyTank extends Tank{
     public void updateMyTankProperties() {
         double koeff = 1 / (double) (Game.MAX_FPS);
 
-        if (game.lJstrength > 0)
-            angleH = -game.lJangle + 90;
-        current_speed = speed * game.lJstrength / 100;
+        if (game.getlJstrength() > 0)
+            angleH = -game.getlJangle() + 90;
+        current_speed = speed * game.getlJstrength() / 100;
 
-        if (game.rJstrength > 0)
-            angleT = -game.rJangle + 90 - angleH;
+        if (game.getrJstrength() > 0)
+            angleT = -game.getrJangle() + 90 - angleH;
 
         x += current_speed * Math.cos(Math.toRadians(90 - angleH)) * koeff;
         y -= current_speed * Math.sin(Math.toRadians(90 - angleH)) * koeff;
 
-        if (game.rJstrength > 0)
-            tankSight.isSighting = true;
+        if (game.getrJstrength() > 0)
+            tankSight.setSighting(true);
         else {
-            if (tankSight.isSighting)
+            if (tankSight.isSighting())
                 createBullet();
-            tankSight.isSighting = false;
+            tankSight.setSighting(false);
         }
 
         updateBulletsCoordinates(koeff);
     }
 
     private void updateBulletsCoordinates(double koeff) {
-        Bullet[] arr_bullets = new Bullet[game.bullets.size()];
-        game.bullets.toArray(arr_bullets);
+        Bullet[] arr_bullets = new Bullet[game.getBullets().size()];
+        game.getBullets().toArray(arr_bullets);
         for (Bullet b : arr_bullets) {
-            b.x += b.speed * Math.cos(Math.toRadians(90 - b.angle)) * koeff;
-            b.y -= b.speed * Math.sin(Math.toRadians(90 - b.angle)) * koeff;
-            if(b.x > game.width + 50 || b.x < -50 || b.y > game.height + 50 || b.y < -50 || b.ricochets == 0)
-                game.bullets.remove(b);
+            b.setX(b.getX() + b.getSpeed() * Math.cos(Math.toRadians(90 - b.getAngle())) * koeff);
+            b.setY(b.getY() - b.getSpeed() * Math.sin(Math.toRadians(90 - b.getAngle())) * koeff);
+            if(b.getX() > game.getWidth() + 50 || b.getX() < -50 || b.getY() > game.getHeight() + 50 || b.getY() < -50 || b.getRicochets() == 0)
+                game.getBullets().remove(b);
         }
     }
 
     private void createBullet() {
-        game.bullets.add(new Bullet(
+        game.getBullets().add(new Bullet(
                 (int) (x + tower.getWidth() / 2 * Math.cos(Math.toRadians(90 - (angleH + angleT)))),
                 (int) (y - tower.getHeight() / 2 * Math.sin(Math.toRadians(90 - (angleH + angleT)))),
                 angleH + angleT));

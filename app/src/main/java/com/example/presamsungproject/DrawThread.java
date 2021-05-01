@@ -37,7 +37,7 @@ public class DrawThread extends Thread {
                         canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), backgroundPaint);
 
                         game.drawAll(canvas, backgroundPaint);
-                        game.fps++;
+                        game.setFps(game.getFps() + 1);
 
                         //
                     }  finally {

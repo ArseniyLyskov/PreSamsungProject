@@ -6,6 +6,9 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.widget.TextView;
+import com.example.presamsungproject.GameObjects.Bullet;
+import com.example.presamsungproject.GameObjects.MyTank;
+import com.example.presamsungproject.GameObjects.Tank;
 
 import java.util.HashSet;
 
@@ -16,14 +19,14 @@ public class Game {
     private Bitmap bmp_bullet;
     public static final int MAX_FPS = 35;
 
-    public int width, height;
-    public MyTank myTank;
-    public HashSet<Tank> enemyTanks = new HashSet<>();
-    public HashSet<Tank> allyTanks = new HashSet<>();
-    public HashSet<Bullet> bullets = new HashSet<>();
-    public double lJangle, lJstrength, rJangle, rJstrength;
-    public int fps;
-    public TextView fps_tv;
+    private int width, height;
+    private MyTank myTank;
+    private HashSet<Tank> enemyTanks = new HashSet<>();
+    private HashSet<Tank> allyTanks = new HashSet<>();
+    private HashSet<Bullet> bullets = new HashSet<>();
+    private double lJangle, lJstrength, rJangle, rJstrength;
+    private int fps;
+    private TextView fps_tv;
 
     {
         width = 1920;
@@ -64,7 +67,71 @@ public class Game {
         Bullet[] arr_bullets = new Bullet[bullets.size()];
         bullets.toArray(arr_bullets);
         for (Bullet b : arr_bullets) {
-            canvas.drawBitmap(bmp_bullet, (int) b.x, (int) b.y, paint);
+            canvas.drawBitmap(bmp_bullet, (int) b.getX(), (int) b.getY(), paint);
         }
+    }
+
+    public int getWidth() {
+        return width;
+    }
+
+    public int getHeight() {
+        return height;
+    }
+
+    public MyTank getMyTank() {
+        return myTank;
+    }
+
+    public HashSet<Bullet> getBullets() {
+        return bullets;
+    }
+
+    public double getlJangle() {
+        return lJangle;
+    }
+
+    public void setlJangle(double lJangle) {
+        this.lJangle = lJangle;
+    }
+
+    public double getlJstrength() {
+        return lJstrength;
+    }
+
+    public void setlJstrength(double lJstrength) {
+        this.lJstrength = lJstrength;
+    }
+
+    public double getrJangle() {
+        return rJangle;
+    }
+
+    public void setrJangle(double rJangle) {
+        this.rJangle = rJangle;
+    }
+
+    public double getrJstrength() {
+        return rJstrength;
+    }
+
+    public void setrJstrength(double rJstrength) {
+        this.rJstrength = rJstrength;
+    }
+
+    public int getFps() {
+        return fps;
+    }
+
+    public void setFps(int fps) {
+        this.fps = fps;
+    }
+
+    public TextView getFps_tv() {
+        return fps_tv;
+    }
+
+    public void setFps_tv(TextView fps_tv) {
+        this.fps_tv = fps_tv;
     }
 }

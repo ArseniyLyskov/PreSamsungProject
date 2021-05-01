@@ -1,4 +1,4 @@
-package com.example.presamsungproject;
+package com.example.presamsungproject.GameObjects;
 
 import android.graphics.*;
 
@@ -47,7 +47,7 @@ public class Tank {
         canvas.rotate((float) angleH, (float) (x + hWidth / 2), (float) (y + hHeight / 2));
         canvas.drawBitmap(hull, (int) x, (int) y, paint);
         canvas.rotate((float) angleT, (float) (x + tWidth / 2), (float) (y + tHeight / 2));
-        if(tankSight.isSighting)
+        if(tankSight.isSighting())
             tankSight.draw(canvas, (int) (x + tWidth / 2), (int) (y + tHeight / 2));
         canvas.drawBitmap(tower, (int) x, (int) y, paint);
         canvas.restore();

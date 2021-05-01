@@ -17,7 +17,7 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            game.myTank.updateMyTankProperties();
+            game.getMyTank().updateMyTankProperties();
             drawThread.isTimeToUpdate = true;
         }
 
@@ -35,8 +35,8 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            game.fps_tv.setText("FPS: " + game.fps + "\nBullets: "+ game.bullets.size());
-            game.fps = 0;
+            game.getFps_tv().setText("FPS: " + game.getFps() + "\nBullets: "+ game.getBullets().size());
+            game.setFps(0);
         }
 
         @Override

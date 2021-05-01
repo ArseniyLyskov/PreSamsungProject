@@ -29,15 +29,15 @@ public class MainActivity extends AppCompatActivity {
         jstickL.setOnMoveListener(new JoystickView.OnMoveListener() {
             @Override
             public void onMove(int angle, int strength) {
-                game.lJangle = angle;
-                game.lJstrength = strength;
+                game.setlJangle(angle);
+                game.setlJstrength(strength);
             }
         });
         jstickR.setOnMoveListener(new JoystickView.OnMoveListener() {
             @Override
             public void onMove(int angle, int strength) {
-                game.rJangle = angle;
-                game.rJstrength = strength;
+                game.setrJangle(angle);
+                game.setrJstrength(strength);
             }
         });
     }
@@ -69,7 +69,7 @@ public class MainActivity extends AppCompatActivity {
         TextView fps_tv = new TextView(this);
         fps_tv.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.RIGHT | Gravity.TOP));
-        game.fps_tv = fps_tv;
+        game.setFps_tv(fps_tv);
 
         frameLayout.addView(new DrawView(this, game));
         frameLayout.addView(jstickL);
