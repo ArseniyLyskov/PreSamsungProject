@@ -2,18 +2,15 @@ package com.example.presamsungproject;
 
 import android.content.Context;
 import android.os.CountDownTimer;
-import android.util.AttributeSet;
-import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
-import android.widget.TextView;
 
 public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     private DrawThread drawThread;
     private Game game;
-    private static final int MAX_FPS = 30;
+    public static final int MAX_FPS = 50;
 
-    public void updateMyTankCoordinates() {
+    public void updateGameProperties() {
         double koeff = 1 / (double) (MAX_FPS);
 
         if (game.lJstrength > 0)
@@ -26,6 +23,29 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         game.myTank.x += game.myTank.current_speed * Math.cos(Math.toRadians(90 - game.myTank.angleH)) * koeff;
         game.myTank.y -= game.myTank.current_speed * Math.sin(Math.toRadians(90 - game.myTank.angleH)) * koeff;
 
+        if (game.rJstrength > 0)
+            game.myTank.tankSight.isSighting = true;
+        else {
+            if (game.myTank.tankSight.isSighting)
+                createBullet();
+            game.myTank.tankSight.isSighting = false;
+        }
+
+        Bullet[] arr_bullets = new Bullet[game.bullets.size()];
+        game.bullets.toArray(arr_bullets);
+        for (Bullet b : arr_bullets) {
+            b.x += b.speed * Math.cos(Math.toRadians(90 - b.angle)) * koeff;
+            b.y -= b.speed * Math.sin(Math.toRadians(90 - b.angle)) * koeff;
+            if(b.x > game.width + 50 || b.x < -50 || b.y > game.height + 50 || b.y < -50 || b.ricochets == 0)
+                game.bullets.remove(b);
+        }
+
+    }
+
+    public void createBullet() {
+        game.bullets.add(new Bullet((int) (game.myTank.x + game.myTank.tower.getWidth() / 2 * Math.cos(Math.toRadians(90 - (game.myTank.angleH + game.myTank.angleT)))),
+                (int) (game.myTank.y - game.myTank.tower.getHeight() / 2 * Math.sin(Math.toRadians(90 - (game.myTank.angleH + game.myTank.angleT)))),
+                game.myTank.angleH + game.myTank.angleT));
     }
 
     class ThreadTimer extends CountDownTimer {
@@ -36,7 +56,7 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            updateMyTankCoordinates();
+            updateGameProperties();
             drawThread.isTimeToUpdate = true;
         }
 
@@ -45,6 +65,7 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
         }
     }
+
     class SecTimer extends CountDownTimer {
 
         public SecTimer(long millisInFuture, long countDownInterval) {
@@ -53,7 +74,7 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            game.fps_tv.setText("FPS:" + game.fps);
+            game.fps_tv.setText("FPS: " + game.fps + "\nBullets: "+ game.bullets.size());
             game.fps = 0;
         }
 
@@ -63,21 +84,11 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
-    public DrawView(Context context) {
-        super(context);
-        getHolder().addCallback(this);
-    }
-
     public DrawView(Context context, Game game) {
         super(context);
         getHolder().addCallback(this);
         this.game = game;
     }
-
-    /*public DrawView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        getHolder().addCallback(this);
-    } // конструктор для обращения activity_main к DrawView*/
 
     @Override
     public void surfaceCreated(SurfaceHolder holder) {
@@ -88,7 +99,6 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         threadTimer.start();
         SecTimer secTimer = new SecTimer(Integer.MAX_VALUE, 1000);
         secTimer.start();
-
     }
 
     @Override

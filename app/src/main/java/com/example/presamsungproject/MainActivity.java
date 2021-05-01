@@ -2,7 +2,6 @@ package com.example.presamsungproject;
 
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
-import android.util.Log;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.TextView;
