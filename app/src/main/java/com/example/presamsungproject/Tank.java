@@ -24,12 +24,16 @@ public class Tank {
         double hHeight = hull.getHeight();
         double tWidth = tower.getWidth();
         double tHeight = tower.getHeight();
+        /*//canvas.save();
         canvas.rotate((float) angleH, (float) (x + hWidth / 2),
                 (float) (y + hHeight / 2));
         canvas.drawBitmap(hull, (int) x, (int) y, paint);
         canvas.rotate((float) -angleH, (float) (x + hWidth / 2),
                 (float) (y + hHeight / 2));
+        //canvas.restore();
 
+
+        //canvas.save();
         canvas.rotate((float) (angleH + angleT), (float) (x + tWidth / 2),
                 (float) (y + tHeight / 2));
         if(tankSight.isSighting)
@@ -37,6 +41,16 @@ public class Tank {
         canvas.drawBitmap(tower, (int) x, (int) y, paint);
         canvas.rotate((float) -(angleH + angleT), (float) (x + tWidth / 2),
                 (float) (y + tHeight / 2));
+        //canvas.restore();*/
+
+        canvas.save();
+        canvas.rotate((float) angleH, (float) (x + hWidth / 2), (float) (y + hHeight / 2));
+        canvas.drawBitmap(hull, (int) x, (int) y, paint);
+        canvas.rotate((float) angleT, (float) (x + tWidth / 2), (float) (y + tHeight / 2));
+        if(tankSight.isSighting)
+            tankSight.draw(canvas, (int) (x + tWidth / 2), (int) (y + tHeight / 2));
+        canvas.drawBitmap(tower, (int) x, (int) y, paint);
+        canvas.restore();
 
         canvas.drawText(playerName, (int) (x + hWidth / 2 - nameWidth / 2), (int) (y - 10), myPaint);
     }

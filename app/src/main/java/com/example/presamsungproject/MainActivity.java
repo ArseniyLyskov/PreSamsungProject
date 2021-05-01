@@ -43,7 +43,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-    public void drawActivity() {
+    private void drawActivity() {
         frameLayout = findViewById(R.id.activity_main);
 
         jstickL = new JoystickView(this);

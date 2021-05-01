@@ -6,7 +6,7 @@ import android.graphics.Paint;
 
 public class TankSight {
     boolean isSighting;
-    Paint paint;
+    private final Paint paint;
 
     {
         paint = new Paint();
@@ -16,6 +16,6 @@ public class TankSight {
     }
 
     public void draw(Canvas canvas, int x1, int y1) {
-        canvas.drawLine(x1, y1, x1, y1 - (int) (canvas.getHeight() * 2), paint);
+        canvas.drawLine(x1, y1, x1, y1 - canvas.getHeight() * 2, paint);
     }
 }

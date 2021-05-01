@@ -14,6 +14,7 @@ public class Game {
     private Bitmap bmp_redHp, bmp_redTp;
     private Bitmap bmp_blueHp, bmp_blueTp;
     private Bitmap bmp_bullet;
+    public static final int MAX_FPS = 35;
 
     public int width, height;
     public MyTank myTank;
@@ -45,7 +46,7 @@ public class Game {
         enemyTanks.add(new Tank(1,1000,300,36,-87,"SecondGuy",1));
 
         myTank = new MyTank(1,200,200,1,0,
-                "Me",0,800, bmp_greenHp, bmp_greenTp);
+                "Me",0,800, bmp_greenHp, bmp_greenTp, this);
 
     }
 
