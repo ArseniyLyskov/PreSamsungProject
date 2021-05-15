@@ -35,7 +35,7 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            game.getFps_tv().setText("FPS: " + game.getFps() + "\nBullets: "+ game.getBullets().size());
+            game.getFps_tv().setText("FPS: " + game.getFps() + "\nBullets: "+ game.getMyTank().getBulletsSize());
             game.setFps(0);
         }
 
