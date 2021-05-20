@@ -2,6 +2,7 @@ package com.example.presamsungproject;
 
 import android.content.Context;
 import android.graphics.*;
+import android.util.Log;
 import android.widget.TextView;
 import com.example.presamsungproject.GameObjects.*;
 
@@ -12,20 +13,31 @@ public class Game {
     private Bitmap bmp_redHp, bmp_redTp;
     private Bitmap bmp_blueHp, bmp_blueTp;
     private Bitmap bmp_bullet;
-    public static final int MAX_FPS = 35;
+    public static final int MAX_FPS = 60;
 
     private int width, height;
     private MyTank myTank;
-    private HashSet<Tank> enemyTanks = new HashSet<>();
-    private HashSet<Tank> allyTanks = new HashSet<>();
+    private HashSet<Tank> enemyTanks;
+    private HashSet<Tank> allyTanks;
     private double lJangle, lJstrength, rJangle, rJstrength;
     private int fps;
+    private int[] startCoordinates;
     private TextView fps_tv;
     private double scale;
+    private Bitmap map_bitmap;
+    private HashSet<HitBox> walls;
 
     {
+        enemyTanks = new HashSet<>();
+        allyTanks = new HashSet<>();
         width = 1920;
         height = 1280;
+    }
+
+    public Game(Map map) {
+        this.map_bitmap = map.getBitmap();
+        walls = map.getWallsHitBox();
+        startCoordinates = map.startCoordinates();
     }
 
     public void start(Context context){
@@ -37,7 +49,6 @@ public class Game {
         bmp_blueTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_tp);
         bmp_bullet = BitmapFactory.decodeResource(context.getResources(), R.drawable.bullet_p);
 
-
         Paint paint1 = new Paint();
         paint1.setTextSize(35);
         paint1.setColor(Color.RED);
@@ -48,21 +59,23 @@ public class Game {
                     paint1, new HashSet<Bullet>(), 1));
         }*/
 
-        enemyTanks.add(new Tank(1000, 300, 36, -87,
+        /*enemyTanks.add(new Tank(1000, 300, 36, -87,
                 "SecondGuy", new TankSight(), bmp_redHp, bmp_redTp,
-                paint1, new HashSet<Bullet>(), 1));
+                paint1, new HashSet<Bullet>(), 1));*/
 
         Paint paint2 = new Paint();
         paint2.setTextSize(35);
         paint2.setColor(Color.GREEN);
 
-        myTank = new MyTank(200,200,0,0,
+        myTank = new MyTank(startCoordinates[0] + (startCoordinates[2] - bmp_greenHp.getWidth()) / 2f,
+                startCoordinates[1] + (startCoordinates[3] - bmp_greenHp.getHeight()) / 2f,0,0,
                 "Me", new TankSight(this), bmp_greenHp, bmp_greenTp,
                 paint2, new HashSet<Bullet>(), 0, 800, 1, this);
 
     }
 
     public void drawAll(Canvas canvas, Paint paint) {
+        canvas.drawBitmap(map_bitmap, 0, 0, paint);
         myTank.draw(canvas, paint, bmp_bullet);
 
         for (Tank t : enemyTanks) {
@@ -72,6 +85,18 @@ public class Game {
         for (Tank t : allyTanks) {
             t.draw(canvas, paint, bmp_blueHp, bmp_blueTp, bmp_bullet);
         }
+
+        //drawAllHitBoxes(canvas);
+    }
+
+    private void drawAllHitBoxes(Canvas canvas) {
+        for (HitBox hb : getHitBoxes()) {
+            hb.draw(canvas);
+        }
+        myTank.getHullHitBox().draw(canvas);
+        myTank.getTowerHitBox().draw(canvas);
+        myTank.getUpdatedHhb().draw(canvas);
+        myTank.getUpdatedThb().draw(canvas);
     }
 
     public HashSet<HitBox> getHitBoxes() {
@@ -88,6 +113,7 @@ public class Game {
             hitBoxes.add(tank.getHullHitBox());
             hitBoxes.add(tank.getTowerHitBox());
         }
+        hitBoxes.addAll(walls);
         return hitBoxes;
     }
 

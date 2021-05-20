@@ -1,7 +1,8 @@
 package com.example.presamsungproject;
 
 import android.content.pm.ActivityInfo;
-import android.graphics.Color;
+import android.graphics.*;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.TextView;
@@ -10,9 +11,10 @@ import android.os.Bundle;
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
 public class MainActivity extends AppCompatActivity {
-    private Game game = new Game();
+    private Game game;
     private FrameLayout frameLayout;
     private JoystickView jstickL, jstickR;
+    private boolean isServer = true;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -22,6 +24,8 @@ public class MainActivity extends AppCompatActivity {
 
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
+        if(isServer)
+            game = new Game(new Map(this));
         game.start(getApplicationContext());
 
         drawActivity();

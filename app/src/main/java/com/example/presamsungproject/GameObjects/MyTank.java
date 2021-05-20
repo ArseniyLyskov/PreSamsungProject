@@ -4,16 +4,21 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import com.example.presamsungproject.Game;
+import com.example.presamsungproject.HitBox;
 
+import java.util.Arrays;
 import java.util.HashSet;
 
 public class MyTank extends Tank {
     private double speed, current_speed;
     private double hp;
     private Game game;
-    HitBox updatedHhb, updatedThb;
+    private HitBox updatedHhb, updatedThb;
+    private double[] updatedHullIndents;
 
     {
+        updatedHullIndents = Arrays.copyOf(hullIndents, hullIndents.length);
+        updatedHullIndents[2] = 13 / 50f;
         updatedHhb = new HitBox(x, y, 0, 1, 1, hullIndents);
         updatedThb = new HitBox(x, y, 0, 1, 1, towerIndents);
     }
@@ -35,8 +40,8 @@ public class MyTank extends Tank {
     public void updateMyTankProperties() {
         double koeff = 1 / (double) (Game.MAX_FPS);
 
-        double xChange = current_speed * Math.cos(Math.toRadians(game.getlJangle())) * koeff;
-        double yChange = current_speed * Math.sin(Math.toRadians(game.getlJangle())) * koeff;
+        double xChange = speed * game.getlJstrength() / 100 * Math.cos(Math.toRadians(game.getlJangle())) * koeff;
+        double yChange = speed * game.getlJstrength() / 100 * Math.sin(Math.toRadians(game.getlJangle())) * koeff;
         double hAngleChange = game.getlJangle();
         double tAngleChange = game.getrJangle();
 
@@ -47,12 +52,12 @@ public class MyTank extends Tank {
         }
 
         if (game.getrJstrength() == 0) {
-            tAngleChange = 90 - (angleH + angleT);
+            tAngleChange = 90 - (90 - hAngleChange + angleT);
         }
 
         HashSet<HitBox> hitBoxes = game.getHitBoxes();
 
-        updatedHhb = new HitBox(x + xChange, y - yChange, 90 - hAngleChange, bmp_hull.getWidth(), bmp_hull.getHeight(), hullIndents);
+        updatedHhb = new HitBox(x + xChange, y - yChange, 90 - hAngleChange, bmp_hull.getWidth(), bmp_hull.getHeight(), updatedHullIndents);
         updatedThb = new HitBox(x + xChange, y - yChange, 90 - tAngleChange, bmp_tower.getWidth(), bmp_tower.getHeight(), towerIndents);
 
         boolean isHullMoveAble = true;
@@ -122,11 +127,17 @@ public class MyTank extends Tank {
 
     public void draw(Canvas canvas, Paint paint, Bitmap bmp_bullets) {
         super.draw(canvas, paint, bmp_hull, bmp_tower, bmp_bullets);
-        //updatedHhb.draw(canvas);
-        //updatedThb.draw(canvas);
     }
 
     public int getBulletsSize() {
         return bullets.size();
+    }
+
+    public HitBox getUpdatedHhb() {
+        return updatedHhb;
+    }
+
+    public HitBox getUpdatedThb() {
+        return updatedThb;
     }
 }

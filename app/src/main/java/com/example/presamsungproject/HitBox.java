@@ -1,4 +1,4 @@
-package com.example.presamsungproject.GameObjects;
+package com.example.presamsungproject;
 
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -27,15 +27,27 @@ public class HitBox {
         this.x = x;
         this.y = y;
 
-        double upIndent = indents[0];
-        double rightIndent = indents[1];
-        double downIndent = indents[2];
-        double leftIndent = indents[3];
+        double upIndent;
+        double rightIndent;
+        double downIndent;
+        double leftIndent;
 
-        angle1 = 180 - Math.toDegrees(Math.atan(upIndent / leftIndent));
-        angle2 = Math.toDegrees(Math.atan(upIndent / rightIndent));
-        angle3 = -Math.toDegrees(Math.atan(downIndent / rightIndent));
-        angle4 = Math.toDegrees(Math.atan(downIndent / leftIndent)) - 180;
+        if(indents != null) {
+            upIndent = indents[0];
+            rightIndent = indents[1];
+            downIndent = indents[2];
+            leftIndent = indents[3];
+        } else {
+            upIndent = 1 / 2f;
+            rightIndent = 1 / 2f;
+            downIndent = 1 / 2f;
+            leftIndent = 1 / 2f;
+        }
+
+        angle1 = 180 - Math.toDegrees(Math.atan((upIndent * bmp_height) / (leftIndent * bmp_width)));
+        angle2 = Math.toDegrees(Math.atan((upIndent * bmp_height) / (rightIndent * bmp_width)));
+        angle3 = -Math.toDegrees(Math.atan((downIndent * bmp_height) / (rightIndent * bmp_width)));
+        angle4 = Math.toDegrees(Math.atan((downIndent * bmp_height) / (leftIndent * bmp_width))) - 180;
 
         r1 = Math.sqrt(Math.pow(bmp_width * leftIndent, 2) + Math.pow(bmp_height * upIndent, 2));
         r2 = Math.sqrt(Math.pow(bmp_width * rightIndent, 2) + Math.pow(bmp_height * upIndent, 2));

@@ -4,6 +4,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import com.example.presamsungproject.Game;
+import com.example.presamsungproject.HitBox;
 
 public class TankSight {
     private boolean isSighting;

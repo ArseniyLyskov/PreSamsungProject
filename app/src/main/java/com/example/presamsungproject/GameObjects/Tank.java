@@ -1,6 +1,7 @@
 package com.example.presamsungproject.GameObjects;
 
 import android.graphics.*;
+import com.example.presamsungproject.HitBox;
 
 import java.util.HashSet;
 
@@ -75,9 +76,6 @@ public class Tank {
         for (Bullet b : arr_bullets) {
             canvas.drawBitmap(bmp_bullet, (int) b.getX(), (int) b.getY(), paint);
         }
-
-        //hullHitBox.draw(canvas);
-        //towerHitBox.draw(canvas);
     }
 
     public Tank(double x, double y, double angleH, double angleT, String playerName, TankSight tankSight,
