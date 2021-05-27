@@ -6,6 +6,7 @@ import android.util.Log;
 import android.widget.TextView;
 import com.example.presamsungproject.GameObjects.*;
 
+import java.util.ArrayList;
 import java.util.HashSet;
 
 public class Game {
@@ -13,11 +14,15 @@ public class Game {
     private Bitmap bmp_greenDHp, bmp_greenDTp, bmp_redDHp, bmp_redDTp, bmp_blueDHp, bmp_blueDTp;
     private Bitmap bmp_bullet;
     public static final int MAX_FPS = 60;
+    public final int id;
+    public final String name;
+    public final boolean isLobby;
+    public ArrayList<Integer> ports;
 
     private int width, height;
     private MyTank myTank;
-    private HashSet<Tank> enemyTanks;
-    private HashSet<Tank> allyTanks;
+    public HashSet<Tank> enemyTanks;
+    public HashSet<Tank> allyTanks;
     private double lJangle, lJstrength, rJangle, rJstrength;
     private int fps;
     private int[] startCoordinates;
@@ -33,8 +38,12 @@ public class Game {
         height = 1280;
     }
 
-    public Game(Map map) {
+    public Game(Map map, int id, String name, boolean isLobby, ArrayList<Integer> ports) {
         this.map_bitmap = map.getBitmap();
+        this.id = id;
+        this.name = name;
+        this.isLobby = isLobby;
+        this.ports = ports;
         walls = map.getWallsHitBox();
         startCoordinates = map.startCoordinates();
     }
@@ -54,6 +63,8 @@ public class Game {
         bmp_blueDTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_dtp);
         bmp_bullet = BitmapFactory.decodeResource(context.getResources(), R.drawable.bullet_p);
 
+        ReceiverStorage.getMessagesReceiver().setGame(this);
+
         Paint paint1 = new Paint();
         paint1.setTextSize(35);
         paint1.setColor(Color.RED);
@@ -72,10 +83,10 @@ public class Game {
         paint2.setTextSize(35);
         paint2.setColor(Color.GREEN);
 
-        myTank = new MyTank(3, startCoordinates[0] + (startCoordinates[2] - bmp_greenHp.getWidth()) / 2f,
+        myTank = new MyTank(id, 3, startCoordinates[0] + (startCoordinates[2] - bmp_greenHp.getWidth()) / 2f,
                 startCoordinates[1] + (startCoordinates[3] - bmp_greenHp.getHeight()) / 2f,0,0,
-                "Me", new TankSight(), bmp_greenHp, bmp_greenTp,
-                paint2, new HashSet<Bullet>(), 0, 800, bmp_greenDHp, bmp_greenDTp, this);
+                name, new TankSight(), bmp_greenHp, bmp_greenTp,
+                paint2, new HashSet<Bullet>(), 800, bmp_greenDHp, bmp_greenDTp, this);
 
     }
 

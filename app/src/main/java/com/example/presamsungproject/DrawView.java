@@ -2,8 +2,11 @@ package com.example.presamsungproject;
 
 import android.content.Context;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import com.example.presamsungproject.ConnectionObjects.BroadcastingMessage;
+import com.example.presamsungproject.ConnectionObjects.StringConverter;
 
 public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     private DrawThread drawThread;
@@ -19,6 +22,17 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         public void onTick(long millisUntilFinished) {
             game.getMyTank().updateMyTankProperties();
             drawThread.isTimeToUpdate = true;
+            if (game.isLobby) {
+                for (Integer port : game.ports) {
+                    String string = game.getMyTank().getString();
+                    BroadcastingMessage message = new BroadcastingMessage(string, "255.255.255.255", port);
+                    message.start();
+                }
+            } else {
+                String string = game.getMyTank().getString();
+                BroadcastingMessage message = new BroadcastingMessage(string, "255.255.255.255", 4444);
+                message.start();
+            }
         }
 
         @Override

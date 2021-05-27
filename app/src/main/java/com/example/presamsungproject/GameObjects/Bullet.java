@@ -27,6 +27,18 @@ public class Bullet {
         this.angle = angle;
     }
 
+    public Bullet(double x, double y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    public String getString() {
+        String result = "";
+        result += "" + x + " ";
+        result += "" + y + " ";
+        return result;
+    }
+
     public void drawHitBox(Canvas canvas) {
         canvas.drawRect((int) x - 5, (int) y - 5, (int) x + 5, (int) y + 5, paint);
     }

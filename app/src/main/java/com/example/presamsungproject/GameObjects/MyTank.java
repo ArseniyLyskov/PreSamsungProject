@@ -25,12 +25,12 @@ public class MyTank extends Tank {
         updatedThb = new HitBox(x, y, 0, 1, 1, towerIndents);
     }
 
-    public MyTank(double hp, double x, double y, double angleH, double angleT, String playerName,
+    public MyTank(long id, double hp, double x, double y, double angleH, double angleT, String playerName,
                   TankSight tankSight, Bitmap bmp_hull, Bitmap bmp_tower, Paint myPaint,
-                  HashSet<Bullet> bullets, long id,
+                  HashSet<Bullet> bullets,
                   double speed, Bitmap bmp_Dhull, Bitmap bmp_Dtower, Game game) {
 
-        super(hp, x, y, angleH, angleT, playerName, tankSight, bmp_hull, bmp_tower, myPaint, bullets, id);
+        super(id, hp, x, y, angleH, angleT, playerName, tankSight, bmp_hull, bmp_tower, myPaint, bullets);
         this.speed = speed;
         this.game = game;
         this.bmp_Dhull = bmp_Dhull;
@@ -38,6 +38,25 @@ public class MyTank extends Tank {
         hullHitBox = new HitBox(x, y, angleH, bmp_hull.getWidth(), bmp_hull.getHeight(), hullIndents);
         towerHitBox = new HitBox(x, y, angleH + angleT, bmp_tower.getWidth(), bmp_tower.getHeight(), towerIndents);
         nameWidth = (int) myPaint.measureText(playerName);
+    }
+
+    public String getString() {
+        Bullet[] arr_bullets = new Bullet[getBullets().size()];
+        getBullets().toArray(arr_bullets);
+
+        String result = "TANK ";
+        result += id + " ";
+        result += hp + " ";
+        result += x + " ";
+        result += y + " ";
+        result += angleH + " ";
+        result += angleT + " ";
+        result += playerName + " ";
+        result += tankSight.getString() + " ";
+        for (Bullet b : arr_bullets) {
+            result += b.getString() + " ";
+        }
+        return result;
     }
 
     public void updateMyTankProperties() {

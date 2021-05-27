@@ -1,10 +1,12 @@
 package com.example.presamsungproject;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.Log;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -15,14 +17,136 @@ public class Map {
     private Bitmap bmp_wall_v, bmp_wall_h, bmp_wall_c;
     private Bitmap map;
     private boolean[][] isTextureAtCell;
+    private boolean[][] isTextureAAtCell;
+    private boolean[][] isTextureBAtCell;
     private boolean[][] isVWallAtCell;
     private boolean[][] isHWallAtCell;
     private boolean[][] isCWallAtCell;
     private int width_quantity;
     private int height_quantity;
+    private Paint paint;
 
     public Map(Context context) {
-        Paint paint = new Paint();
+        sourceInit(context);
+
+        height_quantity = 3 + (int) (Math.random() * 2);
+        width_quantity = height_quantity + 2 + (int) (Math.random() * 2);
+
+        arraysInit(width_quantity, height_quantity);
+
+        map = Bitmap.createBitmap(width_quantity * bmp_texture_map.getWidth() + bmp_wall_v.getWidth(),
+                height_quantity * bmp_texture_map.getHeight() + bmp_wall_h.getHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(map);
+
+        generateRandomCells();
+        drawCells(canvas, paint);
+        generateBorderWalls();
+        generateRandomWalls();
+        drawWalls(canvas, paint);
+    }
+
+    public Map (Context context, String stringSource) {
+        sourceInit(context);
+
+        generateMapFromString(stringSource);
+
+        map = Bitmap.createBitmap(width_quantity * bmp_texture_map.getWidth() + bmp_wall_v.getWidth(),
+                height_quantity * bmp_texture_map.getHeight() + bmp_wall_h.getHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(map);
+
+        drawCells(canvas, paint);
+        drawWalls(canvas, paint);
+    }
+
+    private void generateMapFromString(String stringSource) {
+        String[] splitted = stringSource.split(" ");
+        int pos = 0;
+        if(!splitted[pos].equals("MAP"))
+            return;
+
+        pos++;
+
+        Log.d("MyTag", "" + splitted.length);
+        Log.d("MyTag", "" + stringSource);
+
+        width_quantity = Integer.parseInt(splitted[pos]);
+        pos++;
+        height_quantity = Integer.parseInt(splitted[pos]);
+        pos++;
+
+        arraysInit(width_quantity, height_quantity);
+
+        for (int i = 0; i < height_quantity; i++) {
+            for (int j = 0; j < width_quantity; j++) {
+                isTextureAAtCell[i][j] = Boolean.parseBoolean(splitted[pos]);
+                pos++;
+                isTextureBAtCell[i][j] = Boolean.parseBoolean(splitted[pos]);
+                pos++;
+                isVWallAtCell[i][j] = Boolean.parseBoolean(splitted[pos]);
+                pos++;
+                isHWallAtCell[i][j] = Boolean.parseBoolean(splitted[pos]);
+                pos++;
+                isCWallAtCell[i][j] = Boolean.parseBoolean(splitted[pos]);
+                pos++;
+            }
+        }
+
+        for (int i = 0; i <= width_quantity; i++) {
+            isVWallAtCell[height_quantity][i] = Boolean.parseBoolean(splitted[pos]);
+            pos++;
+            isHWallAtCell[height_quantity][i] = Boolean.parseBoolean(splitted[pos]);
+            pos++;
+            isCWallAtCell[height_quantity][i] = Boolean.parseBoolean(splitted[pos]);
+            pos++;
+        }
+
+        for (int i = 0; i < height_quantity; i++) {
+            isVWallAtCell[i][width_quantity] = Boolean.parseBoolean(splitted[pos]);
+            pos++;
+            isHWallAtCell[i][width_quantity] = Boolean.parseBoolean(splitted[pos]);
+            pos++;
+            isCWallAtCell[i][width_quantity] = Boolean.parseBoolean(splitted[pos]);
+            pos++;
+        }
+
+        for (int i = 0; i < height_quantity; i++) {
+            for (int j = 0; j < width_quantity; j++) {
+                if(!isTextureAAtCell[i][j] && !isTextureBAtCell[i][j])
+                    isTextureAtCell[i][i] = false;
+            }
+        }
+    }
+
+
+    public String mapToString() {
+        String result = "MAP " + width_quantity + " " + height_quantity + " ";
+        for (int i = 0; i < height_quantity; i++) {
+            for (int j = 0; j < width_quantity; j++) {
+                result += "" + isTextureAAtCell[i][j] + " ";
+                result += "" + isTextureBAtCell[i][j] + " ";
+                result += "" + isVWallAtCell[i][j] + " ";
+                result += "" + isHWallAtCell[i][j] + " ";
+                result += "" + isCWallAtCell[i][j] + " ";
+            }
+        }
+        for (int i = 0; i <= width_quantity; i++) {
+            result += "" + isVWallAtCell[height_quantity][i] + " ";
+            result += "" + isHWallAtCell[height_quantity][i] + " ";
+            result += "" + isCWallAtCell[height_quantity][i] + " ";
+        }
+        for (int i = 0; i < height_quantity; i++) {
+            result += "" + isVWallAtCell[i][width_quantity] + " ";
+            result += "" + isHWallAtCell[i][width_quantity] + " ";
+            result += "" + isCWallAtCell[i][width_quantity] + " ";
+        }
+
+        return result;
+    }
+
+    private void sourceInit (Context context) {
+        paint = new Paint();
         bmp_texture_map = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_map);
         bmp_texture_map2 = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_map2);
         bmp_wall_v = BitmapFactory.decodeResource(context.getResources(), R.drawable.wall);
@@ -31,9 +155,9 @@ public class Map {
         canvas.rotate(-90, bmp_wall_v.getWidth() / 2f, bmp_wall_v.getWidth() / 2f);
         canvas.drawBitmap(bmp_wall_v, 0, 0, paint);
         bmp_wall_c = Bitmap.createBitmap(bmp_wall_v, 0, 0, bmp_wall_v.getWidth(), bmp_wall_v.getWidth());
+    }
 
-        height_quantity = 3 + (int) (Math.random() * 2);
-        width_quantity = height_quantity + 2 + (int) (Math.random() * 2);
+    private void arraysInit (int width_quantity, int height_quantity) {
 
         isTextureAtCell = new boolean[height_quantity][width_quantity];
         fillBooleanArrayTrue(isTextureAtCell);
@@ -43,19 +167,31 @@ public class Map {
         fillBooleanArrayFalse(isHWallAtCell);
         isCWallAtCell = new boolean[height_quantity + 1][width_quantity + 1];
         fillBooleanArrayFalse(isCWallAtCell);
+        isTextureAAtCell = new boolean[height_quantity][width_quantity];
+        fillBooleanArrayFalse(isTextureAAtCell);
+        isTextureBAtCell = new boolean[height_quantity][width_quantity];
+        fillBooleanArrayFalse(isTextureBAtCell);
+    }
 
-        map = Bitmap.createBitmap(width_quantity * bmp_texture_map.getWidth() + bmp_wall_v.getWidth(),
-                height_quantity * bmp_texture_map.getHeight() + bmp_wall_h.getHeight(),
-                Bitmap.Config.ARGB_8888);
-        canvas = new Canvas(map);
+    private void drawCells (Canvas canvas, Paint paint) {
+        for (int j = 0; j < height_quantity; j++) {
+            for (int i = 0; i < width_quantity; i++) {
+                if(isTextureAAtCell[j][i])
+                    canvas.drawBitmap(bmp_texture_map, bmp_texture_map.getWidth() * i, bmp_texture_map.getHeight() * j, paint);
+                if(isTextureBAtCell[j][i])
+                    canvas.drawBitmap(bmp_texture_map2, bmp_texture_map.getWidth() * i, bmp_texture_map.getHeight() * j, paint);
+            }
+        }
+    }
 
+    private void generateRandomCells () {
         for (int j = 0; j < height_quantity; j++) {
             for (int i = 0; i < width_quantity; i++) {
                 double random = Math.random() * 100;
                 if (random <= 50) {
-                    canvas.drawBitmap(bmp_texture_map, bmp_texture_map.getWidth() * i, bmp_texture_map.getHeight() * j, paint);
+                    isTextureAAtCell[j][i] = true;
                 } else if (random <= 80) {
-                    canvas.drawBitmap(bmp_texture_map2, bmp_texture_map.getWidth() * i, bmp_texture_map.getHeight() * j, paint);
+                    isTextureBAtCell[j][i] = true;
                 } else {
                     boolean[][] check = new boolean[isTextureAtCell.length][isTextureAtCell[0].length];
                     copyBooleanArray(isTextureAtCell, check);
@@ -63,12 +199,15 @@ public class Map {
                     if (isMapAvailable(check, isHWallAtCell, isVWallAtCell)) {
                         isTextureAtCell[j][i] = false;
                     } else {
-                        canvas.drawBitmap(bmp_texture_map, bmp_texture_map.getWidth() * i, bmp_texture_map.getHeight() * j, paint);
+                        isTextureAAtCell[j][i] = true;
                         //Log.d("MyTag", "Returned cell: " + (i + 1) + " " + (j + 1));
                     }
                 }
             }
         }
+    }
+
+    private void generateBorderWalls () {
         for (int j = 0; j < height_quantity; j++) {
             for (int i = 0; i < width_quantity; i++) {
                 if (!isTextureAtCell[j][i]) {
@@ -99,6 +238,9 @@ public class Map {
             if(isTextureAtCell[height_quantity - 1][i])
                 isHWallAtCell[height_quantity][i] = true;
         }
+    }
+
+    private void generateRandomWalls () {
         for (int j = 1; j < height_quantity; j++) {
             for (int i = 1; i < width_quantity; i++) {
                 if(!isVWallAtCell[j][i] && isTextureAtCell[j][i]) {
@@ -128,6 +270,9 @@ public class Map {
                 }
             }
         }
+    }
+
+    private void drawWalls (Canvas canvas, Paint paint) {
         for (int j = 0; j <= height_quantity; j++) {
             for (int i = 0; i <= width_quantity; i++) {
                 if (isHWallAtCell[j][i])
@@ -269,7 +414,7 @@ public class Map {
         do {
             coordinates[0] = (int) (Math.random() * width_quantity);
             coordinates[1] = (int) (Math.random() * height_quantity);
-        } while (!isTextureAtCell[coordinates[1]][coordinates[0]]);
+        } while (!isTextureAAtCell[coordinates[1]][coordinates[0]] && !isTextureBAtCell[coordinates[1]][coordinates[0]]);
         coordinates[0] *= coordinates[2];
         coordinates[1] *= coordinates[3];
         return coordinates;

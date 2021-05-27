@@ -68,6 +68,7 @@
                 android:layout_gravity="center"
                 android:id="@+id/al_button"
                 android:textSize="20dp"
+                android:onClick="startGameClick"
         />
 
     </LinearLayout>

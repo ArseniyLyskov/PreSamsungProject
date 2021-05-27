@@ -6,6 +6,7 @@ import com.example.presamsungproject.HitBox;
 import java.util.HashSet;
 
 public class Tank {
+    final long id;
     double hp;
     double x, y;
     double angleH, angleT;
@@ -14,10 +15,9 @@ public class Tank {
     Bitmap bmp_hull, bmp_tower;
     Paint myPaint;
     int nameWidth;
-    HashSet<Bullet> bullets;
-    HitBox hullHitBox, towerHitBox;
+    public HashSet<Bullet> bullets;
+    public HitBox hullHitBox, towerHitBox;
     double[] hullIndents, towerIndents;
-    final long id;
 
     {
         hullIndents = new double[4];
@@ -79,9 +79,9 @@ public class Tank {
         }
     }
 
-    public Tank(double hp, double x, double y, double angleH, double angleT, String playerName, TankSight tankSight,
+    public Tank(long id, double hp, double x, double y, double angleH, double angleT, String playerName, TankSight tankSight,
                 Bitmap bmp_hull, Bitmap bmp_tower, Paint myPaint,
-                HashSet<Bullet> bullets, long id) {
+                HashSet<Bullet> bullets) {
 
         this.hp = hp;
         this.x = x;

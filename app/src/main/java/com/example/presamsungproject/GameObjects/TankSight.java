@@ -38,11 +38,33 @@ public class TankSight {
         }
     }
 
+    public TankSight(boolean isSighting, double x1, double y1, double x2, double y2) {
+        this.isSighting = isSighting;
+        this.x1 = x1;
+        this.y1 = y1;
+        this.x2 = x2;
+        this.y2 = y2;
+    }
+
+    public TankSight() {
+
+    }
+
     public void setSighting(boolean isSighting) {
         this.isSighting = isSighting;
     }
 
     public boolean isSighting() {
         return isSighting;
+    }
+
+    public String getString() {
+        String result = "";
+        result += "" + isSighting + " ";
+        result += "" + x1 + " ";
+        result += "" + y1 + " ";
+        result += "" + x2 + " ";
+        result += "" + y2 + " ";
+        return result;
     }
 }

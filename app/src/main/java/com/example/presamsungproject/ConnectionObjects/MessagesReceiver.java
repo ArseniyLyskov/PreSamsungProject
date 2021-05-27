@@ -1,7 +1,9 @@
 package com.example.presamsungproject.ConnectionObjects;
 
 import android.util.Log;
+import android.view.View;
 import com.example.presamsungproject.Activities.LobbyActivity;
+import com.example.presamsungproject.Game;
 
 import java.net.*;
 
@@ -13,7 +15,11 @@ public class MessagesReceiver extends Thread {
     private String address;
     private int port;
     private LobbyActivity lobbyActivity;
+    private Game game;
 
+    public void setGame(Game game) {
+        this.game = game;
+    }
 
     public void run() {
 
@@ -25,7 +31,7 @@ public class MessagesReceiver extends Thread {
                 DatagramPacket packet = new DatagramPacket(buf, buf.length);
                 socket.receive(packet);
                 String received = new String(packet.getData(), 0, packet.getLength());
-                Log.d("MyTag", "Received message: " + received);
+                Log.d("MyTagReceived", "Received message: " + received);
                 if ("end".equals(received)) {
                     break;
                 } else {
@@ -48,12 +54,33 @@ public class MessagesReceiver extends Thread {
 
         if(result[0].equals(StringConverter.SEND_READY_TO_BATTLE)) {
             lobbyActivity.names.add(result[1]);
+            lobbyActivity.ports.add(Integer.valueOf(result[2]));
             String string = StringConverter.createParticipantsList(lobbyActivity.names);
 
             updateTextViews(string.split(" ").length - 1, StringConverter.getParticipantsList(string));
 
-            BroadcastingMessage message = new BroadcastingMessage(string, "255.255.255.255", 4446);
-            message.start();
+            for (Integer port : lobbyActivity.ports) {
+                BroadcastingMessage message = new BroadcastingMessage(string, "255.255.255.255", port);
+                message.start();
+            }
+        }
+
+        if(result[0].equals("TANK")) {
+            Log.d("MyTag2", "" + "nach");
+            if(result[1].equals("4444"))
+                return;
+
+            if(game.ports.contains(result[1])) {
+                Log.d("MyTag2", "" + "est");
+            } else {
+                game.enemyTanks.add(StringConverter.getTank(received));
+                Log.d("MyTag2", "" + "nov");
+            }
+
+            for (Integer port : lobbyActivity.ports) {
+                BroadcastingMessage message = new BroadcastingMessage(received, "255.255.255.255", port);
+                message.start();
+            }
         }
     }
 
@@ -63,6 +90,23 @@ public class MessagesReceiver extends Thread {
         if(result[0].equals(StringConverter.SEND_PARTICIPANTS_LIST)) {
             String update = StringConverter.getParticipantsList(received);
             updateTextViews(result.length - 1, update);
+        }
+
+        if(result[0].equals("MAP")) {
+            lobbyActivity.goToMainActivity(received);
+        }
+
+        if(result[0].equals("TANK")) {
+            Log.d("MyTag2", "" + "nach");
+            if(result[1].equals(port))
+                return;
+
+            if(game.ports.contains(result[1])) {
+                Log.d("MyTag2", "" + "est");
+            } else {
+                game.enemyTanks.add(StringConverter.getTank(received));
+                Log.d("MyTag2", "" + "nov");
+            }
         }
     }
 

@@ -26,7 +26,7 @@ public class BroadcastingMessage extends Thread {
             Log.d("MyTag", "Message sent: " + broadcastMessage);
         } catch (Exception e) {
             e.printStackTrace();
-            Log.d("MyTag", "BroadcastingMessage Thread Error");
+            Log.d("MyError", "BroadcastingMessage Thread Error");
         }
     }
 
