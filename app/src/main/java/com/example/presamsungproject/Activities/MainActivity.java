@@ -1,13 +1,16 @@
-package com.example.presamsungproject;
+package com.example.presamsungproject.Activities;
 
 import android.content.pm.ActivityInfo;
 import android.graphics.*;
-import android.util.Log;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import com.example.presamsungproject.DrawView;
+import com.example.presamsungproject.Game;
+import com.example.presamsungproject.Map;
+import com.example.presamsungproject.R;
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
 public class MainActivity extends AppCompatActivity {
@@ -20,9 +23,10 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        //setContentView(new DrawView(this));
-
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+        if(savedInstanceState == null)
+            return;
 
         if(isServer)
             game = new Game(new Map(this));

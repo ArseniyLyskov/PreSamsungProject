@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/al_imageview"
+    />
+
+    <ImageView
+            android:layout_gravity="center"
+            android:layout_width="350dp"
+            android:layout_height="300dp"
+            android:id="@+id/al_imageview2"
+    />
+
+    <LinearLayout
+            xmlns:android="http://schemas.android.com/apk/res/android"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center">
+
+        <TextView
+                android:textAlignment="center"
+                android:text="Waiting for other players..."
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@android:color/black"
+                android:textSize="20dp"
+        />
+
+        <TextView
+                android:textAlignment="center"
+                android:text="Number of people waiting: "
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:id="@+id/al_textview_number"
+                android:textColor="@android:color/black"
+                android:textSize="20dp"
+        />
+
+        <ScrollView
+                android:layout_width="300dp"
+                android:layout_height="150dp"
+                android:layout_gravity="center">
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/al_textview_nicks"
+                    android:gravity="center"
+                    android:textColor="@android:color/black"
+                    android:textSize="20dp"
+            />
+
+        </ScrollView>
+
+        <Button
+                android:text="Start game"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:id="@+id/al_button"
+                android:textSize="20dp"
+        />
+
+    </LinearLayout>
+
+</FrameLayout>

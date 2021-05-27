@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        xmlns:android="http://schemas.android.com/apk/res/android">
+
+    <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:id="@+id/as_imageview"
+    />
+
+    <ImageView
+            android:layout_gravity="center"
+            android:layout_width="350dp"
+            android:layout_height="200dp"
+            android:id="@+id/as_imageview2"
+    />
+
+    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+                  android:orientation="vertical"
+                  android:layout_width="match_parent"
+                  android:layout_height="match_parent"
+                  android:gravity="center">
+
+        <EditText
+                android:layout_width="250dp"
+                android:layout_height="wrap_content"
+                android:id="@+id/as_edittext"
+                android:textAlignment="center"
+                android:hint="Enter your nickname"
+                android:textSize="20dp"
+                android:textColor="@android:color/black"
+        />
+
+        <Button
+                android:text="Join lobby"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:onClick="joinLobbyClick"
+                android:textSize="20dp"
+        />
+
+        <Button
+                android:text="Create lobby"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:onClick="crateLobbyClick"
+                android:textSize="20dp"
+        />
+
+    </LinearLayout>
+
+</FrameLayout>

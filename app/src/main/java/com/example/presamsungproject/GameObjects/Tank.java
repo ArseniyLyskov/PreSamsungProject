@@ -6,6 +6,7 @@ import com.example.presamsungproject.HitBox;
 import java.util.HashSet;
 
 public class Tank {
+    double hp;
     double x, y;
     double angleH, angleT;
     String playerName;
@@ -66,22 +67,23 @@ public class Tank {
         canvas.restore();
 
         if(tankSight.isSighting())
-            tankSight.draw(canvas, x + tWidth / 2 + tWidth * towerIndents[0] * Math.cos(Math.toRadians(90 - angleH - angleT)),
-                    y + tHeight / 2 - tHeight * towerIndents[0] * Math.sin(Math.toRadians(90 - angleH - angleT)), angleH + angleT);
+            tankSight.draw(canvas);
 
         canvas.drawText(playerName, (int) (x + hWidth / 2 - nameWidth / 2), (int) (y - 10), myPaint);
 
         Bullet[] arr_bullets = new Bullet[bullets.size()];
         bullets.toArray(arr_bullets);
         for (Bullet b : arr_bullets) {
-            canvas.drawBitmap(bmp_bullet, (int) b.getX(), (int) b.getY(), paint);
+            canvas.drawBitmap(bmp_bullet, (int) (b.getX() - bmp_bullet.getWidth() / 2), (int) (b.getY() - bmp_bullet.getHeight() / 2), paint);
+            //canvas.drawRect((int) b.getX() - 5, (int) b.getY() - 5, (int) b.getX() + 5, (int) b.getY() + 5, paint);
         }
     }
 
-    public Tank(double x, double y, double angleH, double angleT, String playerName, TankSight tankSight,
+    public Tank(double hp, double x, double y, double angleH, double angleT, String playerName, TankSight tankSight,
                 Bitmap bmp_hull, Bitmap bmp_tower, Paint myPaint,
                 HashSet<Bullet> bullets, long id) {
 
+        this.hp = hp;
         this.x = x;
         this.y = y;
         this.angleH = angleH;
@@ -104,5 +106,9 @@ public class Tank {
 
     public HitBox getTowerHitBox() {
         return towerHitBox;
+    }
+
+    public HashSet<Bullet> getBullets() {
+        return bullets;
     }
 }

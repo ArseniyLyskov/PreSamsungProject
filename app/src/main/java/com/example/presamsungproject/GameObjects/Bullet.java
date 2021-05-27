@@ -1,13 +1,23 @@
 package com.example.presamsungproject.GameObjects;
 
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
+
 public class Bullet {
     private double x, y;
     private double speed;
     private double angle;
     private int ricochets;
+    private Paint paint;
 
     {
-        ricochets = 1;
+        paint = new Paint();
+        paint.setColor(Color.CYAN);
+        paint.setStrokeWidth(3);
+        paint.setStyle(Paint.Style.STROKE);
+
+        ricochets = 3;
         speed = 1200;
     }
 
@@ -15,6 +25,10 @@ public class Bullet {
         this.x = x;
         this.y = y;
         this.angle = angle;
+    }
+
+    public void drawHitBox(Canvas canvas) {
+        canvas.drawRect((int) x - 5, (int) y - 5, (int) x + 5, (int) y + 5, paint);
     }
 
     public double getX() {

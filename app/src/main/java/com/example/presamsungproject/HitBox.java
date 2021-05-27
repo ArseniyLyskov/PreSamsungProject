@@ -123,7 +123,7 @@ public class HitBox {
 
     private static boolean isSquaresIntersect(int[] x1, int[] y1,
                                               int[] x2, int[] y2) {
-        return isPointInSquare(x2[0], y2[0], x1, y1) ||
+        boolean intersection = isPointInSquare(x2[0], y2[0], x1, y1) ||
                 isPointInSquare(x2[1], y2[1], x1, y1) ||
                 isPointInSquare(x2[2], y2[2], x1, y1) ||
                 isPointInSquare(x2[3], y2[3], x1, y1) ||
@@ -131,11 +131,49 @@ public class HitBox {
                 isPointInSquare(x1[1], y1[1], x2, y2) ||
                 isPointInSquare(x1[2], y1[2], x2, y2) ||
                 isPointInSquare(x1[3], y1[3], x2, y2);
-
+        if(intersection)
+            return true;
+        else {
+            int maxX1 = Math.max(Math.max(x1[0], x1[1]), Math.max(x1[2], x1[3]));
+            int maxX2 = Math.max(Math.max(x2[0], x2[1]), Math.max(x2[2], x2[3]));
+            int maxY1 = Math.max(Math.max(y1[0], y1[1]), Math.max(y1[2], y1[3]));
+            int maxY2 = Math.max(Math.max(y2[0], y2[1]), Math.max(y2[2], y2[3]));
+            int minX1 = Math.min(Math.min(x1[0], x1[1]), Math.min(x1[2], x1[3]));
+            int minX2 = Math.min(Math.min(x2[0], x2[1]), Math.min(x2[2], x2[3]));
+            int minY1 = Math.min(Math.min(y1[0], y1[1]), Math.min(y1[2], y1[3]));
+            int minY2 = Math.min(Math.min(y2[0], y2[1]), Math.min(y2[2], y2[3]));
+            if(maxX1 <= maxX2 && minX1 >= minX2)
+                if(maxY1 >= maxY2 && minY1 <= minY2)
+                    return true;
+            if(maxY1 <= maxY2 && minY1 >= minY2)
+                if(maxX1 >= maxX2 && minX1 <= minX2)
+                    return true;
+        }
+        return false;
     }
 
     public static boolean isHitBoxesIntersect(HitBox hb1, HitBox hb2) {
         return isSquaresIntersect(hb1.getXpoints(), hb1.getYpoints(), hb2.getXpoints(), hb2.getYpoints());
+    }
+
+    public static boolean isPointInSquareHitBox(int x0, int y0, HitBox hitBox) {
+        int[] hbXpoints = hitBox.getXpoints();
+        int[] hbYpoints = hitBox.getYpoints();
+        return x0 >= hbXpoints[0] && x0 <= hbXpoints[1] && y0 >= hbYpoints[0] && y0 <= hbYpoints[3];
+    }
+
+    public static boolean isPointInHitBox(int x0, int y0, HitBox hitBox) {
+        int[] hbXpoints = hitBox.getXpoints();
+        int[] hbYpoints = hitBox.getYpoints();
+        return isPointInSquare(x0, y0, hbXpoints, hbYpoints);
+    }
+
+    public static boolean isHorizontalWallIntersection(int x1, int y1, int x2, int y2, HitBox hitBox) {
+        int[] hbXpoints = hitBox.getXpoints();
+        int[] hbYpoints = hitBox.getYpoints();
+        int[] temp1 = sightSegmentIntersection(new int[]{x1, x2}, new int[]{y1, y2}, new int[]{hbXpoints[0], hbXpoints[1]}, new int[]{hbYpoints[0], hbYpoints[0]});
+        int[] temp2 = sightSegmentIntersection(new int[]{x1, x2}, new int[]{y1, y2}, new int[]{hbXpoints[0], hbXpoints[1]}, new int[]{hbYpoints[3], hbYpoints[3]});
+        return temp1[0] != -1 || temp2[0] != -1;
     }
 
     public static int[] sightHitBoxIntersection(int[] x, int[] y, HitBox hitBox) {
@@ -148,6 +186,11 @@ public class HitBox {
                 result_x = temp[0];
                 result_y = temp[1];
             }
+        }
+        int[] temp = sightSegmentIntersection(x, y, new int[]{hbXpoints[3], hbXpoints[0]}, new int[]{hbYpoints[3], hbYpoints[0]});
+        if(temp[0] != -1 && (result_x == -1 || Math.abs(x[0] - temp[0]) < Math.abs(x[0] - result_x))) {
+            result_x = temp[0];
+            result_y = temp[1];
         }
         return new int[]{result_x, result_y};
     }

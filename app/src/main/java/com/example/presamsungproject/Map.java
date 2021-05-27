@@ -5,7 +5,6 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.util.Log;
 
 import java.util.Arrays;
 import java.util.HashSet;
@@ -65,7 +64,7 @@ public class Map {
                         isTextureAtCell[j][i] = false;
                     } else {
                         canvas.drawBitmap(bmp_texture_map, bmp_texture_map.getWidth() * i, bmp_texture_map.getHeight() * j, paint);
-                        Log.d("MyTag", "Returned cell: " + (i + 1) + " " + (j + 1));
+                        //Log.d("MyTag", "Returned cell: " + (i + 1) + " " + (j + 1));
                     }
                 }
             }
@@ -245,7 +244,7 @@ public class Map {
                         if (isVWallAtCell[k][i])
                             length++;
                         else {
-                            if (isHWallAtCell[j][k] || isCWallAtCell[j][k])
+                            if (isHWallAtCell[k][i] || isCWallAtCell[k][i])
                                 height_piece = bmp_wall_c.getHeight();
                             break;
                         }
