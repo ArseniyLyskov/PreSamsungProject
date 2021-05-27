@@ -321,14 +321,6 @@ public class Map {
         return true;
     }
 
-    private void copyBooleanArray(boolean[][] prev, boolean[][] ne) {
-        for (int i = 0; i < prev.length; i++) {
-            for (int j = 0; j < prev[0].length; j++) {
-                ne[i][j] = prev[i][j];
-            }
-        }
-    }
-
     private void checkingCellsConnections(boolean[][] availableCells, boolean[][] isTextureAtCell, int y, int x, boolean[][] isHWallAtCell, boolean[][] isVWallAtCell) {
         availableCells[y][x] = true;
         if (y > 0)
@@ -343,6 +335,14 @@ public class Map {
         if (x > 0)
             if (!availableCells[y][x - 1] && !isVWallAtCell[y][x] && isTextureAtCell[y][x - 1])
                 checkingCellsConnections(availableCells, isTextureAtCell, y, x - 1, isHWallAtCell, isVWallAtCell);
+    }
+
+    private void copyBooleanArray(boolean[][] prev, boolean[][] ne) {
+        for (int i = 0; i < prev.length; i++) {
+            for (int j = 0; j < prev[0].length; j++) {
+                ne[i][j] = prev[i][j];
+            }
+        }
     }
 
     private void fillBooleanArrayFalse(boolean[][] booleanArray) {
