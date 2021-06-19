@@ -1,26 +1,30 @@
 package com.example.presamsungproject.GameObjects;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import com.example.presamsungproject.HitBox;
+import com.example.presamsungproject.MyPaints;
 
+import java.io.Serializable;
 import java.util.HashSet;
 
-public class TankSight {
+public class TankSight implements Serializable {
     private boolean isSighting;
-    private final Paint paint;
     private double x1, y1, x2, y2;
+    private static final long serialVersionUID = 3L;
 
     {
-        paint = new Paint();
         isSighting = false;
-        paint.setColor(Color.RED);
-        paint.setStrokeWidth(2);
     }
 
     public void draw(Canvas canvas) {
-        canvas.drawLine((int) x1, (int) y1, (int) x2, (int) y2, paint);
+        canvas.drawLine((int) x1, (int) y1, (int) x2, (int) y2, MyPaints.getTankSightPaint());
+    }
+
+    public void scaleTo(double koeff) {
+        x1 *= koeff;
+        y1 *= koeff;
+        x2 *= koeff;
+        y2 *= koeff;
     }
 
     public void update(double x1, double y1, double angle, HashSet<HitBox> hitBoxes) {
@@ -58,13 +62,4 @@ public class TankSight {
         return isSighting;
     }
 
-    public String getString() {
-        String result = "";
-        result += "" + isSighting + " ";
-        result += "" + x1 + " ";
-        result += "" + y1 + " ";
-        result += "" + x2 + " ";
-        result += "" + y2 + " ";
-        return result;
-    }
 }

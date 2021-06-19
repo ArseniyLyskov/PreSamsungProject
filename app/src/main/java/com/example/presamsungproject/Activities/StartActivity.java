@@ -9,12 +9,14 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
+import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.Map;
+import com.example.presamsungproject.MyPaints;
 import com.example.presamsungproject.R;
 
 public class StartActivity extends AppCompatActivity {
     private EditText editText;
-    private ImageView imageView, imageView2;
+    private ImageView menuImage, backgroundImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,32 +27,61 @@ public class StartActivity extends AppCompatActivity {
         if(savedInstanceState == null)
             return;
 
-        editText = findViewById(R.id.as_edittext);
-        imageView = findViewById(R.id.as_imageview);
-        imageView2 = findViewById(R.id.as_imageview2);
+        MyPaints.paintsInit();
 
-        Bitmap background = new Map(getApplicationContext()).getBitmap();
-        imageView.setImageBitmap(background);
-        imageView2.setImageResource(R.drawable.white350_200);
+        editText = findViewById(R.id.as_edittext);
+        menuImage = findViewById(R.id.as_menu_image);
+        backgroundImage = findViewById(R.id.as_background_image);
+
+        Bitmap background = new Map().getDrawnMap(getApplicationContext());
+        backgroundImage.setImageBitmap(background);
+        menuImage.setImageResource(R.drawable.white350_200);
+
+        MessageManager.findExternalAddress();
     }
 
     public void joinLobbyClick(View view) {
-        changeActivity(false);
+        if(!isConnectedToWiFI())
+            return;
+        if(isNickNameEntered()) {
+            String name = editText.getText().toString();
+
+            Intent intent = new Intent(this, LobbyClientActivity.class);
+            intent.putExtra("name", name);
+            startActivity(intent);
+        }
     }
 
-    public void crateLobbyClick(View view) {
-        changeActivity(true);
+    public void createLobbyClick(View view) {
+        if(!isConnectedToWiFI())
+            return;
+        if(isNickNameEntered()) {
+            String name = editText.getText().toString();
+
+            Intent intent = new Intent(this, LobbyServerActivity.class);
+            intent.putExtra("name", name);
+            startActivity(intent);
+        }
     }
 
-    private void changeActivity(boolean isLobby) {
+    private boolean isNickNameEntered() {
         if (editText.getText().toString().equals("")) {
             Toast.makeText(getApplicationContext(), "You didn't enter your nickname", Toast.LENGTH_SHORT).show();
-            return;
+            return false;
         }
-        Intent intent = new Intent(this, LobbyActivity.class);
-        intent.putExtra("isLobby", isLobby);
-        intent.putExtra("name", editText.getText().toString());
-        startActivity(intent);
+        else return true;
+    }
+
+    private boolean isConnectedToWiFI() {
+        boolean connected = false;
+        if(MessageManager.EXTERNAL_ADDRESS != null)
+            connected = MessageManager.EXTERNAL_ADDRESS.length() > 4
+                    && MessageManager.EXTERNAL_ADDRESS.length() < 16;
+        else
+            MessageManager.findExternalAddress();
+        if(!connected)
+            Toast.makeText(getApplicationContext(), "Error. Check your connection to Wi-Fi.", Toast.LENGTH_SHORT).show();
+        return connected;
     }
 
 }

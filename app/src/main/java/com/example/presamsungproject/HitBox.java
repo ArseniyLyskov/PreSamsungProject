@@ -1,24 +1,18 @@
 package com.example.presamsungproject;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
 import android.graphics.Path;
 
-public class HitBox {
-    private double x, y;
-    private double angle1, angle2, angle3, angle4;
-    private int bmp_width, bmp_height;
-    private double r1, r2, r3, r4;
-    private int x1, y1, x2, y2, x3, y3, x4, y4;
-    private Paint paint;
+import java.io.Serializable;
 
-    {
-        paint = new Paint();
-        paint.setColor(Color.CYAN);
-        paint.setStrokeWidth(3);
-        paint.setStyle(Paint.Style.STROKE);
-    }
+public class HitBox implements Serializable {
+    private transient double x, y;
+    private transient double angle1, angle2, angle3, angle4;
+    private transient int bmp_width, bmp_height;
+    private transient double r1, r2, r3, r4;
+
+    private int x1, y1, x2, y2, x3, y3, x4, y4;
+    private static final long serialVersionUID = 5L;
 
     public HitBox(double x, double y, double angle, int bmp_width, int bmp_height,
                   double[] indents) {
@@ -32,7 +26,7 @@ public class HitBox {
         double downIndent;
         double leftIndent;
 
-        if(indents != null) {
+        if (indents != null) {
             upIndent = indents[0];
             rightIndent = indents[1];
             downIndent = indents[2];
@@ -57,6 +51,17 @@ public class HitBox {
         updateProperties(x, y, angle);
     }
 
+    public void scaleTo(double koeff) {
+        x1 *= koeff;
+        y1 *= koeff;
+        x2 *= koeff;
+        y2 *= koeff;
+        x3 *= koeff;
+        y3 *= koeff;
+        x4 *= koeff;
+        y4 *= koeff;
+    }
+
     public void draw(Canvas canvas) {
         Path path = new Path();
         path.moveTo(x1, y1);
@@ -64,7 +69,7 @@ public class HitBox {
         path.lineTo(x3, y3);
         path.lineTo(x4, y4);
         path.lineTo(x1, y1);
-        canvas.drawPath(path, paint);
+        canvas.drawPath(path, MyPaints.getHitBoxPaint());
     }
 
     private int[] getXpoints() {
@@ -115,7 +120,7 @@ public class HitBox {
         return false;
     }
 
-    private static boolean isPointInSquare(int x0,  int y0,
+    private static boolean isPointInSquare(int x0, int y0,
                                            int[] x, int[] y) {
         return isPointInTriangle(x0, y0, x[0], y[0], x[1], y[1], x[2], y[2]) ||
                 isPointInTriangle(x0, y0, x[0], y[0], x[3], y[3], x[2], y[2]);
@@ -131,7 +136,7 @@ public class HitBox {
                 isPointInSquare(x1[1], y1[1], x2, y2) ||
                 isPointInSquare(x1[2], y1[2], x2, y2) ||
                 isPointInSquare(x1[3], y1[3], x2, y2);
-        if(intersection)
+        if (intersection)
             return true;
         else {
             int maxX1 = Math.max(Math.max(x1[0], x1[1]), Math.max(x1[2], x1[3]));
@@ -142,11 +147,11 @@ public class HitBox {
             int minX2 = Math.min(Math.min(x2[0], x2[1]), Math.min(x2[2], x2[3]));
             int minY1 = Math.min(Math.min(y1[0], y1[1]), Math.min(y1[2], y1[3]));
             int minY2 = Math.min(Math.min(y2[0], y2[1]), Math.min(y2[2], y2[3]));
-            if(maxX1 <= maxX2 && minX1 >= minX2)
-                if(maxY1 >= maxY2 && minY1 <= minY2)
+            if (maxX1 <= maxX2 && minX1 >= minX2)
+                if (maxY1 >= maxY2 && minY1 <= minY2)
                     return true;
-            if(maxY1 <= maxY2 && minY1 >= minY2)
-                if(maxX1 >= maxX2 && minX1 <= minX2)
+            if (maxY1 <= maxY2 && minY1 >= minY2)
+                if (maxX1 >= maxX2 && minX1 <= minX2)
                     return true;
         }
         return false;
@@ -181,14 +186,14 @@ public class HitBox {
         int[] hbYpoints = hitBox.getYpoints();
         int result_x = -1, result_y = -1;
         for (int i = 0; i < 3; i++) {
-            int[] temp = sightSegmentIntersection(x, y, new int[]{hbXpoints[i], hbXpoints[i+1]}, new int[]{hbYpoints[i], hbYpoints[i+1]});
-            if(temp[0] != -1 && (result_x == -1 || Math.abs(x[0] - temp[0]) < Math.abs(x[0] - result_x))) {
+            int[] temp = sightSegmentIntersection(x, y, new int[]{hbXpoints[i], hbXpoints[i + 1]}, new int[]{hbYpoints[i], hbYpoints[i + 1]});
+            if (temp[0] != -1 && (result_x == -1 || Math.abs(x[0] - temp[0]) < Math.abs(x[0] - result_x))) {
                 result_x = temp[0];
                 result_y = temp[1];
             }
         }
         int[] temp = sightSegmentIntersection(x, y, new int[]{hbXpoints[3], hbXpoints[0]}, new int[]{hbYpoints[3], hbYpoints[0]});
-        if(temp[0] != -1 && (result_x == -1 || Math.abs(x[0] - temp[0]) < Math.abs(x[0] - result_x))) {
+        if (temp[0] != -1 && (result_x == -1 || Math.abs(x[0] - temp[0]) < Math.abs(x[0] - result_x))) {
             result_x = temp[0];
             result_y = temp[1];
         }
@@ -196,7 +201,7 @@ public class HitBox {
     }
 
     private static int[] sightSegmentIntersection(int[] x1, int[] y1,
-                                             int[] x2, int[] y2) {
+                                                  int[] x2, int[] y2) {
 
         int maxX1 = Math.max(x1[0], x1[1]);
         int maxY1 = Math.max(y1[0], y1[1]);
@@ -207,43 +212,43 @@ public class HitBox {
         int minX2 = Math.min(x2[0], x2[1]);
         int minY2 = Math.min(y2[0], y2[1]);
 
-        if(maxX1 < minX2 || maxX2 < minX1 || maxY1 < minY2 || maxY2 < minY1)
+        if (maxX1 < minX2 || maxX2 < minX1 || maxY1 < minY2 || maxY2 < minY1)
             return new int[]{-1, -1};
 
-        if((x1[0] - x1[1] == 0) && (x2[0] - x2[1] == 0)) {
-            if(y1[0] > maxY2)
+        if ((x1[0] - x1[1] == 0) && (x2[0] - x2[1] == 0)) {
+            if (y1[0] > maxY2)
                 return new int[]{x1[0], maxY2};
-            if(y1[0] < minY2)
+            if (y1[0] < minY2)
                 return new int[]{x1[0], minY2};
             return new int[]{x1[0], y1[0]};
         }
 
-        if(x1[0] - x1[1] == 0) {
+        if (x1[0] - x1[1] == 0) {
             int x_nizhn;
-            if(maxY2 == y2[0])
+            if (maxY2 == y2[0])
                 x_nizhn = x2[0];
             else
                 x_nizhn = x2[1];
             double tg = (double) (maxY2 - minY2) / (double) (maxX2 - minX2);
             double y = maxY2 - Math.abs(x_nizhn - x1[0]) * tg;
 
-            if(y < maxY1 && y > minY1)
+            if (y < maxY1 && y > minY1)
                 return new int[]{x1[0], (int) y};
             else
                 return new int[]{-1, -1};
 
         }
 
-        if(x2[0] - x2[1] == 0) {
+        if (x2[0] - x2[1] == 0) {
             int x_nizhn;
-            if(maxY1 == y1[0])
+            if (maxY1 == y1[0])
                 x_nizhn = x1[0];
             else
                 x_nizhn = x1[1];
             double tg = (double) (maxY1 - minY1) / (double) (maxX1 - minX1);
             double y = maxY1 - Math.abs(x_nizhn - x2[0]) * tg;
 
-            if(y < maxY2 && y > minY2)
+            if (y < maxY2 && y > minY2)
                 return new int[]{x2[0], (int) y};
             else
                 return new int[]{-1, -1};
@@ -262,7 +267,7 @@ public class HitBox {
         double x = (b2 - b1) / (k1 - k2);
         double y = k1 * x + b1;
 
-        if(x < maxX1 && x > minX1 && x < maxX2 && x > minX2) {
+        if (x < maxX1 && x > minX1 && x < maxX2 && x > minX2) {
             return new int[]{(int) x, (int) y};
         } else {
             return new int[]{-1, -1};

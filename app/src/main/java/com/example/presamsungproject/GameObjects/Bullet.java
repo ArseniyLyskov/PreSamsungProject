@@ -1,24 +1,26 @@
 package com.example.presamsungproject.GameObjects;
 
 import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
+import com.example.presamsungproject.MyPaints;
 
-public class Bullet {
+import java.io.Serializable;
+
+public class Bullet implements Serializable {
+    private transient double speed;
+    private transient int ricochets;
+    private transient double angle;
+
     private double x, y;
-    private double speed;
-    private double angle;
-    private int ricochets;
-    private Paint paint;
+    private static final long serialVersionUID = 4L;
 
     {
-        paint = new Paint();
-        paint.setColor(Color.CYAN);
-        paint.setStrokeWidth(3);
-        paint.setStyle(Paint.Style.STROKE);
-
         ricochets = 3;
         speed = 1200;
+    }
+
+    public void scaleTo(double koeff) {
+        x *= koeff;
+        y *= koeff;
     }
 
     public Bullet(double x, double y, double angle) {
@@ -32,15 +34,8 @@ public class Bullet {
         this.y = y;
     }
 
-    public String getString() {
-        String result = "";
-        result += "" + x + " ";
-        result += "" + y + " ";
-        return result;
-    }
-
     public void drawHitBox(Canvas canvas) {
-        canvas.drawRect((int) x - 5, (int) y - 5, (int) x + 5, (int) y + 5, paint);
+        canvas.drawRect((int) x - 5, (int) y - 5, (int) x + 5, (int) y + 5, MyPaints.getHitBoxPaint());
     }
 
     public double getX() {

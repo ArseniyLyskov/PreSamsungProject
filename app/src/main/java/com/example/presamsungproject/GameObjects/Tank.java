@@ -3,21 +3,22 @@ package com.example.presamsungproject.GameObjects;
 import android.graphics.*;
 import com.example.presamsungproject.HitBox;
 
+import java.io.Serializable;
 import java.util.HashSet;
 
-public class Tank {
-    final long id;
-    double hp;
+public class Tank implements Serializable {
+    public double hp;
+    public int team;
+    public int scale;
+    public String address;
     double x, y;
     double angleH, angleT;
     String playerName;
     TankSight tankSight;
-    Bitmap bmp_hull, bmp_tower;
-    Paint myPaint;
-    int nameWidth;
     public HashSet<Bullet> bullets;
     public HitBox hullHitBox, towerHitBox;
     double[] hullIndents, towerIndents;
+    private static final long serialVersionUID = 2L;
 
     {
         hullIndents = new double[4];
@@ -30,6 +31,9 @@ public class Tank {
         towerIndents[1] = 3 / 50f;
         towerIndents[2] = 1 / 50f;
         towerIndents[3] = 4 / 50f;
+
+        hullHitBox = new HitBox(0, 0, 0, 1, 1, hullIndents);
+        towerHitBox = new HitBox(0, 0, 0, 1, 1, towerIndents);
     }
 
     public void draw(Canvas canvas, Paint paint, Bitmap bmp_hull, Bitmap bmp_tower, Bitmap bmp_bullet) {
@@ -37,6 +41,7 @@ public class Tank {
         double hHeight = bmp_hull.getHeight();
         double tWidth = bmp_tower.getWidth();
         double tHeight = bmp_tower.getHeight();
+
         /*
         // Иной способ отрисовки танка
         //canvas.save();
@@ -66,38 +71,61 @@ public class Tank {
         canvas.drawBitmap(bmp_tower, (int) x, (int) y, paint);
         canvas.restore();
 
-        if(tankSight.isSighting())
+        if (tankSight.isSighting())
             tankSight.draw(canvas);
 
-        canvas.drawText(playerName, (int) (x + hWidth / 2 - nameWidth / 2), (int) (y - 10), myPaint);
+        canvas.drawText(playerName, (int) (x + hWidth / 2 - (int) paint.measureText(playerName) / 2), (int) (y - 10), paint);
 
         Bullet[] arr_bullets = new Bullet[bullets.size()];
         bullets.toArray(arr_bullets);
         for (Bullet b : arr_bullets) {
             canvas.drawBitmap(bmp_bullet, (int) (b.getX() - bmp_bullet.getWidth() / 2), (int) (b.getY() - bmp_bullet.getHeight() / 2), paint);
-            //canvas.drawRect((int) b.getX() - 5, (int) b.getY() - 5, (int) b.getX() + 5, (int) b.getY() + 5, paint);
         }
     }
 
-    public Tank(long id, double hp, double x, double y, double angleH, double angleT, String playerName, TankSight tankSight,
-                Bitmap bmp_hull, Bitmap bmp_tower, Paint myPaint,
-                HashSet<Bullet> bullets) {
+    public Tank(double hp, int team, double x, double y, double angleH, double angleT,
+                String playerName, TankSight tankSight, HashSet<Bullet> bullets) {
 
         this.hp = hp;
+        this.team = team;
         this.x = x;
         this.y = y;
         this.angleH = angleH;
         this.angleT = angleT;
         this.playerName = playerName;
         this.tankSight = tankSight;
-        this.bmp_hull = bmp_hull;
-        this.bmp_tower = bmp_tower;
-        this.myPaint = myPaint;
         this.bullets = bullets;
-        this.id = id;
-        hullHitBox = new HitBox(x, y, angleH, bmp_hull.getWidth(), bmp_hull.getHeight(), hullIndents);
-        towerHitBox = new HitBox(x, y, angleH + angleT, bmp_tower.getWidth(), bmp_tower.getHeight(), towerIndents);
-        nameWidth = (int) myPaint.measureText(playerName);
+    }
+
+    public void scaleTo(double koeff) {
+        this.x *= koeff;
+        this.y *= koeff;
+        tankSight.scaleTo(koeff);
+        Bullet[] arr_bullets = new Bullet[bullets.size()];
+        bullets.toArray(arr_bullets);
+        for (Bullet b : arr_bullets) {
+            b.scaleTo(koeff);
+        }
+        hullHitBox.scaleTo(koeff);
+        towerHitBox.scaleTo(koeff);
+    }
+
+    public Tank(double hp, int team, double x, double y, double angleH, double angleT, String playerName,
+                TankSight tankSight, HashSet<Bullet> bullets, HitBox hullHitBox, HitBox towerHitBox, String address, int scale) {
+
+        this.hp = hp;
+        this.team = team;
+        this.x = x;
+        this.y = y;
+        this.angleH = angleH;
+        this.angleT = angleT;
+        this.playerName = playerName;
+        this.tankSight = tankSight;
+        this.bullets = bullets;
+        this.hullHitBox = hullHitBox;
+        this.towerHitBox = towerHitBox;
+        this.address = address;
+        this.scale = scale;
     }
 
     public HitBox getHullHitBox() {

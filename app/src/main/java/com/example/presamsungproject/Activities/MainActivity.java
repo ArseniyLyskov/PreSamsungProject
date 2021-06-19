@@ -2,33 +2,22 @@ package com.example.presamsungproject.Activities;
 
 import android.content.pm.ActivityInfo;
 import android.graphics.*;
-import android.util.Log;
 import android.view.Gravity;
 import android.widget.FrameLayout;
 import android.widget.TextView;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import com.example.presamsungproject.ConnectionObjects.StringConverter;
+import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.DrawView;
 import com.example.presamsungproject.Game;
 import com.example.presamsungproject.Map;
 import com.example.presamsungproject.R;
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
-import java.util.ArrayList;
-
 public class MainActivity extends AppCompatActivity {
     private Game game;
     private FrameLayout frameLayout;
     private JoystickView jstickL, jstickR;
-    private int port;
-    private boolean isLobby;
-    private boolean ready;
-
-    {
-        ready = false;
-    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,25 +25,21 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
 
-        isLobby = getIntent().getBooleanExtra("isLobby", false);
-        //map_bitmap;
-
-        if(savedInstanceState == null)
+        if (savedInstanceState == null)
             return;
 
-        port = getIntent().getIntExtra("port", -1);
-        if(port == -1) {
-            Toast.makeText(getApplicationContext(), "Didn't get port", Toast.LENGTH_SHORT).show();
-            return;
-        }
-
+        boolean isLobby = getIntent().getBooleanExtra("isLobby", false);
         String name = getIntent().getStringExtra("name");
+        int team = getIntent().getIntExtra("team", -1);
+        Map map;
+        if (isLobby)
+            map = LobbyServerActivity.map;
+        else
+            map = LobbyClientActivity.map;
 
-        ArrayList<Integer> ports = getIntent().getIntegerArrayListExtra("ports");
-
-        game = new Game(new Map(this, getIntent().getStringExtra("map")), port, name, isLobby, ports);
-
-        game.start(getApplicationContext());
+        game = new Game(map, name, team, isLobby, getApplicationContext());
+        game.start();
+        MessageManager.setGame(game);
 
         drawActivity();
 

@@ -1,151 +1,52 @@
 package com.example.presamsungproject;
 
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.util.Log;
 
+import java.io.Serializable;
 import java.util.Arrays;
 import java.util.HashSet;
 
-public class Map {
-    private Bitmap bmp_texture_map;
-    private Bitmap bmp_texture_map2;
-    private Bitmap bmp_wall_v, bmp_wall_h, bmp_wall_c;
-    private Bitmap map;
-    private boolean[][] isTextureAtCell;
-    private boolean[][] isTextureAAtCell;
-    private boolean[][] isTextureBAtCell;
-    private boolean[][] isVWallAtCell;
-    private boolean[][] isHWallAtCell;
-    private boolean[][] isCWallAtCell;
-    private int width_quantity;
-    private int height_quantity;
-    private Paint paint;
+public class Map implements Serializable {
+    private transient Bitmap bmp_texture_map;
+    private transient Bitmap bmp_texture_map2;
+    private transient Bitmap bmp_wall_v, bmp_wall_h, bmp_wall_c;
+    private transient Bitmap bitMap;
+    private transient Paint paint;
 
-    public Map(Context context) {
-        sourceInit(context);
+    private MapCell[][] mapCells;
+    private static final long serialVersionUID = 1L;
 
-        height_quantity = 3 + (int) (Math.random() * 2);
-        width_quantity = height_quantity + 2 + (int) (Math.random() * 2);
+    public Map() {
+        int height_quantity = 3 + (int) (Math.random() * 2);
+        int width_quantity = height_quantity + 2 + (int) (Math.random() * 2);
 
-        arraysInit(width_quantity, height_quantity);
-
-        map = Bitmap.createBitmap(width_quantity * bmp_texture_map.getWidth() + bmp_wall_v.getWidth(),
-                height_quantity * bmp_texture_map.getHeight() + bmp_wall_h.getHeight(),
-                Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(map);
+        mapCellsInit(width_quantity, height_quantity);
 
         generateRandomCells();
-        drawCells(canvas, paint);
         generateBorderWalls();
         generateRandomWalls();
-        drawWalls(canvas, paint);
+        generateCornerWalls();
     }
 
-    public Map (Context context, String stringSource) {
+    public Bitmap getDrawnMap(Context context) {
         sourceInit(context);
 
-        generateMapFromString(stringSource);
-
-        map = Bitmap.createBitmap(width_quantity * bmp_texture_map.getWidth() + bmp_wall_v.getWidth(),
-                height_quantity * bmp_texture_map.getHeight() + bmp_wall_h.getHeight(),
+        bitMap = Bitmap.createBitmap((mapCells[0].length - 1) * bmp_texture_map.getWidth() + bmp_wall_v.getWidth(),
+                (mapCells.length - 1) * bmp_texture_map.getHeight() + bmp_wall_h.getHeight(),
                 Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(map);
+        Canvas canvas = new Canvas(bitMap);
 
         drawCells(canvas, paint);
         drawWalls(canvas, paint);
+
+        return bitMap;
     }
 
-    private void generateMapFromString(String stringSource) {
-        String[] splitted = stringSource.split(" ");
-        int pos = 0;
-        if(!splitted[pos].equals("MAP"))
-            return;
-
-        pos++;
-
-        Log.d("MyTag", "" + splitted.length);
-        Log.d("MyTag", "" + stringSource);
-
-        width_quantity = Integer.parseInt(splitted[pos]);
-        pos++;
-        height_quantity = Integer.parseInt(splitted[pos]);
-        pos++;
-
-        arraysInit(width_quantity, height_quantity);
-
-        for (int i = 0; i < height_quantity; i++) {
-            for (int j = 0; j < width_quantity; j++) {
-                isTextureAAtCell[i][j] = Boolean.parseBoolean(splitted[pos]);
-                pos++;
-                isTextureBAtCell[i][j] = Boolean.parseBoolean(splitted[pos]);
-                pos++;
-                isVWallAtCell[i][j] = Boolean.parseBoolean(splitted[pos]);
-                pos++;
-                isHWallAtCell[i][j] = Boolean.parseBoolean(splitted[pos]);
-                pos++;
-                isCWallAtCell[i][j] = Boolean.parseBoolean(splitted[pos]);
-                pos++;
-            }
-        }
-
-        for (int i = 0; i <= width_quantity; i++) {
-            isVWallAtCell[height_quantity][i] = Boolean.parseBoolean(splitted[pos]);
-            pos++;
-            isHWallAtCell[height_quantity][i] = Boolean.parseBoolean(splitted[pos]);
-            pos++;
-            isCWallAtCell[height_quantity][i] = Boolean.parseBoolean(splitted[pos]);
-            pos++;
-        }
-
-        for (int i = 0; i < height_quantity; i++) {
-            isVWallAtCell[i][width_quantity] = Boolean.parseBoolean(splitted[pos]);
-            pos++;
-            isHWallAtCell[i][width_quantity] = Boolean.parseBoolean(splitted[pos]);
-            pos++;
-            isCWallAtCell[i][width_quantity] = Boolean.parseBoolean(splitted[pos]);
-            pos++;
-        }
-
-        for (int i = 0; i < height_quantity; i++) {
-            for (int j = 0; j < width_quantity; j++) {
-                if(!isTextureAAtCell[i][j] && !isTextureBAtCell[i][j])
-                    isTextureAtCell[i][i] = false;
-            }
-        }
-    }
-
-
-    public String mapToString() {
-        String result = "MAP " + width_quantity + " " + height_quantity + " ";
-        for (int i = 0; i < height_quantity; i++) {
-            for (int j = 0; j < width_quantity; j++) {
-                result += "" + isTextureAAtCell[i][j] + " ";
-                result += "" + isTextureBAtCell[i][j] + " ";
-                result += "" + isVWallAtCell[i][j] + " ";
-                result += "" + isHWallAtCell[i][j] + " ";
-                result += "" + isCWallAtCell[i][j] + " ";
-            }
-        }
-        for (int i = 0; i <= width_quantity; i++) {
-            result += "" + isVWallAtCell[height_quantity][i] + " ";
-            result += "" + isHWallAtCell[height_quantity][i] + " ";
-            result += "" + isCWallAtCell[height_quantity][i] + " ";
-        }
-        for (int i = 0; i < height_quantity; i++) {
-            result += "" + isVWallAtCell[i][width_quantity] + " ";
-            result += "" + isHWallAtCell[i][width_quantity] + " ";
-            result += "" + isCWallAtCell[i][width_quantity] + " ";
-        }
-
-        return result;
-    }
-
-    private void sourceInit (Context context) {
+    private void sourceInit(Context context) {
         paint = new Paint();
         bmp_texture_map = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_map);
         bmp_texture_map2 = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_map2);
@@ -157,49 +58,44 @@ public class Map {
         bmp_wall_c = Bitmap.createBitmap(bmp_wall_v, 0, 0, bmp_wall_v.getWidth(), bmp_wall_v.getWidth());
     }
 
-    private void arraysInit (int width_quantity, int height_quantity) {
-
-        isTextureAtCell = new boolean[height_quantity][width_quantity];
-        fillBooleanArrayTrue(isTextureAtCell);
-        isVWallAtCell = new boolean[height_quantity + 1][width_quantity + 1];
-        fillBooleanArrayFalse(isVWallAtCell);
-        isHWallAtCell = new boolean[height_quantity + 1][width_quantity + 1];
-        fillBooleanArrayFalse(isHWallAtCell);
-        isCWallAtCell = new boolean[height_quantity + 1][width_quantity + 1];
-        fillBooleanArrayFalse(isCWallAtCell);
-        isTextureAAtCell = new boolean[height_quantity][width_quantity];
-        fillBooleanArrayFalse(isTextureAAtCell);
-        isTextureBAtCell = new boolean[height_quantity][width_quantity];
-        fillBooleanArrayFalse(isTextureBAtCell);
+    private void mapCellsInit(int width_quantity, int height_quantity) {
+        mapCells = new MapCell[height_quantity + 1][width_quantity + 1];
+        fillMapCells(mapCells);
+        for (int i = 0; i < mapCells.length; i++) {
+            mapCells[i][width_quantity].isTexture = false;
+        }
+        for (int i = 0; i < mapCells[0].length; i++) {
+            mapCells[height_quantity][i].isTexture = false;
+        }
     }
 
-    private void drawCells (Canvas canvas, Paint paint) {
-        for (int j = 0; j < height_quantity; j++) {
-            for (int i = 0; i < width_quantity; i++) {
-                if(isTextureAAtCell[j][i])
+    private void drawCells(Canvas canvas, Paint paint) {
+        for (int j = 0; j + 1 < mapCells.length; j++) {
+            for (int i = 0; i + 1 < mapCells[0].length; i++) {
+                if (mapCells[j][i].isTextureA)
                     canvas.drawBitmap(bmp_texture_map, bmp_texture_map.getWidth() * i, bmp_texture_map.getHeight() * j, paint);
-                if(isTextureBAtCell[j][i])
+                if (mapCells[j][i].isTextureB)
                     canvas.drawBitmap(bmp_texture_map2, bmp_texture_map.getWidth() * i, bmp_texture_map.getHeight() * j, paint);
             }
         }
     }
 
-    private void generateRandomCells () {
-        for (int j = 0; j < height_quantity; j++) {
-            for (int i = 0; i < width_quantity; i++) {
+    private void generateRandomCells() {
+        for (int j = 0; j + 1 < mapCells.length; j++) {
+            for (int i = 0; i + 1 < mapCells[0].length; i++) {
                 double random = Math.random() * 100;
                 if (random <= 50) {
-                    isTextureAAtCell[j][i] = true;
+                    mapCells[j][i].isTextureA = true;
                 } else if (random <= 80) {
-                    isTextureBAtCell[j][i] = true;
+                    mapCells[j][i].isTextureB = true;
                 } else {
-                    boolean[][] check = new boolean[isTextureAtCell.length][isTextureAtCell[0].length];
-                    copyBooleanArray(isTextureAtCell, check);
-                    check[j][i] = false;
-                    if (isMapAvailable(check, isHWallAtCell, isVWallAtCell)) {
-                        isTextureAtCell[j][i] = false;
+                    MapCell[][] check = new MapCell[mapCells.length][mapCells[0].length]; //TODO: Don't create copy, return changes instead
+                    copyMapCellsArray(mapCells, check);
+                    check[j][i].isTexture = false;
+                    if (isMapAvailable(check)) {
+                        mapCells[j][i].isTexture = false;
                     } else {
-                        isTextureAAtCell[j][i] = true;
+                        mapCells[j][i].isTextureA = true;
                         //Log.d("MyTag", "Returned cell: " + (i + 1) + " " + (j + 1));
                     }
                 }
@@ -207,96 +103,100 @@ public class Map {
         }
     }
 
-    private void generateBorderWalls () {
-        for (int j = 0; j < height_quantity; j++) {
-            for (int i = 0; i < width_quantity; i++) {
-                if (!isTextureAtCell[j][i]) {
+    private void generateBorderWalls() {
+        for (int j = 0; j < mapCells.length; j++) {
+            for (int i = 0; i < mapCells[0].length; i++) {
+                if (!mapCells[j][i].isTexture) {
                     if (i > 0)
-                        if (isTextureAtCell[j][i - 1])
-                            isVWallAtCell[j][i] = true;
-                    if (i < width_quantity - 1)
-                        if (isTextureAtCell[j][i + 1])
-                            isVWallAtCell[j][i + 1] = true;
+                        if (mapCells[j][i - 1].isTexture)
+                            mapCells[j][i].isVWall = true;
+                    if (i < mapCells[0].length - 1)
+                        if (mapCells[j][i + 1].isTexture)
+                            mapCells[j][i + 1].isVWall = true;
                     if (j > 0)
-                        if (isTextureAtCell[j - 1][i])
-                            isHWallAtCell[j][i] = true;
-                    if (j < height_quantity - 1)
-                        if (isTextureAtCell[j + 1][i])
-                            isHWallAtCell[j + 1][i] = true;
+                        if (mapCells[j - 1][i].isTexture)
+                            mapCells[j][i].isHWall = true;
+                    if (j < mapCells.length - 1)
+                        if (mapCells[j + 1][i].isTexture)
+                            mapCells[j + 1][i].isHWall = true;
                 }
             }
         }
-        for (int i = 0; i < height_quantity; i++) {
-            if(isTextureAtCell[i][0])
-                isVWallAtCell[i][0] = true;
-            if(isTextureAtCell[i][width_quantity - 1])
-                isVWallAtCell[i][width_quantity] = true;
+        for (int i = 0; i < mapCells.length; i++) {
+            if (mapCells[i][0].isTexture)
+                mapCells[i][0].isVWall = true;
+            if (mapCells[i][mapCells[0].length - 1].isTexture)
+                mapCells[i][mapCells[0].length].isVWall = true;
         }
-        for (int i = 0; i < width_quantity; i++) {
-            if(isTextureAtCell[0][i])
-                isHWallAtCell[0][i] = true;
-            if(isTextureAtCell[height_quantity - 1][i])
-                isHWallAtCell[height_quantity][i] = true;
+        for (int i = 0; i < mapCells[0].length; i++) {
+            if (mapCells[0][i].isTexture)
+                mapCells[0][i].isHWall = true;
+            if (mapCells[mapCells.length - 1][i].isTexture)
+                mapCells[mapCells.length][i].isHWall = true;
         }
     }
 
-    private void generateRandomWalls () {
-        for (int j = 1; j < height_quantity; j++) {
-            for (int i = 1; i < width_quantity; i++) {
-                if(!isVWallAtCell[j][i] && isTextureAtCell[j][i]) {
-                    double random = Math.random() * 100;
-                    if(random <= 40) {
-                        boolean[][] checkV = new boolean[isVWallAtCell.length][isVWallAtCell[0].length];
-                        copyBooleanArray(isVWallAtCell, checkV);
-                        checkV[j][i] = true;
-                        if (isMapAvailable(isTextureAtCell, isHWallAtCell, checkV))
-                            isVWallAtCell[j][i] = true;
-                        /*else
-                            Log.d("MyTag", "Returned wallV: " + (i + 1) + " " + (j + 1));*/
-                    }
+    private void generateCornerWalls() {
+        for (int j = 1; j < mapCells.length; j++) {
+            for (int i = 1; i < mapCells[0].length; i++) {
+                if ((!mapCells[j][i].isHWall) && (!mapCells[j][i].isVWall) && mapCells[j][i - 1].isHWall && mapCells[j - 1][i].isVWall) {
+                    mapCells[j][i].isCWall = true;
                 }
+            }
+        }
+    }
 
-                if(!isHWallAtCell[j][i] && isTextureAtCell[j][i]) {
+    private void generateRandomWalls() {
+        for (int j = 1; j + 1 < mapCells.length; j++) {
+            for (int i = 1; i + 1 < mapCells[0].length; i++) {
+                if (!mapCells[j][i].isVWall && mapCells[j][i].isTexture) {
                     double random = Math.random() * 100;
                     if (random <= 40) {
-                        boolean[][] checkH = new boolean[isHWallAtCell.length][isHWallAtCell[0].length];
-                        copyBooleanArray(isHWallAtCell, checkH);
-                        checkH[j][i] = true;
-                        if (isMapAvailable(isTextureAtCell, checkH, isVWallAtCell))
-                            isHWallAtCell[j][i] = true;
-                        /*else
-                            Log.d("MyTag", "Returned wallH: " + (i + 1) + " " + (j + 1));*/
+                        MapCell[][] check = new MapCell[mapCells.length][mapCells[0].length]; //TODO: Don't create copy, return changes instead
+                        copyMapCellsArray(mapCells, check);
+                        check[j][i].isVWall = true;
+                        if (isMapAvailable(check))
+                            mapCells[j][i].isVWall = true;
+                        //else
+                        //Log.d("MyTag", "Returned wallV: " + (i + 1) + " " + (j + 1));
+                    }
+                }
+
+                if (!mapCells[j][i].isHWall && mapCells[j][i].isTexture) {
+                    double random = Math.random() * 100;
+                    if (random <= 40) {
+                        MapCell[][] check = new MapCell[mapCells.length][mapCells[0].length];
+                        copyMapCellsArray(mapCells, check);
+                        check[j][i].isHWall = true;
+                        if (isMapAvailable(check))
+                            mapCells[j][i].isHWall = true;
+                        //else
+                        //Log.d("MyTag", "Returned wallH: " + (i + 1) + " " + (j + 1));
                     }
                 }
             }
         }
     }
 
-    private void drawWalls (Canvas canvas, Paint paint) {
-        for (int j = 0; j <= height_quantity; j++) {
-            for (int i = 0; i <= width_quantity; i++) {
-                if (isHWallAtCell[j][i])
+    private void drawWalls(Canvas canvas, Paint paint) {
+        for (int j = 0; j < mapCells.length; j++) {
+            for (int i = 0; i < mapCells[0].length; i++) {
+                if (mapCells[j][i].isHWall)
                     canvas.drawBitmap(bmp_wall_h, i * bmp_texture_map.getWidth(), j * bmp_texture_map.getHeight(), paint);
-                if (isVWallAtCell[j][i])
+                if (mapCells[j][i].isVWall)
                     canvas.drawBitmap(bmp_wall_v, i * bmp_texture_map.getWidth(), j * bmp_texture_map.getHeight(), paint);
-            }
-        }
-        for (int j = 1; j <= height_quantity; j++) {
-            for (int i = 1; i <= width_quantity; i++) {
-                if((!isHWallAtCell[j][i]) && (!isVWallAtCell[j][i]) && isHWallAtCell[j][i-1] && isVWallAtCell[j-1][i]) {
-                    isCWallAtCell[j][i] = true;
+                if (mapCells[j][i].isCWall)
                     canvas.drawBitmap(bmp_wall_c, i * bmp_texture_map.getWidth(), j * bmp_texture_map.getHeight(), paint);
-                }
             }
         }
     }
 
-    private boolean isMapAvailable(boolean[][] check, boolean[][] isHWallAtCell, boolean[][] isVWallAtCell) {
+    private boolean isMapAvailable(MapCell[][] check) {
         int unavailableCells = 0;
         int x = -1, y = -1;
         for (int j = 0; j < check.length; j++) {
             for (int i = 0; i < check[j].length; i++) {
-                if (!check[j][i])
+                if (!check[j][i].isTexture)
                     unavailableCells++;
                 else {
                     x = i;
@@ -304,15 +204,15 @@ public class Map {
                 }
             }
         }
-        if (unavailableCells == check.length * check[0].length)
+        if (unavailableCells == check.length * check[0].length || x == -1)
             return false;
         boolean[][] availableCells = new boolean[check.length][check[0].length];
-        fillBooleanArrayFalse(availableCells);
-        checkingCellsConnections(availableCells, check, y, x, isHWallAtCell, isVWallAtCell);
+        fillBooleanArrayWithValue(availableCells, false);
+        checkingCellsConnections(availableCells, check, y, x);
         int count = 0;
         for (int i = 0; i < availableCells.length; i++) {
             for (int j = 0; j < availableCells[0].length; j++) {
-                if (availableCells[i][j] == true)
+                if (availableCells[i][j])
                     count++;
             }
         }
@@ -321,54 +221,56 @@ public class Map {
         return true;
     }
 
-    private void copyBooleanArray(boolean[][] prev, boolean[][] ne) {
-        for (int i = 0; i < prev.length; i++) {
-            for (int j = 0; j < prev[0].length; j++) {
-                ne[i][j] = prev[i][j];
+    private void copyMapCellsArray(MapCell[][] arrayCopyFrom, MapCell[][] arrayCopyTo) {
+        for (int i = 0; i < arrayCopyFrom.length; i++) {
+            for (int j = 0; j < arrayCopyFrom[0].length; j++) {
+                arrayCopyTo[i][j] = arrayCopyFrom[i][j].getCopy();
             }
         }
     }
 
-    private void checkingCellsConnections(boolean[][] availableCells, boolean[][] isTextureAtCell, int y, int x, boolean[][] isHWallAtCell, boolean[][] isVWallAtCell) {
+    private void checkingCellsConnections(boolean[][] availableCells, MapCell[][] check, int y, int x) {
         availableCells[y][x] = true;
         if (y > 0)
-            if (!availableCells[y - 1][x] && !isHWallAtCell[y][x] && isTextureAtCell[y - 1][x])
-                checkingCellsConnections(availableCells, isTextureAtCell, y - 1, x, isHWallAtCell, isVWallAtCell);
-        if (x < isTextureAtCell[0].length - 1)
-            if (!availableCells[y][x + 1] && !isVWallAtCell[y][x + 1] && isTextureAtCell[y][x + 1])
-                checkingCellsConnections(availableCells, isTextureAtCell, y, x + 1, isHWallAtCell, isVWallAtCell);
-        if (y < isTextureAtCell.length - 1)
-            if (!availableCells[y + 1][x] && !isHWallAtCell[y + 1][x] && isTextureAtCell[y + 1][x])
-                checkingCellsConnections(availableCells, isTextureAtCell, y + 1, x, isHWallAtCell, isVWallAtCell);
+            if (!availableCells[y - 1][x] && !check[y][x].isHWall && check[y - 1][x].isTexture)
+                checkingCellsConnections(availableCells, check, y - 1, x);
+        if (x < check[0].length - 1)
+            if (!availableCells[y][x + 1] && !check[y][x + 1].isVWall && check[y][x + 1].isTexture)
+                checkingCellsConnections(availableCells, check, y, x + 1);
+        if (y < check.length - 1)
+            if (!availableCells[y + 1][x] && !check[y + 1][x].isHWall && check[y + 1][x].isTexture)
+                checkingCellsConnections(availableCells, check, y + 1, x);
         if (x > 0)
-            if (!availableCells[y][x - 1] && !isVWallAtCell[y][x] && isTextureAtCell[y][x - 1])
-                checkingCellsConnections(availableCells, isTextureAtCell, y, x - 1, isHWallAtCell, isVWallAtCell);
+            if (!availableCells[y][x - 1] && !check[y][x].isVWall && check[y][x - 1].isTexture)
+                checkingCellsConnections(availableCells, check, y, x - 1);
     }
 
-    private void fillBooleanArrayFalse(boolean[][] booleanArray) {
+    private void fillBooleanArrayWithValue(boolean[][] booleanArray, boolean value) {
         for (boolean[] booleans : booleanArray) {
-            Arrays.fill(booleans, false);
+            Arrays.fill(booleans, value);
         }
     }
 
-    private void fillBooleanArrayTrue(boolean[][] booleanArray) {
-        for (boolean[] booleans : booleanArray) {
-            Arrays.fill(booleans, true);
+    private void fillMapCells(MapCell[][] mapCells) {
+        for (int i = 0; i < mapCells.length; i++) {
+            for (int j = 0; j < mapCells[0].length; j++) {
+                mapCells[i][j] = new MapCell(j, i);
+            }
         }
     }
 
     public HashSet<HitBox> getWallsHitBox() {
         HashSet<HitBox> wallsHitBox = new HashSet<>();
-        for (int j = 0; j <= height_quantity; j++) {
-            for (int i = 0; i <= width_quantity; i++) {
-                if(isHWallAtCell[j][i]) {
+        for (int j = 0; j < mapCells.length; j++) {
+            for (int i = 0; i < mapCells[0].length; i++) {
+                if (mapCells[j][i].isHWall) {
                     int length = 1;
                     int width_piece = 0;
-                    for (int k = i + 1; k <= width_quantity; k++) {
-                        if(isHWallAtCell[j][k])
+                    for (int k = i + 1; k < mapCells[0].length; k++) {
+                        if (mapCells[j][k].isHWall)
                             length++;
                         else {
-                            if(isVWallAtCell[j][k] || isCWallAtCell[j][k])
+                            if (mapCells[j][k].isVWall || mapCells[j][k].isCWall)
                                 width_piece = bmp_wall_c.getWidth();
                             break;
                         }
@@ -380,16 +282,16 @@ public class Map {
             }
         }
 
-        for (int i = 0; i <= width_quantity; i++) {
-            for (int j = 0; j <= height_quantity; j++) {
-                if (isVWallAtCell[j][i]) {
+        for (int i = 0; i < mapCells[0].length; i++) {
+            for (int j = 0; j < mapCells.length; j++) {
+                if (mapCells[j][i].isVWall) {
                     int length = 1;
                     int height_piece = 0;
-                    for (int k = j + 1; k <= height_quantity; k++) {
-                        if (isVWallAtCell[k][i])
+                    for (int k = j + 1; k < mapCells.length; k++) {
+                        if (mapCells[k][i].isVWall)
                             length++;
                         else {
-                            if (isHWallAtCell[k][i] || isCWallAtCell[k][i])
+                            if (mapCells[k][i].isHWall || mapCells[k][i].isCWall)
                                 height_piece = bmp_wall_c.getHeight();
                             break;
                         }
@@ -403,20 +305,51 @@ public class Map {
         return wallsHitBox;
     }
 
-    public Bitmap getBitmap() {
-        return map;
-    }
-
-    public int[] startCoordinates() {
+    public int[] startCoordinates() { //TODO: different coordinates
         int[] coordinates = new int[4];
         coordinates[2] = bmp_texture_map.getWidth();
         coordinates[3] = bmp_texture_map.getHeight();
         do {
-            coordinates[0] = (int) (Math.random() * width_quantity);
-            coordinates[1] = (int) (Math.random() * height_quantity);
-        } while (!isTextureAAtCell[coordinates[1]][coordinates[0]] && !isTextureBAtCell[coordinates[1]][coordinates[0]]);
+            coordinates[0] = (int) (Math.random() * (mapCells[0].length - 1));
+            coordinates[1] = (int) (Math.random() * (mapCells.length - 1));
+        } while (!mapCells[coordinates[1]][coordinates[0]].isTextureA && !mapCells[coordinates[1]][coordinates[0]].isTextureB);
         coordinates[0] *= coordinates[2];
         coordinates[1] *= coordinates[3];
         return coordinates;
+    }
+}
+
+class MapCell implements Serializable {
+    private int x, y;
+    public boolean isTexture;
+    public boolean isTextureA, isTextureB;
+    public boolean isVWall, isHWall;
+    public boolean isCWall;
+
+    public MapCell(int x, int y) {
+        this.x = x;
+        this.y = y;
+        isTexture = true;
+        isTextureA = false;
+        isTextureB = false;
+        isVWall = false;
+        isHWall = false;
+        isCWall = false;
+    }
+
+    public MapCell(int x, int y, boolean isTexture, boolean isTextureA, boolean isTextureB,
+                   boolean isVWall, boolean isHWall, boolean isCWall) {
+        this.x = x;
+        this.y = y;
+        this.isTexture = isTexture;
+        this.isTextureA = isTextureA;
+        this.isTextureB = isTextureB;
+        this.isVWall = isVWall;
+        this.isHWall = isHWall;
+        this.isCWall = isCWall;
+    }
+
+    public MapCell getCopy() {
+        return new MapCell(x, y, isTexture, isTextureA, isTextureB, isVWall, isHWall, isCWall);
     }
 }

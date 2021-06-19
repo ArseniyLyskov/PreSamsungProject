@@ -29,7 +29,7 @@ public class DrawThread extends Thread {
     @Override
     public void run() {
         while (running) {
-            if(isTimeToUpdate) {
+            if (isTimeToUpdate) {
                 Canvas canvas = surfaceHolder.lockCanvas();
                 if (canvas != null) {
                     try {
@@ -40,7 +40,7 @@ public class DrawThread extends Thread {
                         game.setFps(game.getFps() + 1);
 
                         //
-                    }  finally {
+                    } finally {
                         surfaceHolder.unlockCanvasAndPost(canvas);
                         isTimeToUpdate = false;
                     }

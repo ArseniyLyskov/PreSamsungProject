@@ -16,8 +16,9 @@
             android:supportsRtl="true"
             android:theme="@style/Theme.AppCompat.Light.NoActionBar">
 
-        <activity android:name=".Activities.LobbyActivity"/>
+        <activity android:name=".Activities.LobbyServerActivity"/>
         <activity android:name=".Activities.MainActivity"/>
+        <activity android:name=".Activities.LobbyClientActivity"/>
 
         <activity android:name=".Activities.StartActivity">
             <intent-filter>

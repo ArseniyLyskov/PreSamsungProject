@@ -7,14 +7,14 @@
     <ImageView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:id="@+id/al_imageview"
+            android:id="@+id/acl_background_image"
     />
 
     <ImageView
             android:layout_gravity="center"
             android:layout_width="350dp"
             android:layout_height="300dp"
-            android:id="@+id/al_imageview2"
+            android:id="@+id/acl_menu_image"
     />
 
     <LinearLayout
@@ -26,12 +26,13 @@
 
         <TextView
                 android:textAlignment="center"
-                android:text="Waiting for other players..."
+                android:text="Enter lobby creator IP"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
                 android:textColor="@android:color/black"
                 android:textSize="20dp"
+                android:id="@+id/acl_upper_text"
         />
 
         <TextView
@@ -40,20 +41,23 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:id="@+id/al_textview_number"
+                android:id="@+id/acl_textview_number"
                 android:textColor="@android:color/black"
                 android:textSize="20dp"
+                android:visibility="invisible"
         />
 
         <ScrollView
                 android:layout_width="300dp"
-                android:layout_height="150dp"
-                android:layout_gravity="center">
+                android:layout_height="125dp"
+                android:layout_gravity="center"
+                android:visibility="invisible"
+                android:id="@+id/acl_scrollview">
 
             <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:id="@+id/al_textview_nicks"
+                    android:id="@+id/acl_textview_nicks"
                     android:gravity="center"
                     android:textColor="@android:color/black"
                     android:textSize="20dp"
@@ -61,14 +65,22 @@
 
         </ScrollView>
 
+        <EditText
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:hint="Enter here"
+                android:id="@+id/acl_edittext"
+                android:gravity="center"
+                android:inputType="date"
+        />
+
         <Button
-                android:text="Start game"
+                android:text="Connect to lobby via ip"
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:layout_gravity="center"
-                android:id="@+id/al_button"
                 android:textSize="20dp"
-                android:onClick="startGameClick"
+                android:onClick="connectToLobbyClick"
         />
 
     </LinearLayout>
