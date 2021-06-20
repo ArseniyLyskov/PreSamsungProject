@@ -2,8 +2,11 @@ package com.example.presamsungproject.Activities;
 
 import android.content.pm.ActivityInfo;
 import android.graphics.*;
+import android.media.Image;
+import android.util.Log;
 import android.view.Gravity;
 import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -18,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
     private Game game;
     private FrameLayout frameLayout;
     private JoystickView jstickL, jstickR;
+    private Map map;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -31,7 +35,6 @@ public class MainActivity extends AppCompatActivity {
         boolean isLobby = getIntent().getBooleanExtra("isLobby", false);
         String name = getIntent().getStringExtra("name");
         int team = getIntent().getIntExtra("team", -1);
-        Map map;
         if (isLobby)
             map = LobbyServerActivity.map;
         else
@@ -84,6 +87,8 @@ public class MainActivity extends AppCompatActivity {
         jstickR.setFixedCenter(true);
 
         TextView fps_tv = new TextView(this);
+        fps_tv.setTextColor(Color.BLACK);
+        fps_tv.setBackgroundColor(Color.WHITE);
         fps_tv.setLayoutParams(new FrameLayout.LayoutParams(FrameLayout.LayoutParams.WRAP_CONTENT,
                 FrameLayout.LayoutParams.WRAP_CONTENT, Gravity.RIGHT | Gravity.TOP));
         game.setFps_tv(fps_tv);

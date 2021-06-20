@@ -11,8 +11,7 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 public class Map implements Serializable {
-    private transient Bitmap bmp_texture_map;
-    private transient Bitmap bmp_texture_map2;
+    private transient Bitmap bmp_texture_map, bmp_texture_map2, bmp_background_map;
     private transient Bitmap bmp_wall_v, bmp_wall_h, bmp_wall_c;
     private transient Bitmap bitMap;
     private transient Paint paint;
@@ -21,8 +20,8 @@ public class Map implements Serializable {
     private static final long serialVersionUID = 1L;
 
     public Map() {
-        int height_quantity = 3 + (int) (Math.random() * 2);
-        int width_quantity = height_quantity + 2 + (int) (Math.random() * 2);
+        int height_quantity = 15 + (int) (Math.random() * 2);
+        int width_quantity = height_quantity + 10 + (int) (Math.random() * 2);
 
         mapCellsInit(width_quantity, height_quantity);
 
@@ -35,6 +34,8 @@ public class Map implements Serializable {
     public Bitmap getDrawnMap(Context context) {
         sourceInit(context);
 
+        Bitmap backgroundBitmap = getBackgroundMap();
+
         bitMap = Bitmap.createBitmap((mapCells[0].length - 1) * bmp_texture_map.getWidth() + bmp_wall_v.getWidth(),
                 (mapCells.length - 1) * bmp_texture_map.getHeight() + bmp_wall_h.getHeight(),
                 Bitmap.Config.ARGB_8888);
@@ -43,13 +44,32 @@ public class Map implements Serializable {
         drawCells(canvas, paint);
         drawWalls(canvas, paint);
 
-        return bitMap;
+        Canvas backgroundCanvas = new Canvas(backgroundBitmap);
+        backgroundCanvas.drawBitmap(bitMap, bmp_background_map.getWidth(), bmp_background_map.getHeight(), paint);
+
+        return backgroundBitmap;
+    }
+
+    private Bitmap getBackgroundMap() {
+        Bitmap bitMapBackground = Bitmap.createBitmap((mapCells[0].length + 1) * bmp_texture_map.getWidth(),
+                (mapCells.length + 1) * bmp_texture_map.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitMapBackground);
+
+        for (int i = 0; i < mapCells.length + 1; i++) {
+            for (int j = 0; j < mapCells[0].length + 1; j++) {
+                canvas.drawBitmap(bmp_background_map, bmp_background_map.getWidth() * j,
+                        bmp_background_map.getHeight() * i, paint);
+            }
+        }
+
+        return bitMapBackground;
     }
 
     private void sourceInit(Context context) {
         paint = new Paint();
         bmp_texture_map = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_map);
         bmp_texture_map2 = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_map2);
+        bmp_background_map = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_background_map);
         bmp_wall_v = BitmapFactory.decodeResource(context.getResources(), R.drawable.wall);
         bmp_wall_h = Bitmap.createBitmap(bmp_wall_v.getHeight(), bmp_wall_v.getWidth(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bmp_wall_h);
@@ -89,12 +109,9 @@ public class Map implements Serializable {
                 } else if (random <= 80) {
                     mapCells[j][i].isTextureB = true;
                 } else {
-                    MapCell[][] check = new MapCell[mapCells.length][mapCells[0].length]; //TODO: Don't create copy, return changes instead
-                    copyMapCellsArray(mapCells, check);
-                    check[j][i].isTexture = false;
-                    if (isMapAvailable(check)) {
-                        mapCells[j][i].isTexture = false;
-                    } else {
+                    mapCells[j][i].isTexture = false;
+                    if (!isMapAvailable(mapCells)) {
+                        mapCells[j][i].isTexture = true;
                         mapCells[j][i].isTextureA = true;
                         //Log.d("MyTag", "Returned cell: " + (i + 1) + " " + (j + 1));
                     }
@@ -152,26 +169,22 @@ public class Map implements Serializable {
                 if (!mapCells[j][i].isVWall && mapCells[j][i].isTexture) {
                     double random = Math.random() * 100;
                     if (random <= 40) {
-                        MapCell[][] check = new MapCell[mapCells.length][mapCells[0].length]; //TODO: Don't create copy, return changes instead
-                        copyMapCellsArray(mapCells, check);
-                        check[j][i].isVWall = true;
-                        if (isMapAvailable(check))
-                            mapCells[j][i].isVWall = true;
-                        //else
-                        //Log.d("MyTag", "Returned wallV: " + (i + 1) + " " + (j + 1));
+                        mapCells[j][i].isVWall = true;
+                        if (!isMapAvailable(mapCells)) {
+                            mapCells[j][i].isVWall = false;
+                            //Log.d("MyTag", "Returned wallV: " + (i + 1) + " " + (j + 1));
+                        }
                     }
                 }
 
                 if (!mapCells[j][i].isHWall && mapCells[j][i].isTexture) {
                     double random = Math.random() * 100;
                     if (random <= 40) {
-                        MapCell[][] check = new MapCell[mapCells.length][mapCells[0].length];
-                        copyMapCellsArray(mapCells, check);
-                        check[j][i].isHWall = true;
-                        if (isMapAvailable(check))
-                            mapCells[j][i].isHWall = true;
-                        //else
-                        //Log.d("MyTag", "Returned wallH: " + (i + 1) + " " + (j + 1));
+                        mapCells[j][i].isHWall = true;
+                        if (!isMapAvailable(mapCells)) {
+                            mapCells[j][i].isHWall = false;
+                            //Log.d("MyTag", "Returned wallH: " + (i + 1) + " " + (j + 1));
+                        }
                     }
                 }
             }
@@ -316,6 +329,14 @@ public class Map implements Serializable {
         coordinates[0] *= coordinates[2];
         coordinates[1] *= coordinates[3];
         return coordinates;
+    }
+
+    public int getBackgroundCellWidth() {
+        return bmp_background_map.getWidth();
+    }
+
+    public int getBackgroundCellHeight() {
+        return bmp_background_map.getHeight();
     }
 }
 

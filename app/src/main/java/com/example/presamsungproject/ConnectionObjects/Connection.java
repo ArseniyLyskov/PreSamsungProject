@@ -5,18 +5,100 @@ import com.example.presamsungproject.Activities.LobbyServerActivity;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.Socket;
+import java.util.LinkedList;
 
-public class Connection extends Thread {
+public class Connection {
     private Socket connection;
-    private String startMessage = "";
     private DataOutputStream out = null;
     private DataInputStream in = null;
     private String clientAddress = null;
-    private boolean ready = true;
+    private LinkedList<String> messageQueue = new LinkedList<>();
 
     public Connection(Socket connection) {
         this.connection = connection;
+
+        clientAddress = connection.getInetAddress().getHostAddress();
+        try {
+            out = new DataOutputStream(connection.getOutputStream());
+            in = new DataInputStream(connection.getInputStream());
+        } catch (Exception e) {
+            Log.d("MyTag","Connection creating error\n" + e.toString());
+            e.printStackTrace();
+        }
+        Log.d("MyTag", "Connection between: " + connection.getLocalSocketAddress()
+                + " and " + connection.getRemoteSocketAddress());
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while(!connection.isClosed()) {
+                    String received = "";
+                    try {
+                        received = in.readUTF();
+                        if(received == null || received.equals("")) {
+                            Log.d("MyTraffic", "Received trash");
+                            continue;
+                        }
+                    } catch (Exception e) {
+                        Log.d("MyTraffic", "Connection receiving message error\n" + e.toString());
+                        e.printStackTrace();
+                        continue;
+                    }
+                    Log.d("MyTraffic", "Connection received: " + received);
+
+                    if (received.equalsIgnoreCase("end")) {
+                        closeEverything();
+                        break;
+                    }
+                    MessageManager.serverProcessMessage(received);
+                }
+                Server.removeConnection(Connection.this);
+            }
+        }).start();
+
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                while (!connection.isClosed()) {
+                    if (messageQueue.peekFirst() == null)
+                        continue;
+
+                    String toSend = messageQueue.pollFirst();
+
+                    try {
+                        out.writeUTF(toSend);
+                        out.flush();
+                    } catch (Exception e) {
+                        Log.d("MyTraffic", "Connection sending exception\n" + e.toString());
+                        e.printStackTrace();
+                    }
+
+                    if (toSend.equalsIgnoreCase("end")) {
+                        closeEverything();
+                        break;
+                    }
+                }
+            }
+        }).start();
+    }
+
+    private void closeEverything() {
+        try {
+            out.close();
+            in.close();
+            connection.close();
+            Server.removeConnection(Connection.this);
+            Log.d("MyTag", "Connection closed properly");
+        } catch (Exception e) {
+            Log.d("MyTag", "Oops...");
+            e.printStackTrace();
+        }
+        if (!Server.containsAddress(clientAddress)) {
+            LobbyServerActivity.players.remove(clientAddress);
+            LobbyServerActivity.updateUI();
+        }
     }
 
     public String getClientAddress() {
@@ -28,80 +110,15 @@ public class Connection extends Thread {
     }
 
     public void sendMessage(String toSend) {
-        if (toSend.equals("")) {
+        if (toSend == null || toSend.equals("")) {
+            Log.d("MyTraffic", "Sending trash");
             return;
         }
-        if (out != null) {
-            final String finalToSend = new String(toSend);
-            new Thread(new Runnable() {
-                @Override
-                public void run() {
-                    try {
-                        ready = false;
-                        out.writeUTF(finalToSend);
-                        out.flush();
-                        ready = true;
-                        Log.d("MyTag", "Server sent: " + finalToSend);
-                    } catch (Exception e) {
-                        Log.d("MyTag", "Server message sending error");
-                        e.printStackTrace();
-                    }
-                }
-            }).start();
-        } else
-            this.startMessage = toSend;
+        messageQueue.addLast(toSend);
+        //if(messageQueue.size() > 5)
+           // Log.d("MyTraffic", "Connection too many messages");
     }
 
-
-    @Override
-    public void run() {
-        try {
-            Log.d("MyTag", "Connection between: " + connection.getLocalSocketAddress()
-                    + " and " + connection.getRemoteSocketAddress());
-            clientAddress = connection.getInetAddress().getHostAddress();
-            out = new DataOutputStream(connection.getOutputStream());
-            in = new DataInputStream(connection.getInputStream());
-
-            while (!connection.isClosed()) {
-                if (!startMessage.equals("")) {
-                    sendMessage(startMessage);
-                    startMessage = "";
-                }
-
-                String received = in.readUTF();
-                Log.d("MyTag", "Server received: " + received);
-
-                if (received.equalsIgnoreCase("end")) {
-                    break;
-                }
-                MessageManager.serverProcessMessage(received);
-            }
-            in.close();
-            out.close();
-            connection.close();
-            Server.removeConnection(this);
-            Log.d("MyTag", "Connection closed");
-
-        } catch (Exception e) {
-            Log.d("MyTag", "Connection error");
-            e.printStackTrace();
-            if (!(connection == null))
-                if (!connection.isClosed())
-                    try {
-                        connection.close();
-                        Server.removeConnection(this);
-                        Log.d("MyTag", "Connection emergency closed");
-                    } catch (Exception e2) {
-                        Log.d("MyTag", "Connection emergency closing didn't work!!!");
-                        e2.printStackTrace();
-                    }
-        }
-
-        if (clientAddress != null) {
-            LobbyServerActivity.players.remove(clientAddress);
-            LobbyServerActivity.updateUI();
-        }
-    }
 }
 
 

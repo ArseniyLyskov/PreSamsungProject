@@ -77,10 +77,10 @@ public class StartActivity extends AppCompatActivity {
         if(MessageManager.EXTERNAL_ADDRESS != null)
             connected = MessageManager.EXTERNAL_ADDRESS.length() > 4
                     && MessageManager.EXTERNAL_ADDRESS.length() < 16;
-        else
-            MessageManager.findExternalAddress();
-        if(!connected)
+        if(!connected) {
             Toast.makeText(getApplicationContext(), "Error. Check your connection to Wi-Fi.", Toast.LENGTH_SHORT).show();
+            MessageManager.findExternalAddress();
+        }
         return connected;
     }
 

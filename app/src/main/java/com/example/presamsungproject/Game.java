@@ -25,9 +25,11 @@ public class Game {
     public HashMap<String, Tank> otherTanks = new HashMap<>();
 
     private Context context;
+    private Map map;
     private MyTank myTank;
     private double lJangle, lJstrength, rJangle, rJstrength;
     private int fps;
+    private int frameWidth, frameHeight;
     private int[] startCoordinates;
     private TextView fps_tv;
     private Bitmap map_bitmap;
@@ -36,12 +38,13 @@ public class Game {
 
 
     public Game(Map map, String name, int team, boolean isLobby, Context context) {
-        this.map_bitmap = map.getDrawnMap(context);
+        this.map = map;
         this.name = name;
         this.team = team;
         this.isLobby = isLobby;
         this.context = context;
         addrress = MessageManager.EXTERNAL_ADDRESS;
+        map_bitmap = map.getDrawnMap(context);
         walls = map.getWallsHitBox();
         startCoordinates = map.startCoordinates();
     }
@@ -83,7 +86,9 @@ public class Game {
     }
 
     public void drawAll(Canvas canvas, Paint paint) {
-        canvas.drawBitmap(map_bitmap, 0, 0, paint);
+        canvas.translate(getTranslateCanvasX(), getTranslateCanvasY());
+
+        canvas.drawBitmap(map_bitmap, -map.getBackgroundCellWidth(), -map.getBackgroundCellHeight(), paint);
         if (myTank.hp > 0)
             myTank.draw(canvas, MyPaints.getAllyNickPaint(), bmp_greenHp, bmp_greenTp, bmp_bullet);
         else
@@ -157,6 +162,32 @@ public class Game {
         hitBoxes.add(myTank.getTowerHitBox());
         hitBoxes.add(myTank.getHullHitBox());
         return hitBoxes;
+    }
+
+    private int getTranslateCanvasX() {
+        int translation = -(int) (myTank.getX() - frameWidth / 2f + bmp_greenHp.getWidth() / 2f);
+        if(translation > map.getBackgroundCellWidth())
+            return map.getBackgroundCellWidth();
+        if(translation < -(map_bitmap.getWidth() - map.getBackgroundCellWidth() - frameWidth))
+            return -(map_bitmap.getWidth() - map.getBackgroundCellWidth() - frameWidth);
+        return translation;
+    }
+
+    private int getTranslateCanvasY() {
+        int translation = -(int) (myTank.getY() - frameHeight / 2f + bmp_greenHp.getHeight() / 2f);
+        if(translation > map.getBackgroundCellHeight())
+            return map.getBackgroundCellHeight();
+        if(translation < -(map_bitmap.getHeight() - map.getBackgroundCellHeight() - frameHeight))
+            return -(map_bitmap.getHeight() - map.getBackgroundCellHeight() - frameHeight);
+        return translation;
+    }
+
+    public void setFrameWidth(int frameWidth) {
+        this.frameWidth = frameWidth;
+    }
+
+    public void setFrameHeight(int frameHeight) {
+        this.frameHeight = frameHeight;
     }
 
     public int getScale() {

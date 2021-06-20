@@ -32,7 +32,6 @@ public class Server {
                             connections.get(client.getInetAddress().getHostAddress()).sendMessage("end");
                         }
                         Connection connection = new Connection(client);
-                        connection.start();
                         connections.put(client.getInetAddress().getHostAddress(), connection);
                     }
                 } catch (Exception e) {
@@ -79,6 +78,10 @@ public class Server {
 
     public static void removeConnection(Connection connection) {
         connections.remove(connection);
+    }
+
+    public static boolean containsAddress(String address) {
+        return connections.containsKey(address);
     }
 
     public static int getConnectionsQuantity() {

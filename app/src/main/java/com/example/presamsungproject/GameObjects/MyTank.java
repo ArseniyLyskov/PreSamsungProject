@@ -271,6 +271,14 @@ public class MyTank extends Tank {
                     y + bmp_tower.getHeight() / 2f - bmp_tower.getHeight() * towerIndents[0] * Math.sin(Math.toRadians(90 - angleH - angleT)), angleH + angleT, hitBoxes);
     }
 
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
     public int getBulletsSize() {
         return bullets.size();
     }
