@@ -16,6 +16,7 @@ public class Game {
     private Bitmap bmp_greenHp, bmp_greenTp, bmp_redHp, bmp_redTp, bmp_blueHp, bmp_blueTp;
     private Bitmap bmp_greenDHp, bmp_greenDTp, bmp_redDHp, bmp_redDTp, bmp_blueDHp, bmp_blueDTp;
     private Bitmap bmp_bullet;
+    private Bitmap bmp_backgroundCell;
 
     public static final int MAX_FPS = 60;
     public final String addrress;
@@ -29,6 +30,7 @@ public class Game {
     private MyTank myTank;
     private double lJangle, lJstrength, rJangle, rJstrength;
     private int fps;
+    private double scaleTo = 1;
     private int frameWidth, frameHeight;
     private int[] startCoordinates;
     private TextView fps_tv;
@@ -63,6 +65,7 @@ public class Game {
         bmp_blueDHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_dhp);
         bmp_blueDTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_dtp);
         bmp_bullet = BitmapFactory.decodeResource(context.getResources(), R.drawable.bullet_p);
+        bmp_backgroundCell = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_background_map);
 
         myTank = new MyTank(3, team, startCoordinates[0] + (startCoordinates[2] - bmp_greenHp.getWidth()) / 2f,
                 startCoordinates[1] + (startCoordinates[3] - bmp_greenHp.getHeight()) / 2f, 0, 0,
@@ -86,6 +89,7 @@ public class Game {
     }
 
     public void drawAll(Canvas canvas, Paint paint) {
+        canvas.scale((float) scaleTo, (float) scaleTo, canvas.getWidth() / 2f, canvas.getHeight() / 2f);
         canvas.translate(getTranslateCanvasX(), getTranslateCanvasY());
 
         canvas.drawBitmap(map_bitmap, -map.getBackgroundCellWidth(), -map.getBackgroundCellHeight(), paint);
@@ -165,6 +169,8 @@ public class Game {
     }
 
     private int getTranslateCanvasX() {
+        if(frameWidth >= map_bitmap.getWidth())
+            return bmp_backgroundCell.getWidth();
         int translation = -(int) (myTank.getX() - frameWidth / 2f + bmp_greenHp.getWidth() / 2f);
         if(translation > map.getBackgroundCellWidth())
             return map.getBackgroundCellWidth();
@@ -174,6 +180,8 @@ public class Game {
     }
 
     private int getTranslateCanvasY() {
+        if(frameHeight >= map_bitmap.getHeight())
+            return bmp_backgroundCell.getHeight();
         int translation = -(int) (myTank.getY() - frameHeight / 2f + bmp_greenHp.getHeight() / 2f);
         if(translation > map.getBackgroundCellHeight())
             return map.getBackgroundCellHeight();

@@ -4,7 +4,11 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Bitmap;
 import android.os.Bundle;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Display;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
@@ -23,18 +27,19 @@ public class StartActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         if(savedInstanceState == null)
             return;
 
-        MyPaints.paintsInit();
+        MyPaints.paintsInit(getApplicationContext());
 
         editText = findViewById(R.id.as_edittext);
         menuImage = findViewById(R.id.as_menu_image);
         backgroundImage = findViewById(R.id.as_background_image);
 
-        Bitmap background = new Map().getDrawnMap(getApplicationContext());
-        backgroundImage.setImageBitmap(background);
+        backgroundImage.setImageBitmap(MyPaints.getPaintedWallPaper());
+        backgroundImage.setScaleType(ImageView.ScaleType.FIT_XY);
         menuImage.setImageResource(R.drawable.white350_200);
 
         MessageManager.findExternalAddress();
@@ -67,6 +72,9 @@ public class StartActivity extends AppCompatActivity {
     private boolean isNickNameEntered() {
         if (editText.getText().toString().equals("")) {
             Toast.makeText(getApplicationContext(), "You didn't enter your nickname", Toast.LENGTH_SHORT).show();
+            return false;
+        } else if(editText.getText().toString().contains(" ")) {
+            Toast.makeText(getApplicationContext(), "Your nickname mustn't contain a spaces", Toast.LENGTH_SHORT).show();
             return false;
         }
         else return true;

@@ -6,12 +6,14 @@ import android.graphics.Bitmap;
 import android.os.*;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.*;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.presamsungproject.ConnectionObjects.Client;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.ConnectionObjects.Server;
 import com.example.presamsungproject.Map;
+import com.example.presamsungproject.MyPaints;
 import com.example.presamsungproject.R;
 
 import java.io.IOException;
@@ -39,6 +41,7 @@ public class LobbyClientActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_client_lobby);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         if (savedInstanceState == null)
             return;
@@ -52,8 +55,8 @@ public class LobbyClientActivity extends AppCompatActivity {
         scrollView = findViewById(R.id.acl_scrollview);
         handlerInit();
 
-        Bitmap background = new Map().getDrawnMap(getApplicationContext());
-        backgroundImage.setImageBitmap(background);
+        backgroundImage.setImageBitmap(MyPaints.getPaintedWallPaper());
+        backgroundImage.setScaleType(ImageView.ScaleType.FIT_XY);
         menuImage.setImageResource(R.drawable.white350_300);
 
         name = getIntent().getStringExtra("name");

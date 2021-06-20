@@ -8,12 +8,14 @@ import android.os.Handler;
 import android.os.Message;
 import android.util.Log;
 import android.view.View;
+import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.ConnectionObjects.Server;
 import com.example.presamsungproject.Map;
+import com.example.presamsungproject.MyPaints;
 import com.example.presamsungproject.R;
 
 import java.util.HashMap;
@@ -36,6 +38,7 @@ public class LobbyServerActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_server_lobby);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+        this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
         if (savedInstanceState == null)
             return;
@@ -47,8 +50,8 @@ public class LobbyServerActivity extends AppCompatActivity {
         tv_myIP = findViewById(R.id.asl_my_ip);
         handlerInit();
 
-        Bitmap background = new Map().getDrawnMap(getApplicationContext());
-        backgroundImage.setImageBitmap(background);
+        backgroundImage.setImageBitmap(MyPaints.getPaintedWallPaper());
+        backgroundImage.setScaleType(ImageView.ScaleType.FIT_XY);
         menuImage.setImageResource(R.drawable.white350_300);
         tv_myIP.setText(txtMyIP + MessageManager.EXTERNAL_ADDRESS);
 
@@ -90,7 +93,7 @@ public class LobbyServerActivity extends AppCompatActivity {
     }
 
     public void startGameClick(View view) {
-        map = new Map();
+        map = new Map(10, 10, 25, 25);
         String messageToAll = null;
         try {
             messageToAll = MessageManager.sendMapMessage(map);

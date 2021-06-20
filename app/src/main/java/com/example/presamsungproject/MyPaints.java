@@ -1,5 +1,7 @@
 package com.example.presamsungproject;
 
+import android.content.Context;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Paint;
 
@@ -8,8 +10,10 @@ public class MyPaints {
     private static Paint enemyNickPaint;
     private static Paint hitboxPaint;
     private static Paint tanksightPaint;
+    private static Paint defaultPaint;
+    private static Bitmap paintedWallPaper;
 
-    public static void paintsInit() {
+    public static void paintsInit(Context context) {
         hitboxPaint = new Paint();
         hitboxPaint.setColor(Color.CYAN);
         hitboxPaint.setStrokeWidth(3);
@@ -26,6 +30,10 @@ public class MyPaints {
         allyNickPaint = new Paint();
         allyNickPaint.setTextSize(30);
         allyNickPaint.setColor(Color.GREEN);
+
+        defaultPaint = new Paint();
+
+        paintedWallPaper = Map.getWallPaperMap(context);
     }
 
     public static Paint getHitBoxPaint() {
@@ -42,5 +50,13 @@ public class MyPaints {
 
     public static Paint getEnemyNickPaint() {
         return enemyNickPaint;
+    }
+
+    public static Paint getDefaultPaint() {
+        return defaultPaint;
+    }
+
+    public static Bitmap getPaintedWallPaper() {
+        return paintedWallPaper;
     }
 }

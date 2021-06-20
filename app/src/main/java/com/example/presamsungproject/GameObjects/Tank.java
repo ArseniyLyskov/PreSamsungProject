@@ -139,4 +139,20 @@ public class Tank implements Serializable {
     public HashSet<Bullet> getBullets() {
         return bullets;
     }
+
+    public double getX() {
+        return x;
+    }
+
+    public double getY() {
+        return y;
+    }
+
+    public double getAngleH() {
+        return angleH;
+    }
+
+    public double getAngleT() {
+        return angleT;
+    }
 }

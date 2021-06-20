@@ -5,6 +5,12 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
+import android.util.DisplayMetrics;
+import android.util.Log;
+import android.view.Display;
+import com.example.presamsungproject.GameObjects.Bullet;
+import com.example.presamsungproject.GameObjects.Tank;
+import com.example.presamsungproject.GameObjects.TankSight;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -19,9 +25,9 @@ public class Map implements Serializable {
     private MapCell[][] mapCells;
     private static final long serialVersionUID = 1L;
 
-    public Map() {
-        int height_quantity = 15 + (int) (Math.random() * 2);
-        int width_quantity = height_quantity + 10 + (int) (Math.random() * 2);
+    public Map(int min_width, int min_height, int max_width, int max_height) {
+        int height_quantity = min_height + (int) (Math.random() * (max_height - min_height));
+        int width_quantity = min_width + (int) (Math.random() * (max_width - min_width));
 
         mapCellsInit(width_quantity, height_quantity);
 
@@ -63,6 +69,128 @@ public class Map implements Serializable {
         }
 
         return bitMapBackground;
+    }
+
+    public static Bitmap getWallPaperMap(Context context) {
+        DisplayMetrics displaymetrics = context.getResources().getDisplayMetrics();
+        Map map = null;
+        double display_koeff = displaymetrics.widthPixels / (double) displaymetrics.heightPixels;
+        double best_scale_koeff = 1;
+        for (int i = 9; i < 24; i++) {
+            for (int j = 14; j < 29; j++) {
+                if(Math.abs((j + 1) / (double) (i + 1) - display_koeff) < Math.abs(best_scale_koeff - display_koeff))
+                    best_scale_koeff = (j + 1) / (double) (i + 1);
+            }
+        }
+        for (int i = 9; i < 24; i++) {
+            for (int j = 14; j < 29; j++) {
+                if((j + 1) / (double) (i + 1) == best_scale_koeff) {
+                    map = new Map(j, i, j, i);
+                }
+            }
+        }
+        Bitmap map_bitmap = map.getDrawnMap(context);
+        Bitmap bitmap = Bitmap.createBitmap(map_bitmap.getWidth(), map_bitmap.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmap);
+        canvas.drawBitmap(map_bitmap, 0, 0, MyPaints.getDefaultPaint());
+        wallpaperDrawSomething(map, canvas, context);
+        return bitmap;
+    }
+
+    private static void wallpaperDrawSomething(Map map, Canvas canvas, Context context) {
+        Bitmap bmp_bullet = BitmapFactory.decodeResource(context.getResources(), R.drawable.bullet_p);
+        Bitmap bmp_mapCell = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_map);
+        Bitmap bmp_wall_v = BitmapFactory.decodeResource(context.getResources(), R.drawable.wall);
+        Bitmap bmp_redHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.red_hp);
+        Bitmap bmp_redTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.red_tp);
+        Bitmap bmp_blueHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_hp);
+        Bitmap bmp_blueTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_tp);
+        Bitmap bmp_redDHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.red_dhp);
+        Bitmap bmp_redDTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.red_dtp);
+        Bitmap bmp_blueDHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_dhp);
+        Bitmap bmp_blueDTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_dtp);
+
+        Bitmap map_content = Bitmap.createBitmap(canvas.getWidth(), canvas.getHeight(), Bitmap.Config.ARGB_8888);
+        Canvas canvas_content = new Canvas(map_content);
+
+        HashSet<HitBox> hitBoxes = map.getWallsHitBox();
+        HashSet<Tank> tanks = new HashSet<>();
+
+        double[] hullIndents, towerIndents;
+        hullIndents = new double[4];
+        hullIndents[0] = 18 / 50f;
+        hullIndents[1] = 15 / 50f;
+        hullIndents[2] = 19 / 50f;
+        hullIndents[3] = 15 / 50f;
+        towerIndents = new double[4];
+        towerIndents[0] = 25 / 50f;
+        towerIndents[1] = 3 / 50f;
+        towerIndents[2] = 1 / 50f;
+        towerIndents[3] = 4 / 50f;
+
+        for (int i = 0; i < map.getHeightQuantity(); i++) {
+            for (int j = 0; j < map.getWidthQuantity(); j++) {
+                if(map.mapCells[i][j].isTexture) {
+                    int rand = (int) (Math.random() * 100);
+                    int x = j * bmp_mapCell.getWidth() + bmp_wall_v.getWidth();
+                    int y = i * bmp_mapCell.getHeight() + bmp_wall_v.getWidth();
+                    if(rand < 20)
+                        continue;
+                    else if(rand < 80) {
+                        for (int k = 1; k < (int) (Math.random() * 4); k++) {
+                            Bullet b = new Bullet(
+                                    x + Math.random() * bmp_mapCell.getWidth() - bmp_wall_v.getWidth(),
+                                    y + Math.random() * bmp_mapCell.getHeight() - bmp_wall_v.getWidth());
+                            canvas_content.drawBitmap(bmp_bullet, (int) (b.getX() - bmp_bullet.getWidth() / 2),
+                                    (int) (b.getY() - bmp_bullet.getHeight() / 2), MyPaints.getDefaultPaint());
+                        }
+                    } else {
+                        double tankX = x + Math.random() * (bmp_mapCell.getWidth() - bmp_blueHp.getWidth() - bmp_wall_v.getWidth());
+                        double tankY = y + Math.random() * (bmp_mapCell.getHeight() - bmp_blueHp.getHeight() - bmp_wall_v.getWidth());
+                        double tankAngleH = Math.random() * 360;
+                        double tankAngleT = Math.random() * 360;
+                        Tank tank = new Tank(1, 1, tankX, tankY, tankAngleH, tankAngleT,
+                                "", new TankSight(), new HashSet<Bullet>());
+                        hitBoxes.add(new HitBox(tankX, tankY, tankAngleH, bmp_blueHp.getWidth(), bmp_blueHp.getHeight(), hullIndents));
+                        hitBoxes.add(new HitBox(tankX, tankY, tankAngleH + tankAngleT, bmp_blueTp.getWidth(), bmp_blueTp.getHeight(), towerIndents));
+                        switch ((int) (Math.random() * 3)) {
+                            case 0: {
+                                tank.draw(canvas_content, MyPaints.getDefaultPaint(), bmp_blueHp, bmp_blueTp, bmp_bullet);
+                                tanks.add(tank);
+                                break;
+                            }
+                            case 1: {
+                                tank.draw(canvas_content, MyPaints.getDefaultPaint(), bmp_blueDHp, bmp_blueDTp, bmp_bullet);
+                                break;
+                            }
+                            case 2: {
+                                tank.draw(canvas_content, MyPaints.getDefaultPaint(), bmp_redHp, bmp_redTp, bmp_bullet);
+                                tanks.add(tank);
+                                break;
+                            }
+                            case 3: {
+                                tank.draw(canvas_content, MyPaints.getDefaultPaint(), bmp_redDHp, bmp_redDTp, bmp_bullet);
+                                break;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        for (Tank tank : tanks) {
+            TankSight tankSight = new TankSight();
+            tankSight.update(tank.getX() + bmp_blueTp.getWidth() / 2f + bmp_blueTp.getWidth() * towerIndents[0] * Math.cos(Math.toRadians(90 - tank.getAngleH() - tank.getAngleT())),
+                    tank.getY() + bmp_blueTp.getHeight() / 2f - bmp_blueTp.getHeight() * towerIndents[0] * Math.sin(Math.toRadians(90 - tank.getAngleH() - tank.getAngleT())),
+                    tank.getAngleH() + tank.getAngleT(), hitBoxes);
+            tankSight.draw(canvas_content);
+        }
+
+        /*for (HitBox hb : hitBoxes) {
+            hb.draw(canvas_content);
+        }*/
+
+        canvas.drawBitmap(map_content, bmp_mapCell.getWidth(), bmp_mapCell.getHeight(), MyPaints.getDefaultPaint());
     }
 
     private void sourceInit(Context context) {
@@ -337,6 +465,14 @@ public class Map implements Serializable {
 
     public int getBackgroundCellHeight() {
         return bmp_background_map.getHeight();
+    }
+
+    public int getWidthQuantity() {
+        return mapCells[0].length;
+    }
+
+    public int getHeightQuantity() {
+        return mapCells.length;
     }
 }
 
