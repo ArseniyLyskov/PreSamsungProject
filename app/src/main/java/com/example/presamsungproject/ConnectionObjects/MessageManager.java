@@ -165,6 +165,7 @@ public class MessageManager {
     }
 
     public static void findExternalAddress() {
+        //TODO: а если я сверну приложение - поток остановится?а кто за этим следит?
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -183,6 +184,7 @@ public class MessageManager {
         }).start();
     }
 
+    //TODO: лучше удалять неиспользуемые части кода
     /*public static byte[] stringToByteArray(String string) {
         byte[] byteArray = new byte[0];
         try {

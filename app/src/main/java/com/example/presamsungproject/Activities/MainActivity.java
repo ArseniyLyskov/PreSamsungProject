@@ -1,25 +1,26 @@
 package com.example.presamsungproject.Activities;
 
 import android.content.pm.ActivityInfo;
-import android.graphics.*;
-import android.media.Image;
-import android.util.Log;
+import android.graphics.Color;
+import android.os.Bundle;
 import android.view.Gravity;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
-import android.os.Bundle;
+
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.DrawView;
 import com.example.presamsungproject.Game;
 import com.example.presamsungproject.Map;
 import com.example.presamsungproject.R;
+
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
 public class MainActivity extends AppCompatActivity {
     private Game game;
+    //TODO: может стоит конвертировать в локальные переменные?
     private FrameLayout frameLayout;
     private JoystickView jstickL, jstickR;
     private Map map;
@@ -67,7 +68,7 @@ public class MainActivity extends AppCompatActivity {
 
     private void drawActivity() {
         frameLayout = findViewById(R.id.activity_main);
-
+        //TODO: а нельзя создать джойстик через XML, а потом его настроить?
         jstickL = new JoystickView(this);
         jstickL.setLayoutParams(new FrameLayout.LayoutParams(500, 500, Gravity.LEFT | Gravity.BOTTOM));
         jstickL.setButtonColor(Color.argb(41, 0, 0, 0));

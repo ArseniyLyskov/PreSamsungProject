@@ -8,8 +8,10 @@ import java.net.Socket;
 import java.util.HashMap;
 
 public class Server {
+    //TODO: может тут стоит применить паттерн Singleton, а не статики?
     private static final int serverBacklog = 2;
     private static ServerSocket server = null;
+    //TODO: тут стоит добавить модификатор final, поскольку коллекция одна, но данные разные
     private static HashMap<String, Connection> connections = new HashMap<>();
 
     public static final int serverPort = 4444;
