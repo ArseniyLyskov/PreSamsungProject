@@ -32,7 +32,10 @@ public class MyPaints {
         allyNickPaint.setColor(Color.GREEN);
 
         defaultPaint = new Paint();
-
+        //TODO: вот здесь ты передаёшь контекст в функцию, которая делает с ним операции
+        // и возможно записывает данные, связанные с конекстом в объект
+        // Тут может быть утечка памяти.
+        // Рекомендую подумать о том, чтобы заменить этот метод конструктором и передавать как объект
         paintedWallPaper = Map.getWallPaperMap(context);
     }
 

@@ -4,12 +4,12 @@ import android.util.Log;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.LinkedList;
 
 public class Client {
+    //TODO: может тут стоит применить паттерн Singleton, а не статики?
     private static String serverIP = "";
     private static Socket socket = null;
     private static DataOutputStream out = null;

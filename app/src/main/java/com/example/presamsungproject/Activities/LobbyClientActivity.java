@@ -2,13 +2,20 @@ package com.example.presamsungproject.Activities;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.graphics.Bitmap;
-import android.os.*;
+import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.*;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.ScrollView;
+import android.widget.TextView;
+import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.presamsungproject.ConnectionObjects.Client;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.ConnectionObjects.Server;
@@ -22,11 +29,20 @@ import java.net.Socket;
 
 public class LobbyClientActivity extends AppCompatActivity {
     private static String name;
+
+    //TODO: может стоит конвертировать в локальные переменные?
     private ImageView menuImage, backgroundImage;
     private TextView tv_upper_text;
     private ScrollView scrollView;
     private EditText editText;
+
+    //TODO: не очевидно зачем такой набор статиков.
+    // Нужна модель, которая будет сериализовываться и передаваться между классами
+    // Или можно через интерфейс вызывать методы активности
+
+    //TODO: перенести в values/strings
     private static final String txtWait = "Number of people waiting: ";
+    //TODO: Возможная УТЕЧКА ПАМЯТИ!!
     private static Handler handler;
     private static String nicks;
     private static int players_quantity;
@@ -34,6 +50,8 @@ public class LobbyClientActivity extends AppCompatActivity {
 
     public static int team;
     public static Map map;
+
+    //TODO: Возможная УТЕЧКА ПАМЯТИ!! зачем здесь нужны статики?? кто будет следить за контекстом?
     public static TextView tv_number, tv_nicks;
 
     @Override

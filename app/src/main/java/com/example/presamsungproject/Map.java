@@ -6,8 +6,7 @@ import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.Display;
+
 import com.example.presamsungproject.GameObjects.Bullet;
 import com.example.presamsungproject.GameObjects.Tank;
 import com.example.presamsungproject.GameObjects.TankSight;
@@ -475,7 +474,7 @@ public class Map implements Serializable {
         return mapCells.length;
     }
 }
-
+//TODO: может как анонимный сделать класс? Вроде он нигде больше не используется
 class MapCell implements Serializable {
     private int x, y;
     public boolean isTexture;

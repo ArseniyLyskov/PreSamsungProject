@@ -1,13 +1,20 @@
 package com.example.presamsungproject;
 
 import android.content.Context;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.util.Log;
 import android.widget.TextView;
+
 import com.example.presamsungproject.ConnectionObjects.Client;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.ConnectionObjects.Server;
-import com.example.presamsungproject.GameObjects.*;
+import com.example.presamsungproject.GameObjects.Bullet;
+import com.example.presamsungproject.GameObjects.MyTank;
+import com.example.presamsungproject.GameObjects.Tank;
+import com.example.presamsungproject.GameObjects.TankSight;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -51,6 +58,8 @@ public class Game {
         startCoordinates = map.startCoordinates();
     }
 
+    //TODO: может этот метод вызывать из конструктора View
+    // и сразу передать контекст, чтобы не хранить его в переменной?
     public void start() {
         bmp_greenHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.green_hp);
         bmp_greenTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.green_tp);
@@ -111,7 +120,9 @@ public class Game {
                     t.draw(canvas, MyPaints.getAllyNickPaint(), bmp_blueDHp, bmp_blueDTp, bmp_bullet);
             }
         }
-
+        //TODO: если это дебаг, то лучше в добавить private static final bool DEBUG = false
+        // и если необходимо менять её на true для отладки
+        // чтобы в дальнейшем если было больше таких методов, то не пришлось их все комменитть
         //drawAllHitBoxes(canvas);
     }
 
@@ -119,6 +130,8 @@ public class Game {
         for (HitBox hb : getAllHitBoxes()) {
             hb.draw(canvas);
         }
+        //TODO: а зачем тебе здесь массив, если можно напрямую пробежаться по HashMap?
+        // только ухудшаешь в DEBUG производительность
         for (Bullet b : getBullets()) {
             b.drawHitBox(canvas);
         }
@@ -134,6 +147,7 @@ public class Game {
         for (Tank t : otherTanks.values()) {
             Bullet[] arr_bullets = new Bullet[t.getBullets().size()];
             t.getBullets().toArray(arr_bullets);
+            //TODO: заменить на Collections.addAll(bullets, arr_bullets);
             for (Bullet b : arr_bullets) {
                 bullets.add(b);
             }
@@ -141,6 +155,7 @@ public class Game {
 
         Bullet[] arr_bullets = new Bullet[myTank.getBullets().size()];
         myTank.getBullets().toArray(arr_bullets);
+        //TODO: аналогично, что и выше
         for (Bullet b : arr_bullets) {
             bullets.add(b);
         }
@@ -174,6 +189,7 @@ public class Game {
         int translation = -(int) (myTank.getX() - frameWidth / 2f + bmp_greenHp.getWidth() / 2f);
         if(translation > map.getBackgroundCellWidth())
             return map.getBackgroundCellWidth();
+        //TODO: Тут даже подсказка есть как упростить код
         if(translation < -(map_bitmap.getWidth() - map.getBackgroundCellWidth() - frameWidth))
             return -(map_bitmap.getWidth() - map.getBackgroundCellWidth() - frameWidth);
         return translation;
@@ -185,6 +201,7 @@ public class Game {
         int translation = -(int) (myTank.getY() - frameHeight / 2f + bmp_greenHp.getHeight() / 2f);
         if(translation > map.getBackgroundCellHeight())
             return map.getBackgroundCellHeight();
+        //TODO: Тут даже подсказка есть как упростить код
         if(translation < -(map_bitmap.getHeight() - map.getBackgroundCellHeight() - frameHeight))
             return -(map_bitmap.getHeight() - map.getBackgroundCellHeight() - frameHeight);
         return translation;

@@ -2,30 +2,31 @@ package com.example.presamsungproject.Activities;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.graphics.Bitmap;
 import android.os.Bundle;
-import android.util.DisplayMetrics;
-import android.util.Log;
-import android.view.Display;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
-import com.example.presamsungproject.Map;
 import com.example.presamsungproject.MyPaints;
 import com.example.presamsungproject.R;
 
 public class StartActivity extends AppCompatActivity {
     private EditText editText;
+    //TODO: может стоит конвертировать в локальные переменные?
     private ImageView menuImage, backgroundImage;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
+        //TODO: может это через Manifest прописать? Это не сработает везде.
+        // Также не стоит забывать что это надо делать тогда для всех активностей
+        // Может задуматься об активации immersiveMode и запрета на выключение экрана?
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
@@ -80,6 +81,8 @@ public class StartActivity extends AppCompatActivity {
         else return true;
     }
 
+    //TODO: если всегда идёт проеверка на отсутствие соединения
+    // может стоит тогда написать метод который проверяет отсутствие подключения?
     private boolean isConnectedToWiFI() {
         boolean connected = false;
         if(MessageManager.EXTERNAL_ADDRESS != null)

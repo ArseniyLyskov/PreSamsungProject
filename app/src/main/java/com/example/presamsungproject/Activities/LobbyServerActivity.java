@@ -2,7 +2,6 @@ package com.example.presamsungproject.Activities;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
@@ -11,7 +10,9 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import android.widget.TextView;
+
 import androidx.appcompat.app.AppCompatActivity;
+
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.ConnectionObjects.Server;
 import com.example.presamsungproject.Map;
@@ -20,13 +21,25 @@ import com.example.presamsungproject.R;
 
 import java.util.HashMap;
 
+//TODO: клиент и сервер имеют частично одинаковую структуру
+// Может стоит объединить их абстрактным классом или просто базовым классом,
+// чтобы удалить частично дублирующийся код?
 public class LobbyServerActivity extends AppCompatActivity {
     private String name;
+    //TODO: может стоит конвертировать в локальные переменные?
     private ImageView menuImage, backgroundImage;
     private TextView tv_myIP;
+
+    //TODO: не очевидно зачем такой набор статиков.
+    // Нужна модель, которая будет сериализовываться и передаваться между классами
+    // Или можно через интерфейс вызывать методы активности
+
+    //TODO: перенести в values/strings
     private static final String txtWait = "Number of people waiting: ";
     private static final String txtMyIP = "My IP: ";
     private static Handler handler;
+
+    //TODO: Возможная УТЕЧКА ПАМЯТИ!! зачем здесь нужны статики?? кто будет следить за контекстом?
     private static TextView tv_number, tv_nicks;
 
     public static Map map;
@@ -110,7 +123,7 @@ public class LobbyServerActivity extends AppCompatActivity {
         intent.putExtra("team", 1);
         startActivity(intent);
     }
-
+    //TODO: лучше удалять неиспользуемые части кода
     /*private static boolean isPortAvailable(int port) {
         try (ServerSocket ss = new ServerSocket(port); DatagramSocket ds = new DatagramSocket(port)) {
             return true;

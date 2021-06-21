@@ -7,6 +7,7 @@ import java.io.Serializable;
 
 public class HitBox implements Serializable {
     private transient double x, y;
+    //TODO: сама студия подсказывает о том, что можно их сделать финальными
     private transient double angle1, angle2, angle3, angle4;
     private transient int bmp_width, bmp_height;
     private transient double r1, r2, r3, r4;
