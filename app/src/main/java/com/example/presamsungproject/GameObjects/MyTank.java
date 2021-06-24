@@ -3,13 +3,13 @@ package com.example.presamsungproject.GameObjects;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import com.example.presamsungproject.ConnectionObjects.Client;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
-import com.example.presamsungproject.ConnectionObjects.Server;
 import com.example.presamsungproject.Game;
+import com.example.presamsungproject.Geometry.GeometryMethods;
 import com.example.presamsungproject.HitBox;
 
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 
 public class MyTank extends Tank {
@@ -17,8 +17,7 @@ public class MyTank extends Tank {
     private Game game;
     private HitBox updatedHhb, updatedThb;
     private Bitmap bmp_hull, bmp_tower;
-    private double[] updatedHullIndents;
-    private HashSet<HitBox> hitBoxes;
+    private final double[] updatedHullIndents;
 
     {
         updatedHullIndents = Arrays.copyOf(hullIndents, hullIndents.length);
@@ -45,49 +44,44 @@ public class MyTank extends Tank {
     }
 
     public void updateMyTankProperties() {
-        double speed_koeff = 1 / (double) (Game.MAX_FPS);
+        double speed_koeff = 1f / game.getLast_fps();
 
-        double oldX = x;
-        double oldY = y;
-        double oldAngleT = angleT;
-        double oldAngleH = angleH;
-        boolean oldSighting = tankSight.isSighting();
-        double oldHP = hp;
-
-        if (bmp_hull == null || bmp_tower == null)
+        if (!game.isEverybodyReady)
             return;
 
-        if (hp <= 0) {
-            if (tankSight.isSighting())
-                tankSight.setSighting(false);
-            updateBulletsCoordinates(speed_koeff);
+        if (!checkIsAlive(speed_koeff))
             return;
-        }
+
+        double newX = x;
+        double newY = y;
+        double newAngleT = angleT;
+        double newAngleH = angleH;
+        double newSpeed = current_speed;
+        boolean newSighting;
 
         double xChange = speed * game.getlJstrength() / 100 * Math.cos(Math.toRadians(game.getlJangle())) * speed_koeff;
         double yChange = speed * game.getlJstrength() / 100 * Math.sin(Math.toRadians(game.getlJangle())) * speed_koeff;
-        double hAngleChange = game.getlJangle();
-        double tAngleChange = game.getrJangle();
-
+        double hAngleChange = 90 - game.getlJangle();
+        double tAngleChange = 90 - game.getrJangle();
         if (game.getlJstrength() == 0) {
             xChange = 0;
             yChange = 0;
-            hAngleChange = 90 - angleH;
+            hAngleChange = angleH;
         }
 
         if (game.getrJstrength() == 0) {
-            tAngleChange = 90 - (90 - hAngleChange + angleT);
+            tAngleChange = hAngleChange;
         }
 
-        hitBoxes = game.getAllHitBoxes();
+        HashSet<HitBox> hitBoxes = game.getAllHitBoxes();
 
-        updatedHhb = new HitBox(x + xChange, y - yChange, 90 - hAngleChange, bmp_hull.getWidth(), bmp_hull.getHeight(), updatedHullIndents);
-        updatedThb = new HitBox(x + xChange, y - yChange, 90 - tAngleChange, bmp_tower.getWidth(), bmp_tower.getHeight(), towerIndents);
+        updatedHhb = new HitBox(x + xChange, y - yChange, hAngleChange, bmp_hull.getWidth(), bmp_hull.getHeight(), updatedHullIndents);
+        updatedThb = new HitBox(x + xChange, y - yChange, tAngleChange, bmp_tower.getWidth(), bmp_tower.getHeight(), towerIndents);
 
-        HitBox updatedXHhb = new HitBox(x + xChange, y, 90 - hAngleChange, bmp_hull.getWidth(), bmp_hull.getHeight(), updatedHullIndents);
-        HitBox updatedXThb = new HitBox(x + xChange, y, 90 - tAngleChange, bmp_tower.getWidth(), bmp_tower.getHeight(), towerIndents);
-        HitBox updatedYHhb = new HitBox(x, y - yChange, 90 - hAngleChange, bmp_hull.getWidth(), bmp_hull.getHeight(), updatedHullIndents);
-        HitBox updatedYThb = new HitBox(x, y - yChange, 90 - tAngleChange, bmp_tower.getWidth(), bmp_tower.getHeight(), towerIndents);
+        HitBox updatedXHhb = new HitBox(x + xChange, y, hAngleChange, bmp_hull.getWidth(), bmp_hull.getHeight(), updatedHullIndents);
+        HitBox updatedXThb = new HitBox(x + xChange, y, tAngleChange, bmp_tower.getWidth(), bmp_tower.getHeight(), towerIndents);
+        HitBox updatedYHhb = new HitBox(x, y - yChange, hAngleChange, bmp_hull.getWidth(), bmp_hull.getHeight(), updatedHullIndents);
+        HitBox updatedYThb = new HitBox(x, y - yChange, tAngleChange, bmp_tower.getWidth(), bmp_tower.getHeight(), towerIndents);
 
         boolean isHullMoveAble = true;
         boolean isTowerMoveAble = true;
@@ -98,19 +92,14 @@ public class MyTank extends Tank {
         boolean isYTowerMoveAble = true;
 
         for (HitBox hb : hitBoxes) {
-            if (hb == null)
-                return;
-        }
-
-        for (HitBox hb : hitBoxes) {
-            if (HitBox.isHitBoxesIntersect(hb, updatedHhb)) {
+            if (GeometryMethods.isHitBoxesIntersect(hb, updatedHhb)) {
                 isHullMoveAble = false;
                 break;
             }
         }
 
         for (HitBox hb : hitBoxes) {
-            if (HitBox.isHitBoxesIntersect(hb, updatedThb)) {
+            if (GeometryMethods.isHitBoxesIntersect(hb, updatedThb)) {
                 isTowerMoveAble = false;
                 isHullMoveAble = false;
                 break;
@@ -119,13 +108,13 @@ public class MyTank extends Tank {
 
         if (!isHullMoveAble) {
             for (HitBox hb : hitBoxes) {
-                if (HitBox.isHitBoxesIntersect(hb, updatedXHhb)) {
+                if (GeometryMethods.isHitBoxesIntersect(hb, updatedXHhb)) {
                     isXHullMoveAble = false;
                     break;
                 }
             }
             for (HitBox hb : hitBoxes) {
-                if (HitBox.isHitBoxesIntersect(hb, updatedYHhb)) {
+                if (GeometryMethods.isHitBoxesIntersect(hb, updatedYHhb)) {
                     isYHullMoveAble = false;
                     break;
                 }
@@ -133,14 +122,14 @@ public class MyTank extends Tank {
         }
         if (!isHullMoveAble) {
             for (HitBox hb : hitBoxes) {
-                if (HitBox.isHitBoxesIntersect(hb, updatedXThb)) {
+                if (GeometryMethods.isHitBoxesIntersect(hb, updatedXThb)) {
                     isXTowerMoveAble = false;
                     isXHullMoveAble = false;
                     break;
                 }
             }
             for (HitBox hb : hitBoxes) {
-                if (HitBox.isHitBoxesIntersect(hb, updatedYThb)) {
+                if (GeometryMethods.isHitBoxesIntersect(hb, updatedYThb)) {
                     isYTowerMoveAble = false;
                     isYHullMoveAble = false;
                     break;
@@ -148,127 +137,98 @@ public class MyTank extends Tank {
             }
         }
 
-        if (isHullMoveAble) {
-            x += xChange;
-            y -= yChange;
+        if (isHullMoveAble || isXHullMoveAble || isYHullMoveAble) {
+            newAngleH = hAngleChange;
+
+            if (isHullMoveAble) {
+                newX = x + xChange;
+                newY = y - yChange;
+            } else if (isXHullMoveAble) {
+                newX = x + xChange;
+            } else {
+                newY = y - yChange;
+            }
+
             if (game.getlJstrength() > 0) {
-                angleH = -game.getlJangle() + 90;
-                current_speed = speed * game.getlJstrength() / 100;
+                newSpeed = speed * game.getlJstrength() / 100;
             } else
-                current_speed = 0;
-        } else if (isXHullMoveAble) {
-            x += xChange;
-            if (game.getlJstrength() > 0) {
-                angleH = -game.getlJangle() + 90;
-                current_speed = speed * game.getlJstrength() / 100;
-            } else
-                current_speed = 0;
-        } else if (isYHullMoveAble) {
-            y -= yChange;
-            if (game.getlJstrength() > 0) {
-                angleH = -game.getlJangle() + 90;
-                current_speed = speed * game.getlJstrength() / 100;
-            } else
-                current_speed = 0;
+                newSpeed = 0;
         }
 
-        if ((isTowerMoveAble || isXTowerMoveAble || isYTowerMoveAble) && game.getrJstrength() > 0)
-            angleT = -game.getrJangle() + 90 - angleH;
+        if (isTowerMoveAble || isXTowerMoveAble || isYTowerMoveAble) {
+            newAngleT = tAngleChange;
+        } else {
+            newAngleT += newAngleH;
+        }
 
         if (game.getrJstrength() > 0)
-            tankSight.setSighting(true);
+            newSighting = true;
         else {
             if (tankSight.isSighting())
                 createBullet();
-            tankSight.setSighting(false);
+            newSighting = false;
+        }
+
+        if (newX != x || newY != y || newAngleT != angleT || newAngleH != angleH
+                || newSighting != tankSight.isSighting() || bullets.size() > 0) {
+            x = newX;
+            y = newY;
+            angleT = newAngleT - newAngleH;
+            angleH = newAngleH;
+            current_speed = newSpeed;
+            tankSight.setSighting(newSighting);
+            MessageManager.sendMyTank();
         }
 
         hullHitBox.updateProperties(x, y, angleH);
         towerHitBox.updateProperties(x, y, angleH + angleT);
 
         updateBulletsCoordinates(speed_koeff);
-
-        if (oldX != x || oldY != y || oldHP != hp || oldAngleT != angleT
-                || oldAngleH != angleH || oldSighting != tankSight.isSighting() || bullets.size() > 0) {
-            if (game.isEverybodyReady) {
-                MessageManager.sendMyTank();
-            }
-        }
+        if (tankSight.isSighting())
+            tankSight.update(x + bmp_tower.getWidth() / 2f + bmp_tower.getWidth() * towerIndents[0] * Math.cos(Math.toRadians(90 - angleH - angleT)),
+                    y + bmp_tower.getHeight() / 2f - bmp_tower.getHeight() * towerIndents[0] * Math.sin(Math.toRadians(90 - angleH - angleT)),
+                    angleH + angleT, hitBoxes);
     }
 
     private void updateBulletsCoordinates(double speed_koeff) {
-        Bullet[] arr_bullets = new Bullet[bullets.size()];
-        bullets.toArray(arr_bullets);
-        for (Bullet b : arr_bullets) {
-            double newX = b.getX() + b.getSpeed() * Math.cos(Math.toRadians(90 - b.getAngle())) * speed_koeff;
-            double newY = b.getY() - b.getSpeed() * Math.sin(Math.toRadians(90 - b.getAngle())) * speed_koeff;
-            boolean changeCoordinates = true;
-            for (HitBox hb : game.getWallsHitBoxes()) {
-                if (HitBox.isPointInSquareHitBox((int) newX, (int) newY, hb)) {
-                    if (HitBox.isHorizontalWallIntersection((int) b.getX(), (int) b.getY(), (int) newX, (int) newY, hb))
-                        b.setAngle(180 - b.getAngle());
-                    else
-                        b.setAngle(-b.getAngle());
-                    b.setRicochets(b.getRicochets() - 1);
-                    changeCoordinates = false;
-                    break;
-                }
-            }
-            if (changeCoordinates) {
-                b.setX(newX);
-                b.setY(newY);
-            }
-            //Log.d("MyTag", "" + b.getRicochets());
+        HashSet<Bullet> temp = new HashSet<>(bullets);
+        HashSet<HitBox> walls = game.getWallsHitBoxes();
+        Collection<Tank> otherTanks = game.otherTanks.values();
+        for (Bullet b : temp) {
+            b.update(this, speed_koeff, walls, otherTanks);
             if (b.getRicochets() < 0) {
                 bullets.remove(b);
                 MessageManager.sendMyTank();
             }
-
-
-            for (Tank tank : game.otherTanks.values()) {
-                if (HitBox.isPointInHitBox((int) b.getX(), (int) b.getY(), tank.hullHitBox)
-                        || HitBox.isPointInHitBox((int) b.getX(), (int) b.getY(), tank.towerHitBox)) {
-                    if (game.isLobby) {
-                        Server.specificMessage(tank.address, MessageManager.hitMessage(tank.address));
-                    } else {
-                        Client.sendMessage(MessageManager.hitMessage(tank.address));
-                    }
-                    bullets.remove(b);
-                    MessageManager.sendMyTank();
-                }
-                if (HitBox.isPointInHitBox((int) b.getX(), (int) b.getY(), hullHitBox)
-                        || HitBox.isPointInHitBox((int) b.getX(), (int) b.getY(), towerHitBox)) {
-                    hp--;
-                    bullets.remove(b);
-                    MessageManager.sendMyTank();
-                }
-            }
-
-            for (HitBox hb : game.getTankHitBoxes()) {
-                if (HitBox.isPointInHitBox((int) newX, (int) newY, hb)) {
-                    b.setRicochets(-1);
-                    break;
-                }
-            }
         }
+    }
+
+    private boolean checkIsAlive(double speed_koeff) {
+        boolean isAlive = hp > 0;
+        if (!isAlive) {
+            if (tankSight.isSighting()) {
+                tankSight.setSighting(false);
+                MessageManager.sendMyTank();
+            }
+            updateBulletsCoordinates(speed_koeff);
+        }
+        return isAlive;
     }
 
     private void createBullet() {
         bullets.add(new Bullet(
-                (int) (x + bmp_tower.getWidth() / 2 + bmp_tower.getWidth() / 2 * Math.cos(Math.toRadians(90 - (angleH + angleT)))),
-                (int) (y + bmp_tower.getHeight() / 2 - bmp_tower.getHeight() / 2 * Math.sin(Math.toRadians(90 - (angleH + angleT)))),
+                (int) (x + bmp_tower.getWidth() / 2 + 1.05 * bmp_tower.getWidth() / 2 * Math.cos(Math.toRadians(90 - (angleH + angleT)))),
+                (int) (y + bmp_tower.getHeight() / 2 - 1.05 * bmp_tower.getHeight() / 2 * Math.sin(Math.toRadians(90 - (angleH + angleT)))),
                 angleH + angleT));
     }
 
 
-    public void draw(Canvas canvas, Paint paint, Bitmap bmp_hull, Bitmap bmp_tower, Bitmap bmp_bullets) {
+    public void draw(Canvas canvas, Paint paint, Bitmap bmp_hull, Bitmap bmp_tower) {
         this.bmp_hull = bmp_hull;
         this.bmp_tower = bmp_tower;
 
-        super.draw(canvas, paint, bmp_hull, bmp_tower, bmp_bullets);
-        if (tankSight.isSighting())
-            tankSight.update(x + bmp_tower.getWidth() / 2f + bmp_tower.getWidth() * towerIndents[0] * Math.cos(Math.toRadians(90 - angleH - angleT)),
-                    y + bmp_tower.getHeight() / 2f - bmp_tower.getHeight() * towerIndents[0] * Math.sin(Math.toRadians(90 - angleH - angleT)), angleH + angleT, hitBoxes);
+        updateMyTankProperties();
+        super.draw(canvas, paint, bmp_hull, bmp_tower);
     }
 
     public double getX() {
@@ -289,5 +249,9 @@ public class MyTank extends Tank {
 
     public HitBox getUpdatedThb() {
         return updatedThb;
+    }
+
+    public void minusHealth() {
+        hp--;
     }
 }

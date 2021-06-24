@@ -7,7 +7,7 @@ import android.view.SurfaceView;
 
 public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     private DrawThread drawThread;
-    private Game game;
+    private final Game game;
 
     class ThreadTimer extends CountDownTimer {
 
@@ -18,7 +18,6 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         @Override
         public void onTick(long millisUntilFinished) {
             if (game.isEverybodyReady) {
-                game.getMyTank().updateMyTankProperties();
                 drawThread.isTimeToUpdate = true;
             }
         }
@@ -37,7 +36,9 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            game.getFps_tv().setText("FPS: " + game.getFps()/* + "\nBullets: "+ game.getMyTank().getBulletsSize()*/);
+            int fps = game.getFps();
+            MySingletons.getMyResources().getGameUpdatableUI().updateUI(fps);
+            game.setLast_fps(fps);
             game.setFps(0);
         }
 
@@ -58,7 +59,7 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         drawThread = new DrawThread(holder, game);
         drawThread.setRunning(true);
         drawThread.start();
-        ThreadTimer threadTimer = new ThreadTimer(Integer.MAX_VALUE, (int) (1000 / Game.MAX_FPS));
+        ThreadTimer threadTimer = new ThreadTimer(Integer.MAX_VALUE, (int) (1000f / Game.MAX_FPS));
         threadTimer.start();
         SecTimer secTimer = new SecTimer(Integer.MAX_VALUE, 1000);
         secTimer.start();

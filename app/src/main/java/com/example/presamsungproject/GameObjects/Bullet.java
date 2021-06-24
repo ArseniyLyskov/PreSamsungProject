@@ -1,16 +1,23 @@
 package com.example.presamsungproject.GameObjects;
 
 import android.graphics.Canvas;
-import com.example.presamsungproject.MyPaints;
+import com.example.presamsungproject.ConnectionObjects.MessageManager;
+import com.example.presamsungproject.Geometry.GeometryMethods;
+import com.example.presamsungproject.Geometry.Point;
+import com.example.presamsungproject.Geometry.Segment;
+import com.example.presamsungproject.HitBox;
+import com.example.presamsungproject.MySingletons;
 
 import java.io.Serializable;
+import java.util.Collection;
+import java.util.HashSet;
 
 public class Bullet implements Serializable {
-    private transient double speed;
+    private final transient double speed;
     private transient int ricochets;
     private transient double angle;
 
-    private double x, y;
+    private Point point;
     private static final long serialVersionUID = 4L;
 
     {
@@ -19,58 +26,66 @@ public class Bullet implements Serializable {
     }
 
     public void scaleTo(double koeff) {
-        x *= koeff;
-        y *= koeff;
+        point.scaleTo(koeff);
     }
 
     public Bullet(double x, double y, double angle) {
-        this.x = x;
-        this.y = y;
+        point = new Point((int) x, (int) y);
         this.angle = angle;
     }
 
     public Bullet(double x, double y) {
-        this.x = x;
-        this.y = y;
+        point = new Point((int) x, (int) y);
+    }
+
+    public void update(MyTank myTank, double speed_koeff, HashSet<HitBox> walls, Collection<Tank> otherTanks) {
+        int newX = (int) (point.getX() + speed * Math.cos(Math.toRadians(90 - angle)) * speed_koeff);
+        int newY = (int) (point.getY() - speed * Math.sin(Math.toRadians(90 - angle)) * speed_koeff);
+        for (Tank tank : otherTanks) {
+            if (GeometryMethods.segmentHitBoxIntersection(new Segment(point, new Point(newX, newY)), tank.hullHitBox) != null
+                    || GeometryMethods.segmentHitBoxIntersection(new Segment(point, new Point(newX, newY)), tank.towerHitBox) != null) {
+                if (MySingletons.isLobby()) {
+                    MySingletons.getServer().specificMessage(tank.address, MessageManager.hitMessage(tank.address));
+                } else {
+                    MySingletons.getClient().sendMessage(MessageManager.hitMessage(tank.address));
+                }
+                ricochets = -1;
+                MessageManager.sendMyTank();
+                return;
+            }
+        }
+        if (ricochets != 3)
+            if (GeometryMethods.segmentHitBoxIntersection(new Segment(point, new Point(newX, newY)), myTank.hullHitBox) != null
+                    || GeometryMethods.segmentHitBoxIntersection(new Segment(point, new Point(newX, newY)), myTank.towerHitBox) != null) {
+                ricochets = -1;
+                myTank.minusHealth();
+                MessageManager.sendMyTank();
+                return;
+            }
+        boolean changeCoordinates = true;
+        for (HitBox hb : walls) {
+            if (GeometryMethods.segmentHitBoxIntersection(new Segment(point, new Point(newX, newY)), hb) != null) {
+                angle = GeometryMethods.getBulletRicochetAngle(angle, new Segment(point, new Point(newX, newY)), hb);
+                ricochets--;
+                changeCoordinates = false;
+                break;
+            }
+        }
+        if (changeCoordinates) {
+            point = new Point(newX, newY);
+        }
     }
 
     public void drawHitBox(Canvas canvas) {
-        canvas.drawRect((int) x - 5, (int) y - 5, (int) x + 5, (int) y + 5, MyPaints.getHitBoxPaint());
+        canvas.drawRect(point.getX() - 5, point.getY() - 5, point.getX() + 5, point.getY() + 5,
+                MySingletons.getMyResources().getHitBoxPaint());
     }
 
-    public double getX() {
-        return x;
-    }
-
-    public void setX(double x) {
-        this.x = x;
-    }
-
-    public double getY() {
-        return y;
-    }
-
-    public void setY(double y) {
-        this.y = y;
-    }
-
-    public double getAngle() {
-        return angle;
-    }
-
-    public void setAngle(double angle) {
-        this.angle = angle;
+    public Point getPoint() {
+        return point;
     }
 
     public int getRicochets() {
         return ricochets;
-    }
-
-    public void setRicochets(int ricochets) {
-        this.ricochets = ricochets;
-    }
-
-    public double getSpeed() {
-        return speed;
     }
 }

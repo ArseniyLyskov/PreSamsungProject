@@ -2,12 +2,10 @@ package com.example.presamsungproject;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.Display;
 import com.example.presamsungproject.GameObjects.Bullet;
 import com.example.presamsungproject.GameObjects.Tank;
 import com.example.presamsungproject.GameObjects.TankSight;
@@ -17,10 +15,14 @@ import java.util.Arrays;
 import java.util.HashSet;
 
 public class Map implements Serializable {
-    private transient Bitmap bmp_texture_map, bmp_texture_map2, bmp_background_map;
-    private transient Bitmap bmp_wall_v, bmp_wall_h, bmp_wall_c;
-    private transient Bitmap bitMap;
     private transient Paint paint;
+    private transient int cellWidth;
+    private transient int cellHeight;
+    private transient int wallWidth;
+    private transient int playableBitmapWidth;
+    private transient int playableBitmapHeight;
+    private transient int fullBitmapWidth;
+    private transient int fullBitmapHeight;
 
     private MapCell[][] mapCells;
     private static final long serialVersionUID = 1L;
@@ -31,90 +33,96 @@ public class Map implements Serializable {
 
         mapCellsInit(width_quantity, height_quantity);
 
+        fieldsInit();
+
         generateRandomCells();
         generateBorderWalls();
         generateRandomWalls();
         generateCornerWalls();
     }
 
-    public Bitmap getDrawnMap(Context context) {
-        sourceInit(context);
+    private void fieldsInit() {
+        paint = MySingletons.getMyResources().getDefaultPaint();
 
-        Bitmap backgroundBitmap = getBackgroundMap();
+        cellWidth = MySingletons.getMyResources().getBmp_mapCellBackground().getWidth();
+        cellHeight = MySingletons.getMyResources().getBmp_mapCellBackground().getHeight();
+        wallWidth = MySingletons.getMyResources().getBmp_wallC().getWidth();
+        playableBitmapWidth = (mapCells[0].length - 1) * cellWidth + wallWidth;
+        playableBitmapHeight = (mapCells.length - 1) * cellHeight + wallWidth;
+        fullBitmapWidth = (mapCells[0].length + 1) * cellWidth;
+        fullBitmapHeight = (mapCells.length + 1) * cellHeight;
+    }
 
-        bitMap = Bitmap.createBitmap((mapCells[0].length - 1) * bmp_texture_map.getWidth() + bmp_wall_v.getWidth(),
-                (mapCells.length - 1) * bmp_texture_map.getHeight() + bmp_wall_h.getHeight(),
-                Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitMap);
+    public Bitmap getDrawnMap() {
+        fieldsInit();
 
-        drawCells(canvas, paint);
-        drawWalls(canvas, paint);
+        Bitmap fullBitmap = getBackgroundMap();
+        Bitmap playableBitmap = Bitmap.createBitmap(playableBitmapWidth, playableBitmapHeight, Bitmap.Config.ARGB_8888);
+        Canvas playableBitmapCanvas = new Canvas(playableBitmap);
+        drawCells(playableBitmapCanvas, paint);
+        drawWalls(playableBitmapCanvas, paint);
 
-        Canvas backgroundCanvas = new Canvas(backgroundBitmap);
-        backgroundCanvas.drawBitmap(bitMap, bmp_background_map.getWidth(), bmp_background_map.getHeight(), paint);
+        Canvas fullBitmapCanvas = new Canvas(fullBitmap);
+        fullBitmapCanvas.drawBitmap(playableBitmap, cellWidth, cellHeight, paint);
 
-        return backgroundBitmap;
+        return fullBitmap;
     }
 
     private Bitmap getBackgroundMap() {
-        Bitmap bitMapBackground = Bitmap.createBitmap((mapCells[0].length + 1) * bmp_texture_map.getWidth(),
-                (mapCells.length + 1) * bmp_texture_map.getHeight(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bitMapBackground);
+        Bitmap bitmapBackground = Bitmap.createBitmap(fullBitmapWidth, fullBitmapHeight, Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(bitmapBackground);
 
         for (int i = 0; i < mapCells.length + 1; i++) {
             for (int j = 0; j < mapCells[0].length + 1; j++) {
-                canvas.drawBitmap(bmp_background_map, bmp_background_map.getWidth() * j,
-                        bmp_background_map.getHeight() * i, paint);
+                canvas.drawBitmap(MySingletons.getMyResources().getBmp_mapCellBackground(),
+                        cellWidth * j, cellHeight * i, paint);
             }
         }
 
-        return bitMapBackground;
+        return bitmapBackground;
     }
 
-    public static Bitmap getWallPaperMap(Context context) {
+    public static Bitmap getWallpaperMap(Context context) {
         DisplayMetrics displaymetrics = context.getResources().getDisplayMetrics();
         Map map = null;
         double display_koeff = displaymetrics.widthPixels / (double) displaymetrics.heightPixels;
         double best_scale_koeff = 1;
         for (int i = 9; i < 24; i++) {
             for (int j = 14; j < 29; j++) {
-                if(Math.abs((j + 1) / (double) (i + 1) - display_koeff) < Math.abs(best_scale_koeff - display_koeff))
+                if (Math.abs((j + 1) / (double) (i + 1) - display_koeff) < Math.abs(best_scale_koeff - display_koeff))
                     best_scale_koeff = (j + 1) / (double) (i + 1);
             }
         }
         for (int i = 9; i < 24; i++) {
             for (int j = 14; j < 29; j++) {
-                if((j + 1) / (double) (i + 1) == best_scale_koeff) {
+                if ((j + 1) / (double) (i + 1) == best_scale_koeff) {
                     map = new Map(j, i, j, i);
                 }
             }
         }
-        Bitmap map_bitmap = map.getDrawnMap(context);
+        if (map == null) {
+            Log.d("MyTag", "Wallpaper creating error");
+            return null;
+        }
+        Bitmap map_bitmap = map.getDrawnMap();
         Bitmap bitmap = Bitmap.createBitmap(map_bitmap.getWidth(), map_bitmap.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas = new Canvas(bitmap);
-        canvas.drawBitmap(map_bitmap, 0, 0, MyPaints.getDefaultPaint());
-        wallpaperDrawSomething(map, canvas, context);
+        canvas.drawBitmap(map_bitmap, 0, 0, map.paint);
+        wallpaperDrawSomething(map, canvas);
         return bitmap;
     }
 
-    private static void wallpaperDrawSomething(Map map, Canvas canvas, Context context) {
-        Bitmap bmp_bullet = BitmapFactory.decodeResource(context.getResources(), R.drawable.bullet_p);
-        Bitmap bmp_mapCell = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_map);
-        Bitmap bmp_wall_v = BitmapFactory.decodeResource(context.getResources(), R.drawable.wall);
-        Bitmap bmp_redHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.red_hp);
-        Bitmap bmp_redTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.red_tp);
-        Bitmap bmp_blueHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_hp);
-        Bitmap bmp_blueTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_tp);
-        Bitmap bmp_redDHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.red_dhp);
-        Bitmap bmp_redDTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.red_dtp);
-        Bitmap bmp_blueDHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_dhp);
-        Bitmap bmp_blueDTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_dtp);
-
+    private static void wallpaperDrawSomething(Map map, Canvas canvas) {
         Bitmap map_content = Bitmap.createBitmap(canvas.getWidth(), canvas.getHeight(), Bitmap.Config.ARGB_8888);
         Canvas canvas_content = new Canvas(map_content);
 
         HashSet<HitBox> hitBoxes = map.getWallsHitBox();
         HashSet<Tank> tanks = new HashSet<>();
+
+        int bmp_bulletWidth = MySingletons.getMyResources().getBmp_bullet().getWidth();
+        int bmp_bulletHeight = MySingletons.getMyResources().getBmp_bullet().getHeight();
+        int bmp_tankWidth = MySingletons.getMyResources().getBmp_greenHp().getWidth();
+        int bmp_tankHeight = MySingletons.getMyResources().getBmp_greenHp().getHeight();
 
         double[] hullIndents, towerIndents;
         hullIndents = new double[4];
@@ -130,49 +138,61 @@ public class Map implements Serializable {
 
         for (int i = 0; i < map.getHeightQuantity(); i++) {
             for (int j = 0; j < map.getWidthQuantity(); j++) {
-                if(map.mapCells[i][j].isTexture) {
+                if (map.mapCells[i][j].isTexture) {
                     int rand = (int) (Math.random() * 100);
-                    int x = j * bmp_mapCell.getWidth() + bmp_wall_v.getWidth();
-                    int y = i * bmp_mapCell.getHeight() + bmp_wall_v.getWidth();
-                    if(rand < 20)
+                    int x = j * map.cellWidth + map.wallWidth;
+                    int y = i * map.cellHeight + map.wallWidth;
+                    if (rand < 20) {
                         continue;
-                    else if(rand < 80) {
+                    } else if (rand < 80) {
                         for (int k = 1; k < (int) (Math.random() * 4); k++) {
-                            Bullet b = new Bullet(
-                                    x + Math.random() * bmp_mapCell.getWidth() - bmp_wall_v.getWidth(),
-                                    y + Math.random() * bmp_mapCell.getHeight() - bmp_wall_v.getWidth());
-                            canvas_content.drawBitmap(bmp_bullet, (int) (b.getX() - bmp_bullet.getWidth() / 2),
-                                    (int) (b.getY() - bmp_bullet.getHeight() / 2), MyPaints.getDefaultPaint());
+                            double bX = x + Math.random() * map.cellWidth - map.wallWidth;
+                            double bY = y + Math.random() * map.cellHeight - map.wallWidth;
+                            Bullet b = new Bullet(bX, bY);
+                            canvas_content.drawBitmap(MySingletons.getMyResources().getBmp_bullet(),
+                                    (int) (b.getPoint().getX() - bmp_bulletWidth / 2f),
+                                    (int) (b.getPoint().getY() - bmp_bulletHeight / 2f), map.paint);
                         }
                     } else {
-                        double tankX = x + Math.random() * (bmp_mapCell.getWidth() - bmp_blueHp.getWidth() - bmp_wall_v.getWidth());
-                        double tankY = y + Math.random() * (bmp_mapCell.getHeight() - bmp_blueHp.getHeight() - bmp_wall_v.getWidth());
+                        double tankX = x + Math.random() * (map.cellWidth - bmp_tankWidth - map.wallWidth);
+                        double tankY = y + Math.random() * (map.cellHeight - bmp_tankHeight - map.wallWidth);
                         double tankAngleH = Math.random() * 360;
                         double tankAngleT = Math.random() * 360;
                         Tank tank = new Tank(1, 1, tankX, tankY, tankAngleH, tankAngleT,
                                 "", new TankSight(), new HashSet<Bullet>());
-                        hitBoxes.add(new HitBox(tankX, tankY, tankAngleH, bmp_blueHp.getWidth(), bmp_blueHp.getHeight(), hullIndents));
-                        hitBoxes.add(new HitBox(tankX, tankY, tankAngleH + tankAngleT, bmp_blueTp.getWidth(), bmp_blueTp.getHeight(), towerIndents));
-                        switch ((int) (Math.random() * 3)) {
+                        hitBoxes.add(new HitBox(tankX, tankY, tankAngleH, bmp_tankWidth, bmp_tankHeight, hullIndents));
+                        hitBoxes.add(new HitBox(tankX, tankY, tankAngleH + tankAngleT, bmp_tankWidth, bmp_tankHeight, towerIndents));
+                        Bitmap hull = null;
+                        Bitmap tower = null;
+                        switch ((int) (Math.random() * 4)) {
                             case 0: {
-                                tank.draw(canvas_content, MyPaints.getDefaultPaint(), bmp_blueHp, bmp_blueTp, bmp_bullet);
+                                hull = MySingletons.getMyResources().getBmp_blueHp();
+                                tower = MySingletons.getMyResources().getBmp_blueTp();
                                 tanks.add(tank);
                                 break;
                             }
                             case 1: {
-                                tank.draw(canvas_content, MyPaints.getDefaultPaint(), bmp_blueDHp, bmp_blueDTp, bmp_bullet);
+                                hull = MySingletons.getMyResources().getBmp_blueDHp();
+                                tower = MySingletons.getMyResources().getBmp_blueDTp();
                                 break;
                             }
                             case 2: {
-                                tank.draw(canvas_content, MyPaints.getDefaultPaint(), bmp_redHp, bmp_redTp, bmp_bullet);
+                                hull = MySingletons.getMyResources().getBmp_redHp();
+                                tower = MySingletons.getMyResources().getBmp_redTp();
                                 tanks.add(tank);
                                 break;
                             }
                             case 3: {
-                                tank.draw(canvas_content, MyPaints.getDefaultPaint(), bmp_redDHp, bmp_redDTp, bmp_bullet);
+                                hull = MySingletons.getMyResources().getBmp_redDHp();
+                                tower = MySingletons.getMyResources().getBmp_redDTp();
                                 break;
                             }
                         }
+                        if (hull == null || tower == null) {
+                            Log.d("MyTag", "Creating wallpaper tank error");
+                            return;
+                        }
+                        tank.draw(canvas_content, map.paint, hull, tower);
                     }
                 }
             }
@@ -180,8 +200,8 @@ public class Map implements Serializable {
 
         for (Tank tank : tanks) {
             TankSight tankSight = new TankSight();
-            tankSight.update(tank.getX() + bmp_blueTp.getWidth() / 2f + bmp_blueTp.getWidth() * towerIndents[0] * Math.cos(Math.toRadians(90 - tank.getAngleH() - tank.getAngleT())),
-                    tank.getY() + bmp_blueTp.getHeight() / 2f - bmp_blueTp.getHeight() * towerIndents[0] * Math.sin(Math.toRadians(90 - tank.getAngleH() - tank.getAngleT())),
+            tankSight.update(tank.getX() + bmp_tankWidth / 2f + 1.05 * bmp_tankWidth * towerIndents[0] * Math.cos(Math.toRadians(90 - tank.getAngleH() - tank.getAngleT())),
+                    tank.getY() + bmp_tankHeight / 2f - 1.05 * bmp_tankHeight * towerIndents[0] * Math.sin(Math.toRadians(90 - tank.getAngleH() - tank.getAngleT())),
                     tank.getAngleH() + tank.getAngleT(), hitBoxes);
             tankSight.draw(canvas_content);
         }
@@ -190,20 +210,7 @@ public class Map implements Serializable {
             hb.draw(canvas_content);
         }*/
 
-        canvas.drawBitmap(map_content, bmp_mapCell.getWidth(), bmp_mapCell.getHeight(), MyPaints.getDefaultPaint());
-    }
-
-    private void sourceInit(Context context) {
-        paint = new Paint();
-        bmp_texture_map = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_map);
-        bmp_texture_map2 = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_map2);
-        bmp_background_map = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_background_map);
-        bmp_wall_v = BitmapFactory.decodeResource(context.getResources(), R.drawable.wall);
-        bmp_wall_h = Bitmap.createBitmap(bmp_wall_v.getHeight(), bmp_wall_v.getWidth(), Bitmap.Config.ARGB_8888);
-        Canvas canvas = new Canvas(bmp_wall_h);
-        canvas.rotate(-90, bmp_wall_v.getWidth() / 2f, bmp_wall_v.getWidth() / 2f);
-        canvas.drawBitmap(bmp_wall_v, 0, 0, paint);
-        bmp_wall_c = Bitmap.createBitmap(bmp_wall_v, 0, 0, bmp_wall_v.getWidth(), bmp_wall_v.getWidth());
+        canvas.drawBitmap(map_content, map.cellWidth, map.cellHeight, map.paint);
     }
 
     private void mapCellsInit(int width_quantity, int height_quantity) {
@@ -221,9 +228,11 @@ public class Map implements Serializable {
         for (int j = 0; j + 1 < mapCells.length; j++) {
             for (int i = 0; i + 1 < mapCells[0].length; i++) {
                 if (mapCells[j][i].isTextureA)
-                    canvas.drawBitmap(bmp_texture_map, bmp_texture_map.getWidth() * i, bmp_texture_map.getHeight() * j, paint);
+                    canvas.drawBitmap(MySingletons.getMyResources().getBmp_mapCell1(),
+                            cellWidth * i, cellHeight * j, paint);
                 if (mapCells[j][i].isTextureB)
-                    canvas.drawBitmap(bmp_texture_map2, bmp_texture_map.getWidth() * i, bmp_texture_map.getHeight() * j, paint);
+                    canvas.drawBitmap(MySingletons.getMyResources().getBmp_mapCell2(),
+                            cellWidth * i, cellHeight * j, paint);
             }
         }
     }
@@ -323,11 +332,14 @@ public class Map implements Serializable {
         for (int j = 0; j < mapCells.length; j++) {
             for (int i = 0; i < mapCells[0].length; i++) {
                 if (mapCells[j][i].isHWall)
-                    canvas.drawBitmap(bmp_wall_h, i * bmp_texture_map.getWidth(), j * bmp_texture_map.getHeight(), paint);
+                    canvas.drawBitmap(MySingletons.getMyResources().getBmp_wallH(),
+                            i * cellWidth, j * cellHeight, paint);
                 if (mapCells[j][i].isVWall)
-                    canvas.drawBitmap(bmp_wall_v, i * bmp_texture_map.getWidth(), j * bmp_texture_map.getHeight(), paint);
+                    canvas.drawBitmap(MySingletons.getMyResources().getBmp_wallV(),
+                            i * cellWidth, j * cellHeight, paint);
                 if (mapCells[j][i].isCWall)
-                    canvas.drawBitmap(bmp_wall_c, i * bmp_texture_map.getWidth(), j * bmp_texture_map.getHeight(), paint);
+                    canvas.drawBitmap(MySingletons.getMyResources().getBmp_wallC(),
+                            i * cellWidth, j * cellHeight, paint);
             }
         }
     }
@@ -412,12 +424,12 @@ public class Map implements Serializable {
                             length++;
                         else {
                             if (mapCells[j][k].isVWall || mapCells[j][k].isCWall)
-                                width_piece = bmp_wall_c.getWidth();
+                                width_piece = wallWidth;
                             break;
                         }
                     }
-                    wallsHitBox.add(new HitBox(i * bmp_texture_map.getWidth(), j * bmp_texture_map.getHeight(), 0,
-                            length * bmp_wall_h.getWidth() + width_piece, bmp_wall_h.getHeight(), null));
+                    wallsHitBox.add(new HitBox(i * cellWidth, j * cellHeight, 0,
+                            length * cellWidth + width_piece, wallWidth, null));
                     i += length;
                 }
             }
@@ -433,12 +445,12 @@ public class Map implements Serializable {
                             length++;
                         else {
                             if (mapCells[k][i].isHWall || mapCells[k][i].isCWall)
-                                height_piece = bmp_wall_c.getHeight();
+                                height_piece = wallWidth;
                             break;
                         }
                     }
-                    wallsHitBox.add(new HitBox(i * bmp_texture_map.getWidth(), j * bmp_texture_map.getHeight(), 0,
-                            bmp_wall_v.getWidth(), length * bmp_wall_v.getHeight() + height_piece, null));
+                    wallsHitBox.add(new HitBox(i * cellWidth, j * cellHeight, 0,
+                            wallWidth, length * cellHeight + height_piece, null));
                     j += length;
                 }
             }
@@ -446,10 +458,10 @@ public class Map implements Serializable {
         return wallsHitBox;
     }
 
-    public int[] startCoordinates() { //TODO: different coordinates
+    public int[] getStartCoordinates() { //TODO: different coordinates
         int[] coordinates = new int[4];
-        coordinates[2] = bmp_texture_map.getWidth();
-        coordinates[3] = bmp_texture_map.getHeight();
+        coordinates[2] = cellWidth;
+        coordinates[3] = cellHeight;
         do {
             coordinates[0] = (int) (Math.random() * (mapCells[0].length - 1));
             coordinates[1] = (int) (Math.random() * (mapCells.length - 1));
@@ -459,14 +471,6 @@ public class Map implements Serializable {
         return coordinates;
     }
 
-    public int getBackgroundCellWidth() {
-        return bmp_background_map.getWidth();
-    }
-
-    public int getBackgroundCellHeight() {
-        return bmp_background_map.getHeight();
-    }
-
     public int getWidthQuantity() {
         return mapCells[0].length;
     }
@@ -474,39 +478,39 @@ public class Map implements Serializable {
     public int getHeightQuantity() {
         return mapCells.length;
     }
-}
 
-class MapCell implements Serializable {
-    private int x, y;
-    public boolean isTexture;
-    public boolean isTextureA, isTextureB;
-    public boolean isVWall, isHWall;
-    public boolean isCWall;
+    class MapCell implements Serializable {
+        private int x, y;
+        public boolean isTexture;
+        public boolean isTextureA, isTextureB;
+        public boolean isVWall, isHWall;
+        public boolean isCWall;
 
-    public MapCell(int x, int y) {
-        this.x = x;
-        this.y = y;
-        isTexture = true;
-        isTextureA = false;
-        isTextureB = false;
-        isVWall = false;
-        isHWall = false;
-        isCWall = false;
-    }
+        public MapCell(int x, int y) {
+            this.x = x;
+            this.y = y;
+            isTexture = true;
+            isTextureA = false;
+            isTextureB = false;
+            isVWall = false;
+            isHWall = false;
+            isCWall = false;
+        }
 
-    public MapCell(int x, int y, boolean isTexture, boolean isTextureA, boolean isTextureB,
-                   boolean isVWall, boolean isHWall, boolean isCWall) {
-        this.x = x;
-        this.y = y;
-        this.isTexture = isTexture;
-        this.isTextureA = isTextureA;
-        this.isTextureB = isTextureB;
-        this.isVWall = isVWall;
-        this.isHWall = isHWall;
-        this.isCWall = isCWall;
-    }
+        public MapCell(int x, int y, boolean isTexture, boolean isTextureA, boolean isTextureB,
+                       boolean isVWall, boolean isHWall, boolean isCWall) {
+            this.x = x;
+            this.y = y;
+            this.isTexture = isTexture;
+            this.isTextureA = isTextureA;
+            this.isTextureB = isTextureB;
+            this.isVWall = isVWall;
+            this.isHWall = isHWall;
+            this.isCWall = isCWall;
+        }
 
-    public MapCell getCopy() {
-        return new MapCell(x, y, isTexture, isTextureA, isTextureB, isVWall, isHWall, isCWall);
+        public MapCell getCopy() {
+            return new MapCell(x, y, isTexture, isTextureA, isTextureB, isVWall, isHWall, isCWall);
+        }
     }
 }

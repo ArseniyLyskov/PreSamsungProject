@@ -1,118 +1,114 @@
 package com.example.presamsungproject;
 
-import android.content.Context;
 import android.graphics.*;
 import android.util.Log;
 import android.widget.TextView;
-import com.example.presamsungproject.ConnectionObjects.Client;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
-import com.example.presamsungproject.ConnectionObjects.Server;
 import com.example.presamsungproject.GameObjects.*;
 
 import java.util.HashMap;
 import java.util.HashSet;
 
 public class Game {
-    private Bitmap bmp_greenHp, bmp_greenTp, bmp_redHp, bmp_redTp, bmp_blueHp, bmp_blueTp;
-    private Bitmap bmp_greenDHp, bmp_greenDTp, bmp_redDHp, bmp_redDTp, bmp_blueDHp, bmp_blueDTp;
-    private Bitmap bmp_bullet;
-    private Bitmap bmp_backgroundCell;
-
-    public static final int MAX_FPS = 60;
+    private static final boolean DEBUG = false;
+    public static final int MAX_FPS = 200;
     public final String addrress;
     public final String name;
-    public final boolean isLobby;
     public boolean isEverybodyReady = false;
     public HashMap<String, Tank> otherTanks = new HashMap<>();
 
-    private Context context;
     private Map map;
     private MyTank myTank;
     private double lJangle, lJstrength, rJangle, rJstrength;
-    private int fps;
+    private int fps, last_fps = MAX_FPS;
     private double scaleTo = 1;
     private int frameWidth, frameHeight;
-    private int[] startCoordinates;
-    private TextView fps_tv;
     private Bitmap map_bitmap;
     private HashSet<HitBox> walls;
     private int team;
 
 
-    public Game(Map map, String name, int team, boolean isLobby, Context context) {
+    public Game(Map map, String name, int team) {
         this.map = map;
         this.name = name;
         this.team = team;
-        this.isLobby = isLobby;
-        this.context = context;
         addrress = MessageManager.EXTERNAL_ADDRESS;
-        map_bitmap = map.getDrawnMap(context);
+        map_bitmap = map.getDrawnMap();
         walls = map.getWallsHitBox();
-        startCoordinates = map.startCoordinates();
     }
 
     public void start() {
-        bmp_greenHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.green_hp);
-        bmp_greenTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.green_tp);
-        bmp_redHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.red_hp);
-        bmp_redTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.red_tp);
-        bmp_blueHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_hp);
-        bmp_blueTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_tp);
-        bmp_greenDHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.green_dhp);
-        bmp_greenDTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.green_dtp);
-        bmp_redDHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.red_dhp);
-        bmp_redDTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.red_dtp);
-        bmp_blueDHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_dhp);
-        bmp_blueDTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_dtp);
-        bmp_bullet = BitmapFactory.decodeResource(context.getResources(), R.drawable.bullet_p);
-        bmp_backgroundCell = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_background_map);
-
-        myTank = new MyTank(3, team, startCoordinates[0] + (startCoordinates[2] - bmp_greenHp.getWidth()) / 2f,
-                startCoordinates[1] + (startCoordinates[3] - bmp_greenHp.getHeight()) / 2f, 0, 0,
-                name, new TankSight(), new HashSet<Bullet>(), bmp_greenHp, bmp_greenTp, 800, this);
+        int[] startCoordinates = map.getStartCoordinates();
+        int bmp_tankWidth = MySingletons.getMyResources().getBmp_greenHp().getWidth();
+        int bmp_tankHeight = MySingletons.getMyResources().getBmp_greenHp().getHeight();
+        myTank = new MyTank(3, team, startCoordinates[0] + (startCoordinates[2] - bmp_tankWidth) / 2f,
+                startCoordinates[1] + (startCoordinates[3] - bmp_tankHeight) / 2f, 0, 0,
+                name, new TankSight(), new HashSet<Bullet>(), MySingletons.getMyResources().getBmp_greenHp(),
+                MySingletons.getMyResources().getBmp_greenTp(), 800, this);
 
 
-        if (!isLobby) {
+        if (!MySingletons.isLobby()) {
             try {
                 String message = MessageManager.sendTankMessage(myTank.getTankToSerialize());
-                Client.sendMessage(message);
+                MySingletons.getClient().sendMessage(message);
             } catch (Exception e) {
                 Log.d("MyTag", "Sending tank error");
                 e.printStackTrace();
             }
         } else {
-            if (Server.getConnectionsQuantity() == 0) {
+            if (MySingletons.getServer().getConnectionsQuantity() == 0) {
                 isEverybodyReady = true;
             }
         }
 
     }
 
-    public void drawAll(Canvas canvas, Paint paint) {
+    public void drawAll(Canvas canvas) {
         canvas.scale((float) scaleTo, (float) scaleTo, canvas.getWidth() / 2f, canvas.getHeight() / 2f);
         canvas.translate(getTranslateCanvasX(), getTranslateCanvasY());
 
-        canvas.drawBitmap(map_bitmap, -map.getBackgroundCellWidth(), -map.getBackgroundCellHeight(), paint);
-        if (myTank.hp > 0)
-            myTank.draw(canvas, MyPaints.getAllyNickPaint(), bmp_greenHp, bmp_greenTp, bmp_bullet);
+        canvas.drawBitmap(map_bitmap,
+                -MySingletons.getMyResources().getBmp_mapCellBackground().getWidth(),
+                -MySingletons.getMyResources().getBmp_mapCellBackground().getWidth(),
+                MySingletons.getMyResources().getAllyNickPaint()); //TODO: отрисовка поля занимает много ресурсов
+
+        if (myTank.getHp() > 0)
+            myTank.draw(canvas, MySingletons.getMyResources().getAllyNickPaint(),
+                    MySingletons.getMyResources().getBmp_greenHp(),
+                    MySingletons.getMyResources().getBmp_greenTp());
         else
-            myTank.draw(canvas, MyPaints.getAllyNickPaint(), bmp_greenDHp, bmp_greenDTp, bmp_bullet);
+            myTank.draw(canvas, MySingletons.getMyResources().getAllyNickPaint(),
+                    MySingletons.getMyResources().getBmp_greenDHp(),
+                    MySingletons.getMyResources().getBmp_greenDTp());
 
         for (Tank t : otherTanks.values()) {
-            if (t.team != team) {
-                if (t.hp > 0)
-                    t.draw(canvas, MyPaints.getEnemyNickPaint(), bmp_redHp, bmp_redTp, bmp_bullet);
-                else
-                    t.draw(canvas, MyPaints.getEnemyNickPaint(), bmp_redDHp, bmp_redDTp, bmp_bullet);
+            Bitmap hull;
+            Bitmap tower;
+            Paint paint;
+            if (t.getTeam() != team) {
+                if (t.getHp() > 0) {
+                    hull = MySingletons.getMyResources().getBmp_redHp();
+                    tower = MySingletons.getMyResources().getBmp_redTp();
+                } else {
+                    hull = MySingletons.getMyResources().getBmp_redDHp();
+                    tower = MySingletons.getMyResources().getBmp_redDTp();
+                }
+                paint = MySingletons.getMyResources().getEnemyNickPaint();
             } else {
-                if (t.hp > 0)
-                    t.draw(canvas, MyPaints.getAllyNickPaint(), bmp_blueHp, bmp_blueTp, bmp_bullet);
-                else
-                    t.draw(canvas, MyPaints.getAllyNickPaint(), bmp_blueDHp, bmp_blueDTp, bmp_bullet);
+                if (t.getHp() > 0) {
+                    hull = MySingletons.getMyResources().getBmp_blueHp();
+                    tower = MySingletons.getMyResources().getBmp_blueTp();
+                } else {
+                    hull = MySingletons.getMyResources().getBmp_blueDHp();
+                    tower = MySingletons.getMyResources().getBmp_blueDTp();
+                }
+                paint = MySingletons.getMyResources().getAllyNickPaint();
             }
+            t.draw(canvas, paint, hull, tower);
         }
 
-        //drawAllHitBoxes(canvas);
+        if(DEBUG)
+            drawAllHitBoxes(canvas);
     }
 
     private void drawAllHitBoxes(Canvas canvas) {
@@ -132,18 +128,12 @@ public class Game {
         HashSet<Bullet> bullets = new HashSet<>();
 
         for (Tank t : otherTanks.values()) {
-            Bullet[] arr_bullets = new Bullet[t.getBullets().size()];
-            t.getBullets().toArray(arr_bullets);
-            for (Bullet b : arr_bullets) {
-                bullets.add(b);
-            }
+            HashSet<Bullet> temp = new HashSet<>(t.getBullets());
+            bullets.addAll(temp);
         }
 
-        Bullet[] arr_bullets = new Bullet[myTank.getBullets().size()];
-        myTank.getBullets().toArray(arr_bullets);
-        for (Bullet b : arr_bullets) {
-            bullets.add(b);
-        }
+        HashSet<Bullet> temp = new HashSet<>(myTank.getBullets());
+        bullets.addAll(temp);
         return bullets;
     }
 
@@ -169,25 +159,25 @@ public class Game {
     }
 
     private int getTranslateCanvasX() {
+        int cellWidth = MySingletons.getMyResources().getBmp_mapCellBackground().getWidth();
+        int tankWidth = MySingletons.getMyResources().getBmp_blueHp().getWidth();
         if(frameWidth >= map_bitmap.getWidth())
-            return bmp_backgroundCell.getWidth();
-        int translation = -(int) (myTank.getX() - frameWidth / 2f + bmp_greenHp.getWidth() / 2f);
-        if(translation > map.getBackgroundCellWidth())
-            return map.getBackgroundCellWidth();
-        if(translation < -(map_bitmap.getWidth() - map.getBackgroundCellWidth() - frameWidth))
-            return -(map_bitmap.getWidth() - map.getBackgroundCellWidth() - frameWidth);
-        return translation;
+            return cellWidth;
+        int translation = -(int) (myTank.getX() - frameWidth / 2f + tankWidth / 2f);
+        if(translation > cellWidth)
+            return cellWidth;
+        return Math.max(translation, -(map_bitmap.getWidth() - cellWidth - frameWidth));
     }
 
     private int getTranslateCanvasY() {
+        int cellHeight = MySingletons.getMyResources().getBmp_mapCellBackground().getHeight();
+        int tankHeight = MySingletons.getMyResources().getBmp_blueHp().getHeight();
         if(frameHeight >= map_bitmap.getHeight())
-            return bmp_backgroundCell.getHeight();
-        int translation = -(int) (myTank.getY() - frameHeight / 2f + bmp_greenHp.getHeight() / 2f);
-        if(translation > map.getBackgroundCellHeight())
-            return map.getBackgroundCellHeight();
-        if(translation < -(map_bitmap.getHeight() - map.getBackgroundCellHeight() - frameHeight))
-            return -(map_bitmap.getHeight() - map.getBackgroundCellHeight() - frameHeight);
-        return translation;
+            return cellHeight;
+        int translation = -(int) (myTank.getY() - frameHeight / 2f + tankHeight / 2f);
+        if(translation > cellHeight)
+            return cellHeight;
+        return Math.max(translation, -(map_bitmap.getHeight() - cellHeight - frameHeight));
     }
 
     public void setFrameWidth(int frameWidth) {
@@ -250,11 +240,11 @@ public class Game {
         this.fps = fps;
     }
 
-    public TextView getFps_tv() {
-        return fps_tv;
+    public void setLast_fps(int fps) {
+        this.last_fps = fps;
     }
 
-    public void setFps_tv(TextView fps_tv) {
-        this.fps_tv = fps_tv;
+    public int getLast_fps() {
+        return last_fps;
     }
 }

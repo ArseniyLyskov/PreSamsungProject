@@ -2,21 +2,22 @@ package com.example.presamsungproject.GameObjects;
 
 import android.graphics.*;
 import com.example.presamsungproject.HitBox;
+import com.example.presamsungproject.MySingletons;
 
 import java.io.Serializable;
 import java.util.HashSet;
 
 public class Tank implements Serializable {
-    public double hp;
-    public int team;
-    public int scale;
-    public String address;
+    double hp;
+    int team;
+    int scale;
+    String address;
     double x, y;
     double angleH, angleT;
     String playerName;
     TankSight tankSight;
-    public HashSet<Bullet> bullets;
-    public HitBox hullHitBox, towerHitBox;
+    HashSet<Bullet> bullets;
+    HitBox hullHitBox, towerHitBox;
     double[] hullIndents, towerIndents;
     private static final long serialVersionUID = 2L;
 
@@ -36,7 +37,7 @@ public class Tank implements Serializable {
         towerHitBox = new HitBox(0, 0, 0, 1, 1, towerIndents);
     }
 
-    public void draw(Canvas canvas, Paint paint, Bitmap bmp_hull, Bitmap bmp_tower, Bitmap bmp_bullet) {
+    public void draw(Canvas canvas, Paint paint, Bitmap bmp_hull, Bitmap bmp_tower) {
         double hWidth = bmp_hull.getWidth();
         double hHeight = bmp_hull.getHeight();
         double tWidth = bmp_tower.getWidth();
@@ -76,10 +77,12 @@ public class Tank implements Serializable {
 
         canvas.drawText(playerName, (int) (x + hWidth / 2 - (int) paint.measureText(playerName) / 2), (int) (y - 10), paint);
 
-        Bullet[] arr_bullets = new Bullet[bullets.size()];
-        bullets.toArray(arr_bullets);
-        for (Bullet b : arr_bullets) {
-            canvas.drawBitmap(bmp_bullet, (int) (b.getX() - bmp_bullet.getWidth() / 2), (int) (b.getY() - bmp_bullet.getHeight() / 2), paint);
+        HashSet<Bullet> temp = new HashSet<>(bullets);
+        Bitmap bmp_bullet = MySingletons.getMyResources().getBmp_bullet();
+        for (Bullet b : temp) {
+            canvas.drawBitmap(bmp_bullet,
+                    (int) (b.getPoint().getX() - bmp_bullet.getWidth() / 2),
+                    (int) (b.getPoint().getY() - bmp_bullet.getHeight() / 2), paint);
         }
     }
 
@@ -154,5 +157,17 @@ public class Tank implements Serializable {
 
     public double getAngleT() {
         return angleT;
+    }
+
+    public double getScale() {
+        return scale;
+    }
+
+    public double getHp() {
+        return hp;
+    }
+
+    public int getTeam() {
+        return team;
     }
 }

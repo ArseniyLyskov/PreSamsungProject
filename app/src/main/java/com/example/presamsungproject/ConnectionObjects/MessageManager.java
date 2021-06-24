@@ -1,16 +1,17 @@
 package com.example.presamsungproject.ConnectionObjects;
 
 import android.util.Log;
-import com.example.presamsungproject.Activities.LobbyClientActivity;
-import com.example.presamsungproject.Activities.LobbyServerActivity;
 import com.example.presamsungproject.Game;
 import com.example.presamsungproject.GameObjects.Tank;
 import com.example.presamsungproject.Map;
+import com.example.presamsungproject.MyInterfaces.ServerUpdatableUI;
+import com.example.presamsungproject.MySingletons;
 
 import java.io.*;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Arrays;
+import java.util.HashMap;
 
 public class MessageManager {
     private static final String CONNECT_MESSAGE = "CONNECTED";
@@ -57,17 +58,19 @@ public class MessageManager {
         String[] separated = message.split(" ");
         switch (separated[0]) {
             case CONNECT_MESSAGE: {
-                LobbyServerActivity.players.put(separated[1], separated[2]);
-                LobbyServerActivity.updateUI();
+                ServerUpdatableUI serverUpdatableUI = MySingletons.getMyResources().getServerUpdatableUI();
+                HashMap<String, String> players = serverUpdatableUI.getPlayers();
+                players.put(separated[1], separated[2]);
+                serverUpdatableUI.updateUI();
                 String messageToAll = "";
                 messageToAll = NAMES_LIST_MESSAGE + " ";
                 String namesText = "";
-                for (String s : LobbyServerActivity.players.values()) {
+                for (String s : players.values()) {
                     namesText += s + " ";
                 }
                 messageToAll += namesText;
-                Server.broadcastMessage(messageToAll);
-                Server.specificMessage(separated[1], TEAM_MESSAGE + " " + LobbyServerActivity.players.size());
+                MySingletons.getServer().broadcastMessage(messageToAll);
+                MySingletons.getServer().specificMessage(separated[1], TEAM_MESSAGE + " " + players.size());
                 break;
             }
             case SENDING_TANK_MESSAGE: {
@@ -75,23 +78,23 @@ public class MessageManager {
                 }
                 Tank deserializedTank = deserializeTank(message, separated[1]);
                 game.otherTanks.put(separated[1], deserializedTank);
-                if ((game.otherTanks.size()) == Server.getConnectionsQuantity()) {
+                if ((game.otherTanks.size()) == MySingletons.getServer().getConnectionsQuantity()) {
                     if (!game.isEverybodyReady) {
                         game.isEverybodyReady = true;
                         serverBroadcastAllTanks();
-                        Server.broadcastMessage(READY_MESSAGE);
+                        MySingletons.getServer().broadcastMessage(READY_MESSAGE);
                     } else {
-                        Server.broadcastMessage(message);
+                        MySingletons.getServer().broadcastMessage(message);
                     }
                 }
                 break;
             }
             case HIT_MESSAGE: {
                 if (separated[1].equals(EXTERNAL_ADDRESS)) {
-                    game.getMyTank().hp--;
+                    game.getMyTank().minusHealth();
                     sendMyTank();
                 } else
-                    Server.specificMessage(separated[1], hitMessage(separated[1]));
+                    MySingletons.getServer().specificMessage(separated[1], hitMessage(separated[1]));
                 break;
             }
         }
@@ -105,17 +108,16 @@ public class MessageManager {
                 for (int i = 1; i < separated.length; i++) {
                     namesText += separated[i] + "\n";
                 }
-                LobbyClientActivity.updateUI(namesText, separated.length - 1);
+                MySingletons.getMyResources().getClientUpdatableUI().updateUI(namesText, separated.length - 1);
                 break;
             }
             case SENDING_MAP_MESSAGE: {
                 Map deserializedMap = deserializeMap(message);
-                LobbyClientActivity.map = deserializedMap;
-                LobbyClientActivity.gotoMainActivity();
+                MySingletons.getMyResources().getClientUpdatableUI().startGame(deserializedMap);
                 break;
             }
             case TEAM_MESSAGE: {
-                LobbyClientActivity.team = Integer.parseInt(separated[1]);
+                MySingletons.getMyResources().getClientUpdatableUI().setTeam(Integer.parseInt(separated[1]));
                 break;
             }
             case SENDING_TANK_MESSAGE: {
@@ -131,7 +133,7 @@ public class MessageManager {
             }
             case HIT_MESSAGE: {
                 if (separated[1].equals(EXTERNAL_ADDRESS)) {
-                    game.getMyTank().hp--;
+                    game.getMyTank().minusHealth();
                     sendMyTank();
                 }
                 break;
@@ -141,10 +143,10 @@ public class MessageManager {
 
     public static void sendMyTank() {
         try {
-            if (game.isLobby) {
-                Server.broadcastMessage(MessageManager.sendTankMessage(game.getMyTank().getTankToSerialize()));
+            if (MySingletons.isLobby()) {
+                MySingletons.getServer().broadcastMessage(MessageManager.sendTankMessage(game.getMyTank().getTankToSerialize()));
             } else {
-                Client.sendMessage(MessageManager.sendTankMessage(game.getMyTank().getTankToSerialize()));
+                MySingletons.getClient().sendMessage(MessageManager.sendTankMessage(game.getMyTank().getTankToSerialize()));
             }
         } catch (Exception e) {
             Log.d("MyTag", "Sending myTank error");
@@ -155,16 +157,16 @@ public class MessageManager {
     private static void serverBroadcastAllTanks() {
         try {
             for (Tank tank : game.otherTanks.values()) {
-                Server.broadcastMessage(sendTankMessage(tank));
+                MySingletons.getServer().broadcastMessage(sendTankMessage(tank));
             }
-            Server.broadcastMessage(sendTankMessage(game.getMyTank().getTankToSerialize()));
+            MySingletons.getServer().broadcastMessage(sendTankMessage(game.getMyTank().getTankToSerialize()));
         } catch (Exception e) {
             Log.d("MyTag", "Server sending tank error");
             e.printStackTrace();
         }
     }
 
-    public static void findExternalAddress() {
+    public static void tryToFindExternalAddress() {
         new Thread(new Runnable() {
             @Override
             public void run() {
@@ -182,28 +184,6 @@ public class MessageManager {
             }
         }).start();
     }
-
-    /*public static byte[] stringToByteArray(String string) {
-        byte[] byteArray = new byte[0];
-        try {
-            byteArray = string.getBytes("UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            Log.d("MyTag", "String to byte array converting error");
-            e.printStackTrace();
-        }
-        return byteArray;
-    }
-
-    public static String byteArrayToString(byte[] byteArray) {
-        String string = "";
-        try {
-            string = new String(byteArray, "UTF-8");
-        } catch (UnsupportedEncodingException e) {
-            Log.d("MyTag", "Byte array to string converting error");
-            e.printStackTrace();
-        }
-        return string;
-    }*/
 
     public static void setGame(Game game) {
         MessageManager.game = game;
@@ -243,7 +223,7 @@ public class MessageManager {
         try {
             ois = new ObjectInputStream(bais);
             deserializedTank = (Tank) ois.readObject();
-            deserializedTank.scaleTo(game.getScale() / (float) deserializedTank.scale);
+            deserializedTank.scaleTo(game.getScale() / (float) deserializedTank.getScale());
             return deserializedTank;
         } catch (Exception e) {
             Log.d("MyTag", "Deserializing tank error");

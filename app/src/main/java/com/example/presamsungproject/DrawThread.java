@@ -4,11 +4,11 @@ import android.graphics.*;
 import android.view.SurfaceHolder;
 
 public class DrawThread extends Thread {
-    private SurfaceHolder surfaceHolder;
-    private Game game;
+    private final SurfaceHolder surfaceHolder;
+    private final Game game;
 
     public volatile boolean isTimeToUpdate = false;
-    private volatile boolean running = false; //флаг для остановки потока
+    private volatile boolean running = false;
 
     public DrawThread(SurfaceHolder surfaceHolder, Game game) {
         this.surfaceHolder = surfaceHolder;
@@ -23,7 +23,7 @@ public class DrawThread extends Thread {
         running = run;
     }
 
-    private Paint backgroundPaint = new Paint();
+    private final Paint backgroundPaint = new Paint();
 
     {
         backgroundPaint.setColor(Color.WHITE);
@@ -40,7 +40,7 @@ public class DrawThread extends Thread {
                         //
                         canvas.drawRect(0, 0, canvas.getWidth(), canvas.getHeight(), backgroundPaint);
 
-                        game.drawAll(canvas, backgroundPaint);
+                        game.drawAll(canvas);
                         game.setFps(game.getFps() + 1);
 
                         //
