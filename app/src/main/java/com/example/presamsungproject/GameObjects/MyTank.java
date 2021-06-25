@@ -13,8 +13,9 @@ import java.util.Collection;
 import java.util.HashSet;
 
 public class MyTank extends Tank {
-    private double speed, current_speed;
-    private Game game;
+    private final double speed;
+    private final Game game;
+    private double current_speed;
     private HitBox updatedHhb, updatedThb;
     private Bitmap bmp_hull, bmp_tower;
     private final double[] updatedHullIndents;
@@ -193,7 +194,7 @@ public class MyTank extends Tank {
     private void updateBulletsCoordinates(double speed_koeff) {
         HashSet<Bullet> temp = new HashSet<>(bullets);
         HashSet<HitBox> walls = game.getWallsHitBoxes();
-        Collection<Tank> otherTanks = game.otherTanks.values();
+        Collection<Tank> otherTanks = game.getOtherTanks().values();
         for (Bullet b : temp) {
             b.update(this, speed_koeff, walls, otherTanks);
             if (b.getRicochets() < 0) {

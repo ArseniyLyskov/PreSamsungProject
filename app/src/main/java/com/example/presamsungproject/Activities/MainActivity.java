@@ -1,16 +1,19 @@
 package com.example.presamsungproject.Activities;
 
 import android.content.pm.ActivityInfo;
-import android.graphics.*;
+import android.graphics.Color;
 import android.view.Gravity;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import com.example.presamsungproject.*;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
+import com.example.presamsungproject.DrawView;
+import com.example.presamsungproject.Game;
 import com.example.presamsungproject.MyInterfaces.GameUpdatableUI;
+import com.example.presamsungproject.MySingletons;
+import com.example.presamsungproject.R;
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
 public class MainActivity extends AppCompatActivity implements GameUpdatableUI {

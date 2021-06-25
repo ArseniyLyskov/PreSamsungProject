@@ -2,10 +2,13 @@ package com.example.presamsungproject.Activities;
 
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
-import android.os.*;
+import android.os.Bundle;
 import android.view.View;
 import android.view.WindowManager;
-import android.widget.*;
+import android.widget.EditText;
+import android.widget.ImageView;
+import android.widget.TextView;
+import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.ConnectionObjects.Server;
@@ -37,7 +40,6 @@ public class LobbyClientActivity extends AppCompatActivity implements ClientUpda
 
         MySingletons.setLobby(false);
 
-        ImageView menuImage = findViewById(R.id.acl_menu_image);
         ImageView backgroundImage = findViewById(R.id.acl_background_image);
         tv_number = findViewById(R.id.acl_textview_number);
         tv_nicks = findViewById(R.id.acl_textview_nicks);
@@ -46,7 +48,6 @@ public class LobbyClientActivity extends AppCompatActivity implements ClientUpda
 
         backgroundImage.setImageBitmap(MySingletons.getMyResources().getPaintedWallPaper());
         backgroundImage.setScaleType(ImageView.ScaleType.FIT_XY);
-        menuImage.setImageResource(R.drawable.white350_300);
 
         name = getIntent().getStringExtra("name");
         updateUI("", 0);
@@ -75,17 +76,22 @@ public class LobbyClientActivity extends AppCompatActivity implements ClientUpda
 
     @Override
     public void updateUI(String nicks, int players_quantity) {
-        if (nicks.equals("") || players_quantity == 0) {
-            tv_upper_text.setText("Enter lobby creator IP");
-            tv_number.setText("Number of people waiting: ");
-            tv_number.setVisibility(View.INVISIBLE);
-            tv_nicks.setText("");
-        } else {
-            tv_upper_text.setText("Waiting for the game to start...");
-            tv_number.setText("Number of people waiting: " + players_quantity);
-            tv_number.setVisibility(View.VISIBLE);
-            tv_nicks.setText(nicks);
-        }
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                if (nicks.equals("") || players_quantity == 0) {
+                    tv_upper_text.setText("Enter lobby creator IP");
+                    tv_number.setText("Number of people waiting: ");
+                    tv_number.setVisibility(View.INVISIBLE);
+                    tv_nicks.setText("");
+                } else {
+                    tv_upper_text.setText("Waiting for the game to start...");
+                    tv_number.setText("Number of people waiting: " + players_quantity);
+                    tv_number.setVisibility(View.VISIBLE);
+                    tv_nicks.setText(nicks);
+                }
+            }
+        });
     }
 
     @Override

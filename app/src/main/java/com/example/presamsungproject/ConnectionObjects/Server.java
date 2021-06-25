@@ -58,7 +58,7 @@ public class Server {
     public boolean isRunning() {
         if(serverThread == null)
             return false;
-        return serverThread.isAlive();
+        return serverThread.isInterrupted();
     }
 
 }

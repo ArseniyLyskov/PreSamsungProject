@@ -1,6 +1,8 @@
 package com.example.presamsungproject.GameObjects;
 
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import com.example.presamsungproject.HitBox;
 import com.example.presamsungproject.MySingletons;
 

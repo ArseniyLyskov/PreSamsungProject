@@ -7,7 +7,10 @@ import com.example.presamsungproject.Map;
 import com.example.presamsungproject.MyInterfaces.ServerUpdatableUI;
 import com.example.presamsungproject.MySingletons;
 
-import java.io.*;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.Arrays;
@@ -77,8 +80,8 @@ public class MessageManager {
                 while (game == null) {
                 }
                 Tank deserializedTank = deserializeTank(message, separated[1]);
-                game.otherTanks.put(separated[1], deserializedTank);
-                if ((game.otherTanks.size()) == MySingletons.getServer().getConnectionsQuantity()) {
+                game.getOtherTanks().put(separated[1], deserializedTank);
+                if ((game.getOtherTanks().size()) == MySingletons.getServer().getConnectionsQuantity()) {
                     if (!game.isEverybodyReady) {
                         game.isEverybodyReady = true;
                         serverBroadcastAllTanks();
@@ -123,7 +126,7 @@ public class MessageManager {
             case SENDING_TANK_MESSAGE: {
                 if (!separated[1].equals(EXTERNAL_ADDRESS)) {
                     Tank deserializedTank = deserializeTank(message, separated[1]);
-                    game.otherTanks.put(separated[1], deserializedTank);
+                    game.getOtherTanks().put(separated[1], deserializedTank);
                 }
                 break;
             }
@@ -156,7 +159,7 @@ public class MessageManager {
 
     private static void serverBroadcastAllTanks() {
         try {
-            for (Tank tank : game.otherTanks.values()) {
+            for (Tank tank : game.getOtherTanks().values()) {
                 MySingletons.getServer().broadcastMessage(sendTankMessage(tank));
             }
             MySingletons.getServer().broadcastMessage(sendTankMessage(game.getMyTank().getTankToSerialize()));

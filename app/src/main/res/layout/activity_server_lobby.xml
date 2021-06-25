@@ -14,7 +14,7 @@
             android:layout_gravity="center"
             android:layout_width="350dp"
             android:layout_height="300dp"
-            android:id="@+id/asl_menu_image"
+            android:background="@drawable/panel_350_300"
     />
 
     <LinearLayout
@@ -58,7 +58,7 @@
 
         <ScrollView
                 android:layout_width="300dp"
-                android:layout_height="150dp"
+                android:layout_height="125dp"
                 android:layout_gravity="center">
 
             <TextView
@@ -79,6 +79,7 @@
                 android:layout_gravity="center"
                 android:textSize="20dp"
                 android:onClick="startGameClick"
+                android:background="@drawable/button"
         />
 
     </LinearLayout>

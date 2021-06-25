@@ -159,7 +159,7 @@ public class Map implements Serializable {
                         double tankAngleH = Math.random() * 360;
                         double tankAngleT = Math.random() * 360;
                         Tank tank = new Tank(1, 1, tankX, tankY, tankAngleH, tankAngleT,
-                                "", new TankSight(), new HashSet<Bullet>());
+                                "", new TankSight(), new HashSet<>());
                         hitBoxes.add(new HitBox(tankX, tankY, tankAngleH, bmp_tankWidth, bmp_tankHeight, hullIndents));
                         hitBoxes.add(new HitBox(tankX, tankY, tankAngleH + tankAngleT, bmp_tankWidth, bmp_tankHeight, towerIndents));
                         Bitmap hull = null;
@@ -480,7 +480,8 @@ public class Map implements Serializable {
     }
 
     class MapCell implements Serializable {
-        private int x, y;
+        private final int x;
+        private final int y;
         public boolean isTexture;
         public boolean isTextureA, isTextureB;
         public boolean isVWall, isHWall;

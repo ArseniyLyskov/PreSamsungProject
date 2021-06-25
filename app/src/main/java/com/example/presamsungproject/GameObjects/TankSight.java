@@ -15,10 +15,6 @@ public class TankSight implements Serializable {
     private Segment segment;
     private static final long serialVersionUID = 3L;
 
-    {
-        isSighting = false;
-    }
-
     public void draw(Canvas canvas) {
         canvas.drawLine(segment.getP1().getX(), segment.getP1().getY(),
                 segment.getP2().getX(), segment.getP2().getY(),
@@ -50,7 +46,8 @@ public class TankSight implements Serializable {
     }
 
     public TankSight() {
-
+        isSighting = false;
+        segment = new Segment(new Point(0, 0), new Point(0, 0));
     }
 
     public void setSighting(boolean isSighting) {

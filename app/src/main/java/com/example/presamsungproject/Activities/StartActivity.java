@@ -29,12 +29,10 @@ public class StartActivity extends AppCompatActivity {
         MySingletons.createMyResources(getApplicationContext());
 
         editText = findViewById(R.id.as_edittext);
-        ImageView menuImage = findViewById(R.id.as_menu_image);
         ImageView backgroundImage = findViewById(R.id.as_background_image);
 
         backgroundImage.setImageBitmap(MySingletons.getMyResources().getPaintedWallPaper());
         backgroundImage.setScaleType(ImageView.ScaleType.FIT_XY);
-        menuImage.setImageResource(R.drawable.white350_200);
 
         MessageManager.tryToFindExternalAddress();
     }

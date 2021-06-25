@@ -21,7 +21,7 @@ public class MySingletons {
     }
 
     public static void createServer() {
-        if(server != null)
+        if (server != null)
             server.stop();
         server = new Server();
         server.start();
@@ -32,7 +32,7 @@ public class MySingletons {
     }
 
     public static void createClient(String serverIP) {
-        if(client != null)
+        if (client != null)
             client.stop();
         client = new Client();
         client.start(serverIP);

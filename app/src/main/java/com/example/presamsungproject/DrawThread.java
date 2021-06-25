@@ -1,6 +1,8 @@
 package com.example.presamsungproject;
 
-import android.graphics.*;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.view.SurfaceHolder;
 
 public class DrawThread extends Thread {

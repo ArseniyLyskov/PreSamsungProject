@@ -14,7 +14,7 @@
             android:layout_gravity="center"
             android:layout_width="350dp"
             android:layout_height="300dp"
-            android:id="@+id/acl_menu_image"
+            android:background="@drawable/panel_350_300"
     />
 
     <LinearLayout
@@ -49,10 +49,8 @@
 
         <ScrollView
                 android:layout_width="300dp"
-                android:layout_height="125dp"
-                android:layout_gravity="center"
-                android:visibility="invisible"
-                android:id="@+id/acl_scrollview">
+                android:layout_height="100dp"
+                android:layout_gravity="center">
 
             <TextView
                     android:layout_width="match_parent"
@@ -72,6 +70,9 @@
                 android:id="@+id/acl_edittext"
                 android:gravity="center"
                 android:inputType="date"
+                android:textColor="@android:color/black"
+                android:textSize="20dp"
+                android:textColorHint="#333333"
         />
 
         <Button
@@ -81,6 +82,7 @@
                 android:layout_gravity="center"
                 android:textSize="20dp"
                 android:onClick="connectToLobbyClick"
+                android:background="@drawable/button"
         />
 
     </LinearLayout>

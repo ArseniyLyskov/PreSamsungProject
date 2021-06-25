@@ -48,7 +48,7 @@ public class GeometryMethods {
 
     private static double findIntersectedSegmentAngle(Segment segment) {
         double intersectedSegmentAngle;
-        if(segment.getP1().getX() - segment.getP2().getX() == 0)
+        if (segment.getP1().getX() - segment.getP2().getX() == 0)
             intersectedSegmentAngle = 0;
         else
             intersectedSegmentAngle = 90 - Math.atan(
@@ -192,7 +192,7 @@ public class GeometryMethods {
         int x = (int) temp_x;
         int y = (int) temp_y;
 
-        if(x - Math.min(maxX1, maxX2) > 1 || Math.max(minX1, minX2) - x > 1 || y - Math.min(maxY1, maxY2) > 1 || Math.max(minY1, minY2) - y > 1) {
+        if (x - Math.min(maxX1, maxX2) > 1 || Math.max(minX1, minX2) - x > 1 || y - Math.min(maxY1, maxY2) > 1 || Math.max(minY1, minY2) - y > 1) {
             return null;
         } else {
             return new Point(x, y);

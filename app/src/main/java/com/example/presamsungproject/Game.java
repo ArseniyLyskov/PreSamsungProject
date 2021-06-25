@@ -1,38 +1,40 @@
 package com.example.presamsungproject;
 
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
 import android.util.Log;
-import android.widget.TextView;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
-import com.example.presamsungproject.GameObjects.*;
+import com.example.presamsungproject.GameObjects.Bullet;
+import com.example.presamsungproject.GameObjects.MyTank;
+import com.example.presamsungproject.GameObjects.Tank;
+import com.example.presamsungproject.GameObjects.TankSight;
 
 import java.util.HashMap;
 import java.util.HashSet;
 
 public class Game {
-    private static final boolean DEBUG = false;
     public static final int MAX_FPS = 200;
-    public final String addrress;
-    public final String name;
+    private static final boolean DEBUG = false;
     public boolean isEverybodyReady = false;
-    public HashMap<String, Tank> otherTanks = new HashMap<>();
 
-    private Map map;
+    private final String name;
+    private final HashMap<String, Tank> otherTanks = new HashMap<>();
+    private final Map map;
+    private final Bitmap map_bitmap;
+    private final HashSet<HitBox> walls;
+    private final int team;
     private MyTank myTank;
     private double lJangle, lJstrength, rJangle, rJstrength;
     private int fps, last_fps = MAX_FPS;
     private double scaleTo = 1;
     private int frameWidth, frameHeight;
-    private Bitmap map_bitmap;
-    private HashSet<HitBox> walls;
-    private int team;
 
 
     public Game(Map map, String name, int team) {
         this.map = map;
         this.name = name;
         this.team = team;
-        addrress = MessageManager.EXTERNAL_ADDRESS;
         map_bitmap = map.getDrawnMap();
         walls = map.getWallsHitBox();
     }
@@ -43,7 +45,7 @@ public class Game {
         int bmp_tankHeight = MySingletons.getMyResources().getBmp_greenHp().getHeight();
         myTank = new MyTank(3, team, startCoordinates[0] + (startCoordinates[2] - bmp_tankWidth) / 2f,
                 startCoordinates[1] + (startCoordinates[3] - bmp_tankHeight) / 2f, 0, 0,
-                name, new TankSight(), new HashSet<Bullet>(), MySingletons.getMyResources().getBmp_greenHp(),
+                name, new TankSight(), new HashSet<>(), MySingletons.getMyResources().getBmp_greenHp(),
                 MySingletons.getMyResources().getBmp_greenTp(), 800, this);
 
 
@@ -246,5 +248,9 @@ public class Game {
 
     public int getLast_fps() {
         return last_fps;
+    }
+
+    public HashMap<String, Tank> getOtherTanks() {
+        return otherTanks;
     }
 }

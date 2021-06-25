@@ -36,7 +36,6 @@ public class LobbyServerActivity extends AppCompatActivity implements ServerUpda
 
         MySingletons.setLobby(true);
 
-        ImageView menuImage = findViewById(R.id.asl_menu_image);
         ImageView backgroundImage = findViewById(R.id.asl_background_image);
         tv_number = findViewById(R.id.asl_textview_number);
         tv_nicks = findViewById(R.id.asl_textview_nicks);
@@ -44,7 +43,6 @@ public class LobbyServerActivity extends AppCompatActivity implements ServerUpda
 
         backgroundImage.setImageBitmap(MySingletons.getMyResources().getPaintedWallPaper());
         backgroundImage.setScaleType(ImageView.ScaleType.FIT_XY);
-        menuImage.setImageResource(R.drawable.white350_300);
         tv_myIP.setText("My IP: " + MessageManager.EXTERNAL_ADDRESS);
 
         name = getIntent().getStringExtra("name");
@@ -58,7 +56,7 @@ public class LobbyServerActivity extends AppCompatActivity implements ServerUpda
 
     @Override
     protected void onDestroy() {
-        if(MySingletons.getServer() != null && MySingletons.getServer().isRunning()) {
+        if (MySingletons.getServer() != null && MySingletons.getServer().isRunning()) {
             players.clear();
             updateUI();
             MySingletons.getServer().stop();
@@ -68,26 +66,29 @@ public class LobbyServerActivity extends AppCompatActivity implements ServerUpda
 
     public void startGameClick(View view) {
         Map map = new Map(10, 10, 25, 25);
-        String messageToAll = null;
         try {
-            messageToAll = MessageManager.sendMapMessage(map);
+            String messageToAll = MessageManager.sendMapMessage(map);
             MySingletons.getServer().broadcastMessage(messageToAll);
+            startGame(map);
         } catch (Exception e) {
             Log.d("MyTag", "Error during serializing map");
             e.printStackTrace();
-            return;
         }
-        startGame(map);
     }
 
     @Override
     public void updateUI() {
-        tv_number.setText("Number of people waiting: " + players.size());
-        String namesText = "";
-        for (String s : players.values()) {
-            namesText += s + "\n";
-        }
-        tv_nicks.setText(namesText);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                tv_number.setText("Number of people waiting: " + players.size());
+                String namesText = "";
+                for (String s : players.values()) {
+                    namesText += s + "\n";
+                }
+                tv_nicks.setText(namesText);
+            }
+        });
     }
 
     @Override

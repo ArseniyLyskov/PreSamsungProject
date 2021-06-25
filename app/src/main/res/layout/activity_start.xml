@@ -14,7 +14,7 @@
             android:layout_gravity="center"
             android:layout_width="350dp"
             android:layout_height="200dp"
-            android:id="@+id/as_menu_image"
+            android:background="@drawable/panel_350_200"
     />
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
@@ -29,6 +29,7 @@
                 android:id="@+id/as_edittext"
                 android:textAlignment="center"
                 android:hint="Enter your nickname"
+                android:textColorHint="#333333"
                 android:textSize="20dp"
                 android:textColor="@android:color/black"
         />
@@ -39,14 +40,17 @@
                 android:layout_height="wrap_content"
                 android:onClick="joinLobbyClick"
                 android:textSize="20dp"
+                android:background="@drawable/button"
         />
 
         <Button
+                android:layout_marginTop="3dp"
                 android:text="Create lobby"
                 android:layout_width="300dp"
                 android:layout_height="wrap_content"
                 android:onClick="createLobbyClick"
                 android:textSize="20dp"
+                android:background="@drawable/button"
         />
 
     </LinearLayout>
