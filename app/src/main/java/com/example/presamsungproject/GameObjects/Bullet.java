@@ -5,8 +5,9 @@ import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.Geometry.GeometryMethods;
 import com.example.presamsungproject.Geometry.Point;
 import com.example.presamsungproject.Geometry.Segment;
-import com.example.presamsungproject.HitBox;
-import com.example.presamsungproject.MySingletons;
+import com.example.presamsungproject.Models.HitBox;
+import com.example.presamsungproject.Models.MySingletons;
+import com.example.presamsungproject.Models.MySoundEffects;
 
 import java.io.Serializable;
 import java.util.Collection;
@@ -50,6 +51,10 @@ public class Bullet implements Serializable {
                     MySingletons.getClient().sendMessage(MessageManager.hitMessage(tank.address));
                 }
                 ricochets = -1;
+                if(tank.getHp() > 1)
+                    MessageManager.sendSFX(MySoundEffects.HIT);
+                else
+                    MessageManager.sendSFX(MySoundEffects.EXPLOSION);
                 MessageManager.sendMyTank();
                 return;
             }
@@ -58,6 +63,10 @@ public class Bullet implements Serializable {
             if (GeometryMethods.segmentHitBoxIntersection(new Segment(point, new Point(newX, newY)), myTank.hullHitBox) != null
                     || GeometryMethods.segmentHitBoxIntersection(new Segment(point, new Point(newX, newY)), myTank.towerHitBox) != null) {
                 ricochets = -1;
+                if(myTank.getHp() > 1)
+                    MessageManager.sendSFX(MySoundEffects.HIT);
+                else
+                    MessageManager.sendSFX(MySoundEffects.EXPLOSION);
                 myTank.minusHealth();
                 MessageManager.sendMyTank();
                 return;
@@ -65,6 +74,8 @@ public class Bullet implements Serializable {
         boolean changeCoordinates = true;
         for (HitBox hb : walls) {
             if (GeometryMethods.segmentHitBoxIntersection(new Segment(point, new Point(newX, newY)), hb) != null) {
+                if (ricochets > 0)
+                    MessageManager.sendSFX(MySoundEffects.RICOCHET);
                 angle = GeometryMethods.getBulletRicochetAngle(angle, new Segment(point, new Point(newX, newY)), hb);
                 ricochets--;
                 changeCoordinates = false;

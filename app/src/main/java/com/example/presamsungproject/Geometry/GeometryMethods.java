@@ -1,6 +1,6 @@
 package com.example.presamsungproject.Geometry;
 
-import com.example.presamsungproject.HitBox;
+import com.example.presamsungproject.Models.HitBox;
 
 public class GeometryMethods {
     public static boolean isHitBoxesIntersect(HitBox hb1, HitBox hb2) {
@@ -12,11 +12,11 @@ public class GeometryMethods {
     }
 
     public static double getBulletRicochetAngle(double current_angle, Segment segment, HitBox hitBox) {
-        Square square = hitBox.getSquare();
-        Segment segment1 = new Segment(square.getP1(), square.getP2());
-        Segment segment2 = new Segment(square.getP2(), square.getP3());
-        Segment segment3 = new Segment(square.getP3(), square.getP4());
-        Segment segment4 = new Segment(square.getP4(), square.getP1());
+        Quadrangle quadrangle = hitBox.getSquare();
+        Segment segment1 = new Segment(quadrangle.getP1(), quadrangle.getP2());
+        Segment segment2 = new Segment(quadrangle.getP2(), quadrangle.getP3());
+        Segment segment3 = new Segment(quadrangle.getP3(), quadrangle.getP4());
+        Segment segment4 = new Segment(quadrangle.getP4(), quadrangle.getP1());
         Point intersection1 = segmentsIntersection(segment, segment1);
         Point intersection2 = segmentsIntersection(segment, segment2);
         Point intersection3 = segmentsIntersection(segment, segment3);
@@ -70,53 +70,53 @@ public class GeometryMethods {
         return expr1 <= 0 && expr2 <= 0 && expr3 <= 0;
     }
 
-    private static boolean isPointInSquare(Point point, Square square) {
-        Triangle t1 = new Triangle(square.getP1(), square.getP2(), square.getP3());
-        Triangle t2 = new Triangle(square.getP1(), square.getP4(), square.getP3());
+    private static boolean isPointInSquare(Point point, Quadrangle quadrangle) {
+        Triangle t1 = new Triangle(quadrangle.getP1(), quadrangle.getP2(), quadrangle.getP3());
+        Triangle t2 = new Triangle(quadrangle.getP1(), quadrangle.getP4(), quadrangle.getP3());
         return isPointInTriangle(point, t1) ||
                 isPointInTriangle(point, t2);
     }
 
-    private static boolean isSquaresIntersect(Square square1, Square square2) {
-        boolean intersection = isPointInSquare(square2.getP1(), square1) ||
-                isPointInSquare(square2.getP2(), square1) ||
-                isPointInSquare(square2.getP3(), square1) ||
-                isPointInSquare(square2.getP4(), square1) ||
-                isPointInSquare(square1.getP1(), square2) ||
-                isPointInSquare(square1.getP2(), square2) ||
-                isPointInSquare(square1.getP3(), square2) ||
-                isPointInSquare(square1.getP4(), square2);
+    private static boolean isSquaresIntersect(Quadrangle quadrangle1, Quadrangle quadrangle2) {
+        boolean intersection = isPointInSquare(quadrangle2.getP1(), quadrangle1) ||
+                isPointInSquare(quadrangle2.getP2(), quadrangle1) ||
+                isPointInSquare(quadrangle2.getP3(), quadrangle1) ||
+                isPointInSquare(quadrangle2.getP4(), quadrangle1) ||
+                isPointInSquare(quadrangle1.getP1(), quadrangle2) ||
+                isPointInSquare(quadrangle1.getP2(), quadrangle2) ||
+                isPointInSquare(quadrangle1.getP3(), quadrangle2) ||
+                isPointInSquare(quadrangle1.getP4(), quadrangle2);
         if (intersection)
             return true;
         else {
-            if (square1.maxX() <= square2.maxX() && square1.minX() >= square2.minX())
-                if (square1.maxY() >= square2.maxY() && square1.minY() <= square2.minY())
+            if (quadrangle1.maxX() <= quadrangle2.maxX() && quadrangle1.minX() >= quadrangle2.minX())
+                if (quadrangle1.maxY() >= quadrangle2.maxY() && quadrangle1.minY() <= quadrangle2.minY())
                     return true;
-            if (square1.maxY() <= square2.maxY() && square1.minY() >= square2.minY())
-                return square1.maxX() >= square2.maxX() && square1.minX() <= square2.minX();
+            if (quadrangle1.maxY() <= quadrangle2.maxY() && quadrangle1.minY() >= quadrangle2.minY())
+                return quadrangle1.maxX() >= quadrangle2.maxX() && quadrangle1.minX() <= quadrangle2.minX();
         }
         return false;
     }
 
-    private static Point segmentSquareIntersection(Segment segment, Square square) {
+    private static Point segmentSquareIntersection(Segment segment, Quadrangle quadrangle) {
         Segment temp = new Segment(segment.getP1(), segment.getP2());
         Point point = null;
-        Point intersection1 = segmentsIntersection(temp, new Segment(square.getP1(), square.getP2()));
+        Point intersection1 = segmentsIntersection(temp, new Segment(quadrangle.getP1(), quadrangle.getP2()));
         if (intersection1 != null) {
             point = intersection1;
             temp = new Segment(temp.getP1(), point);
         }
-        Point intersection2 = segmentsIntersection(temp, new Segment(square.getP2(), square.getP3()));
+        Point intersection2 = segmentsIntersection(temp, new Segment(quadrangle.getP2(), quadrangle.getP3()));
         if (intersection2 != null) {
             point = intersection2;
             temp = new Segment(temp.getP1(), point);
         }
-        Point intersection3 = segmentsIntersection(temp, new Segment(square.getP3(), square.getP4()));
+        Point intersection3 = segmentsIntersection(temp, new Segment(quadrangle.getP3(), quadrangle.getP4()));
         if (intersection3 != null) {
             point = intersection3;
             temp = new Segment(temp.getP1(), point);
         }
-        Point intersection4 = segmentsIntersection(temp, new Segment(square.getP4(), square.getP1()));
+        Point intersection4 = segmentsIntersection(temp, new Segment(quadrangle.getP4(), quadrangle.getP1()));
         if (intersection4 != null) {
             point = intersection4;
         }

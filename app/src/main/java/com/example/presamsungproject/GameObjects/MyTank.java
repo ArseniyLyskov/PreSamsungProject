@@ -4,9 +4,11 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
-import com.example.presamsungproject.Game;
+import com.example.presamsungproject.Models.Game;
 import com.example.presamsungproject.Geometry.GeometryMethods;
-import com.example.presamsungproject.HitBox;
+import com.example.presamsungproject.Models.HitBox;
+import com.example.presamsungproject.Models.MySingletons;
+import com.example.presamsungproject.Models.MySoundEffects;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -44,7 +46,7 @@ public class MyTank extends Tank {
         return new Tank(hp, team, x, y, angleH, angleT, playerName, tankSight, bullets, hullHitBox, towerHitBox, MessageManager.EXTERNAL_ADDRESS, scale);
     }
 
-    public void updateMyTankProperties() {
+    public void updateMyTankProperties() { //TODO: проверка пересечеий отрезков при перемещении, а не четырёхугольников
         double speed_koeff = 1f / game.getLast_fps();
 
         if (!game.isEverybodyReady)
@@ -217,9 +219,10 @@ public class MyTank extends Tank {
     }
 
     private void createBullet() {
+        MessageManager.sendSFX(MySoundEffects.SHOOT);
         bullets.add(new Bullet(
-                (int) (x + bmp_tower.getWidth() / 2 + 1.05 * bmp_tower.getWidth() / 2 * Math.cos(Math.toRadians(90 - (angleH + angleT)))),
-                (int) (y + bmp_tower.getHeight() / 2 - 1.05 * bmp_tower.getHeight() / 2 * Math.sin(Math.toRadians(90 - (angleH + angleT)))),
+                (int) (x + bmp_tower.getWidth() / 2 + bmp_tower.getWidth() / 2 * Math.cos(Math.toRadians(90 - (angleH + angleT)))),
+                (int) (y + bmp_tower.getHeight() / 2 - bmp_tower.getHeight() / 2 * Math.sin(Math.toRadians(90 - (angleH + angleT)))),
                 angleH + angleT));
     }
 

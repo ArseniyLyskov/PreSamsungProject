@@ -1,18 +1,16 @@
 package com.example.presamsungproject.ConnectionObjects;
 
 import android.util.Log;
-import com.example.presamsungproject.Game;
 import com.example.presamsungproject.GameObjects.Tank;
-import com.example.presamsungproject.Map;
-import com.example.presamsungproject.MyInterfaces.ServerUpdatableUI;
-import com.example.presamsungproject.MySingletons;
+import com.example.presamsungproject.Models.Game;
+import com.example.presamsungproject.Models.Map;
+import com.example.presamsungproject.Models.MySingletons;
+import com.example.presamsungproject.MyInterfaces.StartActivityMessageListener;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.net.InetSocketAddress;
-import java.net.Socket;
 import java.util.Arrays;
 import java.util.HashMap;
 
@@ -24,6 +22,7 @@ public class MessageManager {
     private static final String SENDING_TANK_MESSAGE = "SENDING_TANK";
     private static final String READY_MESSAGE = "READY";
     private static final String HIT_MESSAGE = "HIT";
+    private static final String SFX_MESSAGE = "SFX";
     private static Game game;
     public static String EXTERNAL_ADDRESS = null;
 
@@ -31,25 +30,30 @@ public class MessageManager {
         return CONNECT_MESSAGE + " " + EXTERNAL_ADDRESS + " " + name;
     }
 
+    public static void sendSFX(int effect) {
+        if (MySingletons.isLobby()) {
+            MySingletons.getMyResources().getSFXInterface().executeEffect(effect);
+            MySingletons.getServer().broadcastMessage(SFX_MESSAGE + " " + effect);
+        } else {
+            MySingletons.getClient().sendMessage(SFX_MESSAGE + " " + effect);
+        }
+    }
+
     public static String sendMapMessage(Map map) throws Exception {
-        String serializedMap = null;
+        String serializedMap;
         ByteArrayOutputStream baos = new ByteArrayOutputStream(8192);
         ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(map);
         serializedMap = Arrays.toString(baos.toByteArray());
-        if (serializedMap == null)
-            throw new Exception();
         return SENDING_MAP_MESSAGE + " " + serializedMap;
     }
 
     public static String sendTankMessage(Tank tank) throws Exception {
-        String serializedTank = null;
+        String serializedTank;
         ByteArrayOutputStream baos = new ByteArrayOutputStream(4096);
         ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(tank);
         serializedTank = Arrays.toString(baos.toByteArray());
-        if (serializedTank == null)
-            throw new Exception();
         return SENDING_TANK_MESSAGE + " " + EXTERNAL_ADDRESS + " " + serializedTank;
     }
 
@@ -61,24 +65,17 @@ public class MessageManager {
         String[] separated = message.split(" ");
         switch (separated[0]) {
             case CONNECT_MESSAGE: {
-                ServerUpdatableUI serverUpdatableUI = MySingletons.getMyResources().getServerUpdatableUI();
-                HashMap<String, String> players = serverUpdatableUI.getPlayers();
-                players.put(separated[1], separated[2]);
-                serverUpdatableUI.updateUI();
-                String messageToAll = "";
-                messageToAll = NAMES_LIST_MESSAGE + " ";
-                String namesText = "";
-                for (String s : players.values()) {
-                    namesText += s + " ";
-                }
-                messageToAll += namesText;
+                StartActivityMessageListener SAMListener = MySingletons.getMyResources().getSAMListener();
+                HashMap<String, String> players = SAMListener.serverGetPlayers();
+                SAMListener.serverAddPlayer(separated[1], separated[2]);
+                String messageToAll = NAMES_LIST_MESSAGE + " " + SAMListener.serverGetNamesString();
                 MySingletons.getServer().broadcastMessage(messageToAll);
                 MySingletons.getServer().specificMessage(separated[1], TEAM_MESSAGE + " " + players.size());
                 break;
             }
             case SENDING_TANK_MESSAGE: {
-                while (game == null) {
-                }
+                /*while (game == null) {
+                }*/
                 Tank deserializedTank = deserializeTank(message, separated[1]);
                 game.getOtherTanks().put(separated[1], deserializedTank);
                 if ((game.getOtherTanks().size()) == MySingletons.getServer().getConnectionsQuantity()) {
@@ -100,6 +97,11 @@ public class MessageManager {
                     MySingletons.getServer().specificMessage(separated[1], hitMessage(separated[1]));
                 break;
             }
+            case SFX_MESSAGE: {
+                MySingletons.getMyResources().getSFXInterface().executeEffect(Integer.parseInt(separated[1]));
+                MySingletons.getServer().broadcastMessage(message);
+                break;
+            }
         }
     }
 
@@ -111,16 +113,16 @@ public class MessageManager {
                 for (int i = 1; i < separated.length; i++) {
                     namesText += separated[i] + "\n";
                 }
-                MySingletons.getMyResources().getClientUpdatableUI().updateUI(namesText, separated.length - 1);
+                MySingletons.getMyResources().getSAMListener().clientUpdateUI(namesText, separated.length - 1);
                 break;
             }
             case SENDING_MAP_MESSAGE: {
                 Map deserializedMap = deserializeMap(message);
-                MySingletons.getMyResources().getClientUpdatableUI().startGame(deserializedMap);
+                MySingletons.getMyResources().getSAMListener().clientStartGame(deserializedMap);
                 break;
             }
             case TEAM_MESSAGE: {
-                MySingletons.getMyResources().getClientUpdatableUI().setTeam(Integer.parseInt(separated[1]));
+                MySingletons.getMyResources().getSAMListener().clientSetTeam(Integer.parseInt(separated[1]));
                 break;
             }
             case SENDING_TANK_MESSAGE: {
@@ -140,6 +142,9 @@ public class MessageManager {
                     sendMyTank();
                 }
                 break;
+            }
+            case SFX_MESSAGE: {
+                MySingletons.getMyResources().getSFXInterface().executeEffect(Integer.parseInt(separated[1]));
             }
         }
     }
@@ -167,25 +172,6 @@ public class MessageManager {
             Log.d("MyTag", "Server sending tank error");
             e.printStackTrace();
         }
-    }
-
-    public static void tryToFindExternalAddress() {
-        new Thread(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    Socket testConnection = new Socket();
-                    testConnection.connect(new InetSocketAddress("www.google.com", 80));
-                    //EXTERNAL_ADDRESS = testConnection.getLocalAddress().toString();
-                    EXTERNAL_ADDRESS = testConnection.getLocalAddress().getHostAddress();
-                    Log.d("MyTag", "ExternalAddress: " + EXTERNAL_ADDRESS);
-                    testConnection.close();
-                } catch (Exception e) {
-                    Log.d("MyTag", "Getting external address error.");
-                    e.printStackTrace();
-                }
-            }
-        }).start();
     }
 
     public static void setGame(Game game) {

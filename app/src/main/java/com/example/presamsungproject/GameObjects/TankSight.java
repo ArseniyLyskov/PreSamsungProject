@@ -4,8 +4,8 @@ import android.graphics.Canvas;
 import com.example.presamsungproject.Geometry.GeometryMethods;
 import com.example.presamsungproject.Geometry.Point;
 import com.example.presamsungproject.Geometry.Segment;
-import com.example.presamsungproject.HitBox;
-import com.example.presamsungproject.MySingletons;
+import com.example.presamsungproject.Models.HitBox;
+import com.example.presamsungproject.Models.MySingletons;
 
 import java.io.Serializable;
 import java.util.HashSet;

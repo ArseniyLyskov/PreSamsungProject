@@ -17,11 +17,9 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:isGame="true">
 
-        <activity android:name=".Activities.LobbyServerActivity"/>
-        <activity android:name=".Activities.MainActivity"/>
-        <activity android:name=".Activities.LobbyClientActivity"/>
+        <activity android:name=".Activities.Game.GameActivity"/>
 
-        <activity android:name=".Activities.StartActivity">
+        <activity android:name=".Activities.Start.StartActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 

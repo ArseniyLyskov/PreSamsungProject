@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center">
+
+    <ImageView
+            android:layout_gravity="center"
+            android:layout_width="350dp"
+            android:layout_height="300dp"
+            android:background="@drawable/panel_350_300"
+    />
+
+    <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:layout_margin="30dp">
+
+        <TextView
+                android:textAlignment="center"
+                android:text="Enter lobby creator IP"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@android:color/black"
+                android:textSize="16dp"
+                android:fontFamily="@font/minecraft_font"
+
+                android:id="@+id/flc_upper_text"
+        />
+
+        <TextView
+                android:layout_marginTop="5dp"
+                android:textAlignment="center"
+                android:text="Number of people waiting: "
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textColor="@android:color/black"
+                android:textSize="16dp"
+                android:visibility="invisible"
+                android:fontFamily="@font/minecraft_font"
+
+                android:id="@+id/flc_number"
+        />
+
+        <ScrollView
+                android:layout_width="300dp"
+                android:layout_height="100dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="5dp">
+
+            <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:gravity="center"
+                    android:textColor="@android:color/black"
+                    android:textSize="20dp"
+                    android:fontFamily="@font/minecraft_font"
+
+                    android:id="@+id/flc_nicks"
+            />
+
+        </ScrollView>
+
+        <EditText
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:hint="Enter here"
+                android:gravity="center"
+                android:inputType="date"
+                android:textColor="@android:color/black"
+                android:textSize="20dp"
+                android:textColorHint="#333333"
+                android:fontFamily="@font/minecraft_font"
+                android:maxLength="15"
+
+                android:id="@+id/flc_edittext"
+        />
+
+        <Button
+                android:text="Connect to lobby via ip"
+                android:layout_width="300dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:textSize="18dp"
+                android:background="@drawable/button"
+                android:fontFamily="@font/minecraft_font"
+                android:textAllCaps="false"
+
+                android:id="@+id/flc_button"
+        />
+
+    </LinearLayout>
+
+</FrameLayout>

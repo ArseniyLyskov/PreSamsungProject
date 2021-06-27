@@ -2,7 +2,7 @@ package com.example.presamsungproject.ConnectionObjects;
 
 import android.util.Log;
 import com.example.presamsungproject.ConnectionObjects.Threads.ConnectThread;
-import com.example.presamsungproject.MySingletons;
+import com.example.presamsungproject.Models.MySingletons;
 
 import java.net.Socket;
 import java.util.LinkedList;

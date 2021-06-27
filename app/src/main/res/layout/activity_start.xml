@@ -10,49 +10,26 @@
             android:id="@+id/as_background_image"
     />
 
-    <ImageView
-            android:layout_gravity="center"
-            android:layout_width="350dp"
-            android:layout_height="200dp"
-            android:background="@drawable/panel_350_200"
+    <Button
+            android:layout_margin="1dp"
+            android:layout_gravity="right|top"
+            android:layout_width="40dp"
+            android:layout_height="40dp"
+            android:background="@drawable/panel_350_300"
+            android:gravity="center"
+            android:text="\?"
+            android:textColor="@android:color/black"
+            android:textSize="20dp"
+            android:fontFamily="@font/minecraft_font"
+
+            android:onClick="aboutClick"
     />
 
-    <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-                  android:orientation="vertical"
-                  android:layout_width="match_parent"
-                  android:layout_height="match_parent"
-                  android:gravity="center">
-
-        <EditText
-                android:layout_width="250dp"
-                android:layout_height="wrap_content"
-                android:id="@+id/as_edittext"
-                android:textAlignment="center"
-                android:hint="Enter your nickname"
-                android:textColorHint="#333333"
-                android:textSize="20dp"
-                android:textColor="@android:color/black"
-        />
-
-        <Button
-                android:text="Join lobby"
-                android:layout_width="300dp"
-                android:layout_height="wrap_content"
-                android:onClick="joinLobbyClick"
-                android:textSize="20dp"
-                android:background="@drawable/button"
-        />
-
-        <Button
-                android:layout_marginTop="3dp"
-                android:text="Create lobby"
-                android:layout_width="300dp"
-                android:layout_height="wrap_content"
-                android:onClick="createLobbyClick"
-                android:textSize="20dp"
-                android:background="@drawable/button"
-        />
-
-    </LinearLayout>
+    <FrameLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:id="@+id/as_fragment_container"
+            android:layout_gravity="center"
+    />
 
 </FrameLayout>

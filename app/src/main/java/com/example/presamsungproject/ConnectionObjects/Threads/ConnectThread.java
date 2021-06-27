@@ -3,7 +3,7 @@ package com.example.presamsungproject.ConnectionObjects.Threads;
 import android.util.Log;
 import com.example.presamsungproject.ConnectionObjects.Connection;
 import com.example.presamsungproject.ConnectionObjects.Server;
-import com.example.presamsungproject.MySingletons;
+import com.example.presamsungproject.Models.MySingletons;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;

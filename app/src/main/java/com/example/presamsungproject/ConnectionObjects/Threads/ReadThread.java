@@ -2,7 +2,7 @@ package com.example.presamsungproject.ConnectionObjects.Threads;
 
 import android.util.Log;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
-import com.example.presamsungproject.MySingletons;
+import com.example.presamsungproject.Models.MySingletons;
 
 import java.io.DataInputStream;
 import java.io.IOException;
