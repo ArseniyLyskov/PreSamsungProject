@@ -7,7 +7,6 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.fragment.app.Fragment;
-import com.example.presamsungproject.Activities.Start.AboutFragment;
 import com.example.presamsungproject.Models.MySingletons;
 import com.example.presamsungproject.Models.MySoundEffects;
 import com.example.presamsungproject.MyInterfaces.StartActivityFragmentListener;

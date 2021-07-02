@@ -10,7 +10,7 @@ import java.io.Serializable;
 import java.util.HashSet;
 
 public class Tank implements Serializable {
-    double hp;
+    int hp;
     int team;
     int scale;
     String address;
@@ -88,7 +88,7 @@ public class Tank implements Serializable {
         }
     }
 
-    public Tank(double hp, int team, double x, double y, double angleH, double angleT,
+    public Tank(int hp, int team, double x, double y, double angleH, double angleT,
                 String playerName, TankSight tankSight, HashSet<Bullet> bullets) {
 
         this.hp = hp;
@@ -115,7 +115,7 @@ public class Tank implements Serializable {
         towerHitBox.scaleTo(koeff);
     }
 
-    public Tank(double hp, int team, double x, double y, double angleH, double angleT, String playerName,
+    public Tank(int hp, int team, double x, double y, double angleH, double angleT, String playerName,
                 TankSight tankSight, HashSet<Bullet> bullets, HitBox hullHitBox, HitBox towerHitBox, String address, int scale) {
 
         this.hp = hp;

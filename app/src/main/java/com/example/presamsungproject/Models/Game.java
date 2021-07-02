@@ -8,50 +8,48 @@ import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.GameObjects.Bullet;
 import com.example.presamsungproject.GameObjects.MyTank;
 import com.example.presamsungproject.GameObjects.Tank;
-import com.example.presamsungproject.GameObjects.TankSight;
+import com.example.presamsungproject.Geometry.Point;
+import com.example.presamsungproject.MyInterfaces.GameUIUpdateListener;
 
 import java.util.HashMap;
 import java.util.HashSet;
 
 public class Game {
-    public static final int MAX_FPS = 200;
-    private static final boolean DEBUG = false;
+    public static final int MAX_FPS = 80;
     public boolean isEverybodyReady = false;
 
-    private final String name;
+    private final boolean DEBUG;
+    private GameUIUpdateListener GUIUListener;
     private final HashMap<String, Tank> otherTanks = new HashMap<>();
-    private final Map map;
     private final Bitmap map_bitmap;
     private final HashSet<HitBox> walls;
-    private final int team;
-    private MyTank myTank;
+    private final MyTank myTank;
     private double lJangle, lJstrength, rJangle, rJstrength;
-    private int fps, last_fps = MAX_FPS;
-    private double scaleTo = 1; //TODO: учесть в translate,
+    private int fps = MAX_FPS, previousPFS = MAX_FPS;
+    private double scaleTo = 1; //TODO: учесть в translate
     private int frameWidth, frameHeight;
 
 
-    public Game(Map map, String name, int team) {
-        this.map = map;
-        this.name = name;
-        this.team = team;
+    public Game(String name, GameOptions gameOptions) {
+        Map map = gameOptions.getMap();
+        int hp = gameOptions.getHp();
+        int team = gameOptions.getTeam();
+        boolean ricochetAble = gameOptions.isRicochetAble();
+        DEBUG = gameOptions.isDEBUG();
+
         map_bitmap = map.getDrawnMap();
         walls = map.getWallsHitBox();
+
+        double startCoordinatesScale = (double) gameOptions.getStartCoordinatesScale();
+        Point startCoordinates = gameOptions.getStartCoordinates();
+        startCoordinates.scaleTo(getScale() / startCoordinatesScale);
+        myTank = new MyTank(hp, team, startCoordinates.getX(), startCoordinates.getY(), name, ricochetAble, this);
     }
 
     public void start() {
-        int[] startCoordinates = map.getStartCoordinates();
-        int bmp_tankWidth = MySingletons.getMyResources().getBmp_greenHp().getWidth();
-        int bmp_tankHeight = MySingletons.getMyResources().getBmp_greenHp().getHeight();
-        myTank = new MyTank(3, team, startCoordinates[0] + (startCoordinates[2] - bmp_tankWidth) / 2f,
-                startCoordinates[1] + (startCoordinates[3] - bmp_tankHeight) / 2f, 0, 0,
-                name, new TankSight(), new HashSet<>(), MySingletons.getMyResources().getBmp_greenHp(),
-                MySingletons.getMyResources().getBmp_greenTp(), 800, this);
-
-
         if (!MySingletons.isLobby()) {
             try {
-                String message = MessageManager.sendTankMessage(myTank.getTankToSerialize());
+                String message = MessageManager.sendTankMessage(myTank.getSimpleVersion());
                 MySingletons.getClient().sendMessage(message);
             } catch (Exception e) {
                 Log.d("MyTag", "Sending tank error");
@@ -62,7 +60,6 @@ public class Game {
                 isEverybodyReady = true;
             }
         }
-
     }
 
     public void drawAll(Canvas canvas) {
@@ -72,7 +69,7 @@ public class Game {
         canvas.drawBitmap(map_bitmap,
                 -MySingletons.getMyResources().getBmp_mapCellBackground().getWidth(),
                 -MySingletons.getMyResources().getBmp_mapCellBackground().getWidth(),
-                MySingletons.getMyResources().getAllyNickPaint()); //TODO: отрисовка поля занимает много ресурсов
+                MySingletons.getMyResources().getAllyNickPaint());
 
         if (myTank.getHp() > 0)
             myTank.draw(canvas, MySingletons.getMyResources().getAllyNickPaint(),
@@ -87,7 +84,7 @@ public class Game {
             Bitmap hull;
             Bitmap tower;
             Paint paint;
-            if (t.getTeam() != team) {
+            if (t.getTeam() != myTank.getTeam()) {
                 if (t.getHp() > 0) {
                     hull = MySingletons.getMyResources().getBmp_redHp();
                     tower = MySingletons.getMyResources().getBmp_redTp();
@@ -109,7 +106,7 @@ public class Game {
             t.draw(canvas, paint, hull, tower);
         }
 
-        if(DEBUG)
+        if (DEBUG)
             drawAllHitBoxes(canvas);
     }
 
@@ -163,10 +160,10 @@ public class Game {
     private int getTranslateCanvasX() {
         int cellWidth = MySingletons.getMyResources().getBmp_mapCellBackground().getWidth();
         int tankWidth = MySingletons.getMyResources().getBmp_blueHp().getWidth();
-        if(frameWidth >= map_bitmap.getWidth())
+        if (frameWidth >= map_bitmap.getWidth())
             return cellWidth;
         int translation = -(int) (myTank.getX() - frameWidth / 2f + tankWidth / 2f);
-        if(translation > cellWidth)
+        if (translation > cellWidth)
             return cellWidth;
         return Math.max(translation, -(map_bitmap.getWidth() - cellWidth - frameWidth));
     }
@@ -174,10 +171,10 @@ public class Game {
     private int getTranslateCanvasY() {
         int cellHeight = MySingletons.getMyResources().getBmp_mapCellBackground().getHeight();
         int tankHeight = MySingletons.getMyResources().getBmp_blueHp().getHeight();
-        if(frameHeight >= map_bitmap.getHeight())
+        if (frameHeight >= map_bitmap.getHeight())
             return cellHeight;
         int translation = -(int) (myTank.getY() - frameHeight / 2f + tankHeight / 2f);
-        if(translation > cellHeight)
+        if (translation > cellHeight)
             return cellHeight;
         return Math.max(translation, -(map_bitmap.getHeight() - cellHeight - frameHeight));
     }
@@ -234,23 +231,26 @@ public class Game {
         this.rJstrength = rJstrength;
     }
 
-    public int getFps() {
-        return fps;
+    public int updateFPS() {
+        int temp = fps;
+        fps = 0;
+        previousPFS = temp;
+        return temp;
     }
 
-    public void setFps(int fps) {
-        this.fps = fps;
+    public void increaseFPS() {
+        fps++;
     }
 
-    public void setLast_fps(int fps) {
-        this.last_fps = fps;
-    }
-
-    public int getLast_fps() {
-        return last_fps;
+    public int getPreviousPFS() {
+        return previousPFS;
     }
 
     public HashMap<String, Tank> getOtherTanks() {
         return otherTanks;
+    }
+
+    public void setGUIUListener(GameUIUpdateListener GUIUListener) {
+        this.GUIUListener = GUIUListener;
     }
 }

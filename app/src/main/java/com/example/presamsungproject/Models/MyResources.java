@@ -3,7 +3,9 @@ package com.example.presamsungproject.Models;
 import android.content.Context;
 import android.graphics.*;
 import androidx.core.content.res.ResourcesCompat;
-import com.example.presamsungproject.MyInterfaces.*;
+import com.example.presamsungproject.MyInterfaces.GameUIUpdateListener;
+import com.example.presamsungproject.MyInterfaces.SFXInterface;
+import com.example.presamsungproject.MyInterfaces.StartActivityMessageListener;
 import com.example.presamsungproject.R;
 
 public class MyResources {

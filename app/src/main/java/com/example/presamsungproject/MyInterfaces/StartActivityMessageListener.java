@@ -1,19 +1,13 @@
 package com.example.presamsungproject.MyInterfaces;
 
-import com.example.presamsungproject.Models.Map;
-
-import java.util.HashMap;
+import com.example.presamsungproject.Models.GameOptions;
 
 public interface StartActivityMessageListener {
     void serverAddPlayer(String address, String name);
 
-    String serverGetNamesString();
+    void serverRemovePlayer(String address);
 
     void clientUpdateUI(String nicks, int players_quantity);
 
-    HashMap<String, String> serverGetPlayers();
-
-    void clientStartGame(Map map);
-
-    void clientSetTeam(int team);
+    void clientStartGame(GameOptions gameOptions);
 }

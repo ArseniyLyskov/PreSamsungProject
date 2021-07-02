@@ -5,6 +5,7 @@ import java.io.Serializable;
 public class Segment implements Serializable {
     private final Point p1;
     private final Point p2;
+    private static final long serialVersionUID = 8L;
 
     public Segment(Point p1, Point p2) {
         this.p1 = p1;

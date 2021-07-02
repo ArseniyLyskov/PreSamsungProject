@@ -1,3 +1,34 @@
 <resources>
     <string name="app_name">Tankz</string>
+    <string name="how_to_start_game">
+        \n1) How to start game
+        \n    You have to be connected to Wi-fi, because the
+        game networking takes place on the local network. The device that dispenses Wi-fi cannot be a player :(.
+        \n    One of players creates a game lobby, the IP of his device will be shown on his screen. This person
+        can configure the settings for the generation of the map and the upcoming game and, after waiting for the
+        connection of other players, start it.
+        \n    Other people, wishing to connect to the lobby creator, have to enter IP of his device.
+    </string>
+    <string name="how_to_play">
+        \n2) How to play
+        \n    The left joystick regulates the speed and direction of movement,
+        the right joystick adjust the angle of rotation of the tank tower. When you click on the right joystick,
+        a laser sight appears, the direction of which corresponds to the trajectory of the bullet\'s flight when
+        shot. The shot is carried out upon releasing the right joystick.
+        \n    Your tank has a green color, the allies
+        tank has a blue color, opponents tank has red color.
+        \n    The number and speed of recharging the shot is not
+        limited, but be careful: hitting your or allied tank is also counted.
+    </string>
+    <string name="contact_details">
+        \n    The game is in the development stage, I will be grateful for feedback.
+        \nOpen source for this game:
+        \n    https://github.com/ArseniyLyskov/PreSamsungProject
+        \nMusic by:
+        \n    xenaton@mail.ru
+        \nDesign by:
+        \n    tumenseva06@mail.ru
+        \nGame by:
+        \n    lyskov-05@mail.ru
+    </string>
 </resources>

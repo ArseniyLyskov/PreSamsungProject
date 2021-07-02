@@ -1,7 +1,7 @@
 package com.example.presamsungproject.MyInterfaces;
 
 import androidx.fragment.app.Fragment;
-import com.example.presamsungproject.Models.Map;
+import com.example.presamsungproject.Models.GameOptions;
 
 public interface StartActivityFragmentListener {
     void addFragment(Fragment fragment);
@@ -12,5 +12,7 @@ public interface StartActivityFragmentListener {
 
     void startLobbyFragment(String name, boolean isLobbyCreator);
 
-    void notifyGameCreating(Map map, String name, int team);
+    void notifyGameStarting(String name, GameOptions gameOptions, boolean isLobby);
+
+    void gameOptionsChanged(GameOptions gameOptions);
 }

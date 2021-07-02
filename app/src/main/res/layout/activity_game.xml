@@ -3,48 +3,53 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:orientation="vertical"
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/activity_main">
+        xmlns:android="http://schemas.android.com/apk/res/android">
 
-
-    <!--<com.example.presamsungproject.Activities.Game.DrawView
+    <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/draw_view"
-    />-->
+            android:layout_gravity="center"
 
-    <!--<io.github.controlwear.virtual.joystick.android.JoystickView
+            android:id="@+id/ag_draw_view_container"
+    />
+
+    <io.github.controlwear.virtual.joystick.android.JoystickView
             android:layout_gravity="bottom|left"
             android:layout_width="200dp"
             android:layout_height="200dp"
-            custom:JV_buttonColor="#41000000"
-            custom:JV_buttonSizeRatio="35%"
-            custom:JV_backgroundSizeRatio="60%"
-            custom:JV_borderColor="#808080"
-            custom:JV_backgroundColor="#25000000"
-            custom:JV_borderWidth="4dp"
-            custom:JV_fixedCenter="true"
-            android:id="@+id/jstickL"
+
+            android:id="@+id/ag_jstickL"
     />
 
     <io.github.controlwear.virtual.joystick.android.JoystickView
             android:layout_gravity="bottom|right"
             android:layout_width="200dp"
             android:layout_height="200dp"
-            custom:JV_buttonColor="#41000000"
-            custom:JV_buttonSizeRatio="35%"
-            custom:JV_backgroundSizeRatio="60%"
-            custom:JV_borderColor="#808080"
-            custom:JV_backgroundColor="#25000000"
-            custom:JV_borderWidth="4dp"
-            custom:JV_fixedCenter="true"
-            android:id="@+id/jstickR"
+
+            android:id="@+id/ag_jstickR"
     />
 
     <TextView
+            android:layout_margin="5dp"
+            android:layout_gravity="top|right"
+            android:layout_width="85dp"
+            android:layout_height="30dp"
+            android:text="FPS: 0"
+            android:gravity="center"
+            android:textColor="@android:color/black"
+            android:textSize="15dp"
+            android:fontFamily="@font/minecraft_font"
+            android:background="@drawable/panel_350_200"
+
+            android:id="@+id/ag_fps_tv"
+    />
+
+    <FrameLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:id="@+id/tv"
-    />-->
+            android:layout_gravity="center"
+
+            android:id="@+id/ag_fragment_container"
+    />
 
 </FrameLayout>

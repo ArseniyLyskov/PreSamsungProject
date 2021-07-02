@@ -4,8 +4,8 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
-import com.example.presamsungproject.Models.Game;
 import com.example.presamsungproject.Geometry.GeometryMethods;
+import com.example.presamsungproject.Models.Game;
 import com.example.presamsungproject.Models.HitBox;
 import com.example.presamsungproject.Models.MySingletons;
 import com.example.presamsungproject.Models.MySoundEffects;
@@ -21,33 +21,34 @@ public class MyTank extends Tank {
     private HitBox updatedHhb, updatedThb;
     private Bitmap bmp_hull, bmp_tower;
     private final double[] updatedHullIndents;
+    private boolean ricochetAble;
 
     {
+        speed = 800;
         updatedHullIndents = Arrays.copyOf(hullIndents, hullIndents.length);
         updatedHullIndents[2] = 13 / 50f;
         updatedHhb = new HitBox(x, y, 0, 1, 1, hullIndents);
         updatedThb = new HitBox(x, y, 0, 1, 1, towerIndents);
     }
 
-    public MyTank(double hp, int team, double x, double y, double angleH, double angleT, String playerName,
-                  TankSight tankSight, HashSet<Bullet> bullets, Bitmap bmp_hull, Bitmap bmp_tower, double speed, Game game) {
+    public MyTank(int hp, int team, double x, double y, String playerName, boolean ricochetAble, Game game) {
 
-        super(hp, team, x, y, angleH, angleT, playerName, tankSight, bullets);
-        this.speed = speed;
+        super(hp, team, x, y, 0, 0, playerName, new TankSight(), new HashSet<>());
+        this.ricochetAble = ricochetAble;
         this.game = game;
-        this.bmp_hull = bmp_hull;
-        this.bmp_tower = bmp_tower;
+        bmp_hull = MySingletons.getMyResources().getBmp_greenHp();
+        bmp_tower = MySingletons.getMyResources().getBmp_greenTp();
         hullHitBox = new HitBox(x, y, angleH, bmp_hull.getWidth(), bmp_hull.getHeight(), hullIndents);
         towerHitBox = new HitBox(x, y, angleH + angleT, bmp_tower.getWidth(), bmp_tower.getHeight(), towerIndents);
         scale = game.getScale();
     }
 
-    public Tank getTankToSerialize() {
+    public Tank getSimpleVersion() {
         return new Tank(hp, team, x, y, angleH, angleT, playerName, tankSight, bullets, hullHitBox, towerHitBox, MessageManager.EXTERNAL_ADDRESS, scale);
     }
 
-    public void updateMyTankProperties() { //TODO: проверка пересечеий отрезков при перемещении, а не четырёхугольников
-        double speed_koeff = 1f / game.getLast_fps();
+    public void updateMyTankProperties() {
+        double speed_koeff = 1f / game.getPreviousPFS();
 
         if (!game.isEverybodyReady)
             return;
@@ -66,6 +67,15 @@ public class MyTank extends Tank {
         double yChange = speed * game.getlJstrength() / 100 * Math.sin(Math.toRadians(game.getlJangle())) * speed_koeff;
         double hAngleChange = 90 - game.getlJangle();
         double tAngleChange = 90 - game.getrJangle();
+
+        double maxChange = Math.max(Math.abs(xChange), Math.abs(yChange));
+        double tankWidth = bmp_hull.getWidth() * (hullIndents[1] + hullIndents[3]);
+        if (maxChange > tankWidth) {
+            double normalize_speed_koeff = tankWidth / maxChange;
+            xChange *= normalize_speed_koeff;
+            yChange *= normalize_speed_koeff;
+        }
+
         if (game.getlJstrength() == 0) {
             xChange = 0;
             yChange = 0;
@@ -139,6 +149,7 @@ public class MyTank extends Tank {
                 }
             }
         }
+
 
         if (isHullMoveAble || isXHullMoveAble || isYHullMoveAble) {
             newAngleH = hAngleChange;
@@ -223,7 +234,7 @@ public class MyTank extends Tank {
         bullets.add(new Bullet(
                 (int) (x + bmp_tower.getWidth() / 2 + bmp_tower.getWidth() / 2 * Math.cos(Math.toRadians(90 - (angleH + angleT)))),
                 (int) (y + bmp_tower.getHeight() / 2 - bmp_tower.getHeight() / 2 * Math.sin(Math.toRadians(90 - (angleH + angleT)))),
-                angleH + angleT));
+                angleH + angleT, ricochetAble));
     }
 
 
@@ -257,5 +268,13 @@ public class MyTank extends Tank {
 
     public void minusHealth() {
         hp--;
+        if (hp > 0) {
+            MessageManager.sendSFX(MySoundEffects.HIT);
+            MySingletons.getMyResources().getGUIUListener().vibrate(300);
+        } else {
+            MessageManager.sendSFX(MySoundEffects.EXPLOSION);
+            if (hp > -1)
+                MySingletons.getMyResources().getGUIUListener().vibrate(1000);
+        }
     }
 }

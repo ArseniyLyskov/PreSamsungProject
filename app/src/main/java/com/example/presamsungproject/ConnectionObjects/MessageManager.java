@@ -3,7 +3,7 @@ package com.example.presamsungproject.ConnectionObjects;
 import android.util.Log;
 import com.example.presamsungproject.GameObjects.Tank;
 import com.example.presamsungproject.Models.Game;
-import com.example.presamsungproject.Models.Map;
+import com.example.presamsungproject.Models.GameOptions;
 import com.example.presamsungproject.Models.MySingletons;
 import com.example.presamsungproject.MyInterfaces.StartActivityMessageListener;
 
@@ -12,13 +12,11 @@ import java.io.ByteArrayOutputStream;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.Arrays;
-import java.util.HashMap;
 
 public class MessageManager {
     private static final String CONNECT_MESSAGE = "CONNECTED";
     private static final String NAMES_LIST_MESSAGE = "NAMES_LIST";
-    private static final String TEAM_MESSAGE = "TEAM";
-    private static final String SENDING_MAP_MESSAGE = "SENDING_MAP";
+    private static final String SENDING_GAME_OPTIONS_MESSAGE = "SENDING_GAME_OPTIONS";
     private static final String SENDING_TANK_MESSAGE = "SENDING_TANK";
     private static final String READY_MESSAGE = "READY";
     private static final String HIT_MESSAGE = "HIT";
@@ -39,13 +37,13 @@ public class MessageManager {
         }
     }
 
-    public static String sendMapMessage(Map map) throws Exception {
-        String serializedMap;
+    public static String sendGameOptionsMessage(GameOptions gameOptions) throws Exception {
+        String serializedGameOptions;
         ByteArrayOutputStream baos = new ByteArrayOutputStream(8192);
         ObjectOutputStream oos = new ObjectOutputStream(baos);
-        oos.writeObject(map);
-        serializedMap = Arrays.toString(baos.toByteArray());
-        return SENDING_MAP_MESSAGE + " " + serializedMap;
+        oos.writeObject(gameOptions);
+        serializedGameOptions = Arrays.toString(baos.toByteArray());
+        return SENDING_GAME_OPTIONS_MESSAGE + " " + serializedGameOptions;
     }
 
     public static String sendTankMessage(Tank tank) throws Exception {
@@ -61,21 +59,19 @@ public class MessageManager {
         return HIT_MESSAGE + " " + address;
     }
 
-    public static void serverProcessMessage(String message) {
+    public static String namesListMessage(String namesString) {
+        return NAMES_LIST_MESSAGE + " " + namesString;
+    }
+
+    public static void serverProcessMessage(String message) { //TODO: game ending
         String[] separated = message.split(" ");
         switch (separated[0]) {
             case CONNECT_MESSAGE: {
                 StartActivityMessageListener SAMListener = MySingletons.getMyResources().getSAMListener();
-                HashMap<String, String> players = SAMListener.serverGetPlayers();
                 SAMListener.serverAddPlayer(separated[1], separated[2]);
-                String messageToAll = NAMES_LIST_MESSAGE + " " + SAMListener.serverGetNamesString();
-                MySingletons.getServer().broadcastMessage(messageToAll);
-                MySingletons.getServer().specificMessage(separated[1], TEAM_MESSAGE + " " + players.size());
                 break;
             }
             case SENDING_TANK_MESSAGE: {
-                /*while (game == null) {
-                }*/
                 Tank deserializedTank = deserializeTank(message, separated[1]);
                 game.getOtherTanks().put(separated[1], deserializedTank);
                 if ((game.getOtherTanks().size()) == MySingletons.getServer().getConnectionsQuantity()) {
@@ -116,13 +112,9 @@ public class MessageManager {
                 MySingletons.getMyResources().getSAMListener().clientUpdateUI(namesText, separated.length - 1);
                 break;
             }
-            case SENDING_MAP_MESSAGE: {
-                Map deserializedMap = deserializeMap(message);
-                MySingletons.getMyResources().getSAMListener().clientStartGame(deserializedMap);
-                break;
-            }
-            case TEAM_MESSAGE: {
-                MySingletons.getMyResources().getSAMListener().clientSetTeam(Integer.parseInt(separated[1]));
+            case SENDING_GAME_OPTIONS_MESSAGE: {
+                GameOptions deserializedGameOptions = deserializeGameOptions(message);
+                MySingletons.getMyResources().getSAMListener().clientStartGame(deserializedGameOptions);
                 break;
             }
             case SENDING_TANK_MESSAGE: {
@@ -152,9 +144,9 @@ public class MessageManager {
     public static void sendMyTank() {
         try {
             if (MySingletons.isLobby()) {
-                MySingletons.getServer().broadcastMessage(MessageManager.sendTankMessage(game.getMyTank().getTankToSerialize()));
+                MySingletons.getServer().broadcastMessage(MessageManager.sendTankMessage(game.getMyTank().getSimpleVersion()));
             } else {
-                MySingletons.getClient().sendMessage(MessageManager.sendTankMessage(game.getMyTank().getTankToSerialize()));
+                MySingletons.getClient().sendMessage(MessageManager.sendTankMessage(game.getMyTank().getSimpleVersion()));
             }
         } catch (Exception e) {
             Log.d("MyTag", "Sending myTank error");
@@ -167,7 +159,7 @@ public class MessageManager {
             for (Tank tank : game.getOtherTanks().values()) {
                 MySingletons.getServer().broadcastMessage(sendTankMessage(tank));
             }
-            MySingletons.getServer().broadcastMessage(sendTankMessage(game.getMyTank().getTankToSerialize()));
+            MySingletons.getServer().broadcastMessage(sendTankMessage(game.getMyTank().getSimpleVersion()));
         } catch (Exception e) {
             Log.d("MyTag", "Server sending tank error");
             e.printStackTrace();
@@ -178,8 +170,8 @@ public class MessageManager {
         MessageManager.game = game;
     }
 
-    private static Map deserializeMap(String message) {
-        String temp = message.replaceFirst(SENDING_MAP_MESSAGE + " ", "");
+    private static GameOptions deserializeGameOptions(String message) {
+        String temp = message.replaceFirst(SENDING_GAME_OPTIONS_MESSAGE + " ", "");
         String[] byteValues = temp.substring(1, temp.length() - 1).split(",");
         byte[] bytes = new byte[byteValues.length];
         for (int i = 0, len = bytes.length; i < len; i++) {
@@ -187,11 +179,11 @@ public class MessageManager {
         }
         ByteArrayInputStream bais = new ByteArrayInputStream(bytes);
         ObjectInputStream ois;
-        Map deserializedMap;
+        GameOptions deserializedGameOptions;
         try {
             ois = new ObjectInputStream(bais);
-            deserializedMap = (Map) ois.readObject();
-            return deserializedMap;
+            deserializedGameOptions = (GameOptions) ois.readObject();
+            return deserializedGameOptions;
         } catch (Exception e) {
             Log.d("MyTag", "Deserializing map error");
             e.printStackTrace();

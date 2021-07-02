@@ -2,7 +2,6 @@ package com.example.presamsungproject.ConnectionObjects;
 
 import android.util.Log;
 import com.example.presamsungproject.ConnectionObjects.Threads.ConnectThread;
-import com.example.presamsungproject.Models.MySingletons;
 
 import java.net.Socket;
 import java.util.LinkedList;
@@ -22,12 +21,9 @@ public class Connection {
     }
 
     private void closeEverything() {
-        if (!connectThread.isAlive())
+        if (connectThread.isInterrupted())
             return;
         connectThread.interrupt();
-        if (!MySingletons.getServer().containsAddress(clientAddress)) {
-            //TODO: disconnection
-        }
     }
 
     public String getClientAddress() {

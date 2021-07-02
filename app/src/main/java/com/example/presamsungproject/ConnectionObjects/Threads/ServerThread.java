@@ -3,6 +3,7 @@ package com.example.presamsungproject.ConnectionObjects.Threads;
 import android.util.Log;
 import com.example.presamsungproject.ConnectionObjects.Connection;
 
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
@@ -12,6 +13,7 @@ public class ServerThread extends Thread {
     private final int serverPort;
     private final int serverBacklog;
     private final HashMap<String, Connection> connections;
+    private ServerSocket server = null;
 
     public ServerThread(int serverPort, int serverBacklog, HashMap<String, Connection> connections) {
         this.serverPort = serverPort;
@@ -21,9 +23,7 @@ public class ServerThread extends Thread {
 
     @Override
     public void run() {
-        ServerSocket server = null;
         try {
-            Log.d("MyTag", "Starting server...");
             server = new ServerSocket();
             server.bind(new InetSocketAddress(serverPort), serverBacklog);
             server.setSoTimeout(0);
@@ -31,16 +31,16 @@ public class ServerThread extends Thread {
 
             while (!server.isClosed()) {
                 Socket client = server.accept();
-                if (connections.containsKey(client.getInetAddress().getHostAddress())) {
+                /*if (connections.containsKey(client.getInetAddress().getHostAddress())) {
                     connections.get(client.getInetAddress().getHostAddress()).sendMessage("end");
-                }
+                }*/
                 Connection connection = new Connection(client);
                 connections.put(client.getInetAddress().getHostAddress(), connection);
             }
         } catch (Exception e) {
-            Log.d("MyTag", "Server error during running");
+            Log.d("MyTag", "Server error during running " + e.getMessage());
             e.printStackTrace();
-            if (!(server == null))
+            if (!(server == null)) {
                 if (!server.isClosed())
                     try {
                         server.close();
@@ -49,6 +49,18 @@ public class ServerThread extends Thread {
                         Log.d("MyTag", "Server emergency closing didn't work!!!");
                         e2.printStackTrace();
                     }
+            }
         }
+    }
+
+    @Override
+    public void interrupt() {
+        try {
+            server.close();
+        } catch (IOException e) {
+            Log.d("MyTag", "Server closing error");
+            e.printStackTrace();
+        }
+        super.interrupt();
     }
 }

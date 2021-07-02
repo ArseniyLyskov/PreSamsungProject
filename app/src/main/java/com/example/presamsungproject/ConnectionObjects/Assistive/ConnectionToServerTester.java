@@ -5,6 +5,7 @@ import com.example.presamsungproject.ConnectionObjects.Server;
 import com.example.presamsungproject.Models.MySingletons;
 import com.example.presamsungproject.MyInterfaces.StartActivityFragmentListener;
 
+import java.io.DataOutputStream;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 
@@ -35,8 +36,12 @@ public class ConnectionToServerTester {
             try {
                 Socket socket = new Socket();
                 socket.connect(new InetSocketAddress(serverIP, Server.serverPort), 1000);
+                DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+                out.writeUTF("end");
+                out.flush();
                 socket.close();
                 if (startClientIfSuccess) {
+                    sleep(1000);
                     MySingletons.createClient(serverIP);
                     MySingletons.getClient().sendMessage(MessageManager.connectMessage(name));
                 }

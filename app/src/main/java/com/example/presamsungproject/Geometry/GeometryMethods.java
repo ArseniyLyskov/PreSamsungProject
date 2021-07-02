@@ -4,57 +4,61 @@ import com.example.presamsungproject.Models.HitBox;
 
 public class GeometryMethods {
     public static boolean isHitBoxesIntersect(HitBox hb1, HitBox hb2) {
-        return isSquaresIntersect(hb1.getSquare(), hb2.getSquare());
+        return isRectanglesIntersect(hb1.getRectangle(), hb2.getRectangle());
+    }
+
+    public static boolean isSegmentIntersectHitBox(Segment segment, HitBox hitBox) {
+        return segmentRectangleIntersection(segment, hitBox.getRectangle()) != null;
     }
 
     public static Point segmentHitBoxIntersection(Segment segment, HitBox hitBox) {
-        return segmentSquareIntersection(segment, hitBox.getSquare());
+        return segmentRectangleIntersection(segment, hitBox.getRectangle());
     }
 
     public static double getBulletRicochetAngle(double current_angle, Segment segment, HitBox hitBox) {
-        Quadrangle quadrangle = hitBox.getSquare();
-        Segment segment1 = new Segment(quadrangle.getP1(), quadrangle.getP2());
-        Segment segment2 = new Segment(quadrangle.getP2(), quadrangle.getP3());
-        Segment segment3 = new Segment(quadrangle.getP3(), quadrangle.getP4());
-        Segment segment4 = new Segment(quadrangle.getP4(), quadrangle.getP1());
+        Rectangle rectangle = hitBox.getRectangle();
+        Segment segment1 = new Segment(rectangle.getP1(), rectangle.getP2());
+        Segment segment2 = new Segment(rectangle.getP2(), rectangle.getP3());
+        Segment segment3 = new Segment(rectangle.getP3(), rectangle.getP4());
+        Segment segment4 = new Segment(rectangle.getP4(), rectangle.getP1());
         Point intersection1 = segmentsIntersection(segment, segment1);
         Point intersection2 = segmentsIntersection(segment, segment2);
         Point intersection3 = segmentsIntersection(segment, segment3);
         Point intersection4 = segmentsIntersection(segment, segment4);
-        Point intersection = segmentSquareIntersection(segment, hitBox.getSquare());
+        Point intersection = segmentRectangleIntersection(segment, hitBox.getRectangle());
         double intersectedSegmentAngle = 0;
         if (intersection1 != null) {
             if (intersection.equalsTo(intersection1)) {
-                intersectedSegmentAngle = findIntersectedSegmentAngle(segment1);
+                intersectedSegmentAngle = findSegmentAngle(segment1);
             }
         }
         if (intersection2 != null) {
             if (intersection.equalsTo(intersection2)) {
-                intersectedSegmentAngle = findIntersectedSegmentAngle(segment2);
+                intersectedSegmentAngle = findSegmentAngle(segment2);
             }
         }
         if (intersection3 != null) {
             if (intersection.equalsTo(intersection3)) {
-                intersectedSegmentAngle = findIntersectedSegmentAngle(segment3);
+                intersectedSegmentAngle = findSegmentAngle(segment3);
             }
         }
         if (intersection4 != null) {
             if (intersection.equalsTo(intersection4)) {
-                intersectedSegmentAngle = findIntersectedSegmentAngle(segment4);
+                intersectedSegmentAngle = findSegmentAngle(segment4);
             }
         }
         return intersectedSegmentAngle * 2 - current_angle;
     }
 
-    private static double findIntersectedSegmentAngle(Segment segment) {
-        double intersectedSegmentAngle;
+    private static double findSegmentAngle(Segment segment) {
+        double segmentAngle;
         if (segment.getP1().getX() - segment.getP2().getX() == 0)
-            intersectedSegmentAngle = 0;
+            segmentAngle = 0;
         else
-            intersectedSegmentAngle = 90 - Math.atan(
+            segmentAngle = 90 - Math.atan(
                     (double) (segment.getP1().getY() - segment.getP2().getY())
                             / (double) (segment.getP1().getX() - segment.getP2().getX()));
-        return intersectedSegmentAngle;
+        return segmentAngle;
     }
 
     private static boolean isPointInTriangle(Point point, Triangle triangle) {
@@ -70,57 +74,68 @@ public class GeometryMethods {
         return expr1 <= 0 && expr2 <= 0 && expr3 <= 0;
     }
 
-    private static boolean isPointInSquare(Point point, Quadrangle quadrangle) {
-        Triangle t1 = new Triangle(quadrangle.getP1(), quadrangle.getP2(), quadrangle.getP3());
-        Triangle t2 = new Triangle(quadrangle.getP1(), quadrangle.getP4(), quadrangle.getP3());
+    private static boolean isPointInRectangle(Point point, Rectangle rectangle) {
+        Triangle t1 = new Triangle(rectangle.getP1(), rectangle.getP2(), rectangle.getP3());
+        Triangle t2 = new Triangle(rectangle.getP1(), rectangle.getP4(), rectangle.getP3());
         return isPointInTriangle(point, t1) ||
                 isPointInTriangle(point, t2);
     }
 
-    private static boolean isSquaresIntersect(Quadrangle quadrangle1, Quadrangle quadrangle2) {
-        boolean intersection = isPointInSquare(quadrangle2.getP1(), quadrangle1) ||
-                isPointInSquare(quadrangle2.getP2(), quadrangle1) ||
-                isPointInSquare(quadrangle2.getP3(), quadrangle1) ||
-                isPointInSquare(quadrangle2.getP4(), quadrangle1) ||
-                isPointInSquare(quadrangle1.getP1(), quadrangle2) ||
-                isPointInSquare(quadrangle1.getP2(), quadrangle2) ||
-                isPointInSquare(quadrangle1.getP3(), quadrangle2) ||
-                isPointInSquare(quadrangle1.getP4(), quadrangle2);
+    private static boolean isRectanglesIntersect(Rectangle rectangle1, Rectangle rectangle2) {
+        if (rectangle1.maxXPoint().getX() < rectangle2.minXPoint().getX()
+                || rectangle2.maxXPoint().getX() < rectangle1.minXPoint().getX()
+                || rectangle1.maxYPoint().getY() < rectangle2.minYPoint().getY()
+                || rectangle2.maxYPoint().getY() < rectangle1.minYPoint().getY())
+            return false;
+        boolean intersection =
+                isPointInRectangle(rectangle2.getP1(), rectangle1) ||
+                        isPointInRectangle(rectangle2.getP2(), rectangle1) ||
+                        isPointInRectangle(rectangle2.getP3(), rectangle1) ||
+                        isPointInRectangle(rectangle2.getP4(), rectangle1) ||
+                        isPointInRectangle(rectangle1.getP1(), rectangle2) ||
+                        isPointInRectangle(rectangle1.getP2(), rectangle2) ||
+                        isPointInRectangle(rectangle1.getP3(), rectangle2) ||
+                        isPointInRectangle(rectangle1.getP4(), rectangle2);
         if (intersection)
             return true;
-        else {
-            if (quadrangle1.maxX() <= quadrangle2.maxX() && quadrangle1.minX() >= quadrangle2.minX())
-                if (quadrangle1.maxY() >= quadrangle2.maxY() && quadrangle1.minY() <= quadrangle2.minY())
-                    return true;
-            if (quadrangle1.maxY() <= quadrangle2.maxY() && quadrangle1.minY() >= quadrangle2.minY())
-                return quadrangle1.maxX() >= quadrangle2.maxX() && quadrangle1.minX() <= quadrangle2.minX();
-        }
-        return false;
+        intersection = isSegmentIntersectRectangle(new Segment(rectangle1.getP1(), rectangle1.getP2()), rectangle2) ||
+                isSegmentIntersectRectangle(new Segment(rectangle1.getP2(), rectangle1.getP3()), rectangle2) ||
+                isSegmentIntersectRectangle(new Segment(rectangle1.getP3(), rectangle1.getP4()), rectangle2) ||
+                isSegmentIntersectRectangle(new Segment(rectangle1.getP4(), rectangle1.getP1()), rectangle2);
+        return intersection;
     }
 
-    private static Point segmentSquareIntersection(Segment segment, Quadrangle quadrangle) {
+    private static Point segmentRectangleIntersection(Segment segment, Rectangle rectangle) {
         Segment temp = new Segment(segment.getP1(), segment.getP2());
         Point point = null;
-        Point intersection1 = segmentsIntersection(temp, new Segment(quadrangle.getP1(), quadrangle.getP2()));
+        Point intersection1 = segmentsIntersection(temp, new Segment(rectangle.getP1(), rectangle.getP2()));
         if (intersection1 != null) {
             point = intersection1;
             temp = new Segment(temp.getP1(), point);
         }
-        Point intersection2 = segmentsIntersection(temp, new Segment(quadrangle.getP2(), quadrangle.getP3()));
+        Point intersection2 = segmentsIntersection(temp, new Segment(rectangle.getP2(), rectangle.getP3()));
         if (intersection2 != null) {
             point = intersection2;
             temp = new Segment(temp.getP1(), point);
         }
-        Point intersection3 = segmentsIntersection(temp, new Segment(quadrangle.getP3(), quadrangle.getP4()));
+        Point intersection3 = segmentsIntersection(temp, new Segment(rectangle.getP3(), rectangle.getP4()));
         if (intersection3 != null) {
             point = intersection3;
             temp = new Segment(temp.getP1(), point);
         }
-        Point intersection4 = segmentsIntersection(temp, new Segment(quadrangle.getP4(), quadrangle.getP1()));
+        Point intersection4 = segmentsIntersection(temp, new Segment(rectangle.getP4(), rectangle.getP1()));
         if (intersection4 != null) {
             point = intersection4;
         }
         return point;
+    }
+
+    private static boolean isSegmentsIntersect(Segment segment1, Segment segment2) {
+        return segmentsIntersection(segment1, segment2) != null;
+    }
+
+    private static boolean isSegmentIntersectRectangle(Segment segment, Rectangle rectangle) {
+        return segmentRectangleIntersection(segment, rectangle) != null;
     }
 
     private static Point segmentsIntersection(Segment segment1, Segment segment2) {

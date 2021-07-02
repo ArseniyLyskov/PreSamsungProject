@@ -30,9 +30,9 @@ public class Client {
     }
 
     private void closeEverything() {
-        if (!connectThread.isAlive())
+        if (connectThread.isInterrupted())
             return;
-        connectThread.interrupt();
+        sendMessage("end");
     }
 
     public boolean isConnected() {

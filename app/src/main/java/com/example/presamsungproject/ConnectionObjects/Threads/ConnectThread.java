@@ -7,7 +7,6 @@ import com.example.presamsungproject.Models.MySingletons;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
 import java.util.LinkedList;
@@ -38,11 +37,9 @@ public class ConnectThread extends Thread {
             if (socket == null) {
                 socket = new Socket();
                 socket.connect(new InetSocketAddress(serverIP, Server.serverPort), 500);
-                socket.setSoTimeout(0);
-            } else {
-                Log.d("MyTag", "Connection between: " + socket.getLocalSocketAddress()
-                        + " and " + socket.getRemoteSocketAddress());
             }
+            Log.d("MyTag", "Connection between: " + socket.getLocalSocketAddress()
+                    + " and " + socket.getRemoteSocketAddress());
             DataInputStream in = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             readThread = new ReadThread(this, socket, in);
@@ -63,9 +60,14 @@ public class ConnectThread extends Thread {
             writeThread.interrupt();
         if (socket != null) {
             try {
+                if (MySingletons.isLobby()) {
+                    MySingletons.getMyResources().getSAMListener().serverRemovePlayer(connection.getClientAddress());
+                } else {
+                    MySingletons.getMyResources().getSAMListener().clientUpdateUI("", 0);
+                }
                 socket.close();
                 Log.d("MyTag", "Socket closed properly");
-            } catch (IOException e) {
+            } catch (Exception e) {
                 Log.d("MyTag", "Oops...");
                 e.printStackTrace();
             }

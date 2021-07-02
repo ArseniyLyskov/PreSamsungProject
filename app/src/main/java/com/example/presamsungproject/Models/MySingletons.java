@@ -42,8 +42,8 @@ public class MySingletons {
         return client;
     }
 
-    public static void startGame(Map map, String name, int team) {
-        game = new Game(map, name, team);
+    public static void startGame(String name, GameOptions gameOptions) {
+        game = new Game(name, gameOptions);
     }
 
     public static Game getGame() {

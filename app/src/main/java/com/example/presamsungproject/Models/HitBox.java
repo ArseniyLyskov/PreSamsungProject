@@ -3,7 +3,7 @@ package com.example.presamsungproject.Models;
 import android.graphics.Canvas;
 import android.graphics.Path;
 import com.example.presamsungproject.Geometry.Point;
-import com.example.presamsungproject.Geometry.Quadrangle;
+import com.example.presamsungproject.Geometry.Rectangle;
 
 import java.io.Serializable;
 
@@ -13,7 +13,7 @@ public class HitBox implements Serializable {
     private transient final int bmp_width, bmp_height;
     private transient final double r1, r2, r3, r4;
 
-    private Quadrangle quadrangle;
+    private Rectangle rectangle;
     private static final long serialVersionUID = 5L;
 
     public HitBox(double x, double y, double angle, int bmp_width, int bmp_height,
@@ -54,21 +54,21 @@ public class HitBox implements Serializable {
     }
 
     public void scaleTo(double koeff) {
-        quadrangle.scaleTo(koeff);
+        rectangle.scaleTo(koeff);
     }
 
     public void draw(Canvas canvas) {
         Path path = new Path();
-        path.moveTo(quadrangle.getP1().getX(), quadrangle.getP1().getY());
-        path.lineTo(quadrangle.getP2().getX(), quadrangle.getP2().getY());
-        path.lineTo(quadrangle.getP3().getX(), quadrangle.getP3().getY());
-        path.lineTo(quadrangle.getP4().getX(), quadrangle.getP4().getY());
-        path.lineTo(quadrangle.getP1().getX(), quadrangle.getP1().getY());
+        path.moveTo(rectangle.getP1().getX(), rectangle.getP1().getY());
+        path.lineTo(rectangle.getP2().getX(), rectangle.getP2().getY());
+        path.lineTo(rectangle.getP3().getX(), rectangle.getP3().getY());
+        path.lineTo(rectangle.getP4().getX(), rectangle.getP4().getY());
+        path.lineTo(rectangle.getP1().getX(), rectangle.getP1().getY());
         canvas.drawPath(path, MySingletons.getMyResources().getHitBoxPaint());
     }
 
-    public Quadrangle getSquare() {
-        return quadrangle;
+    public Rectangle getRectangle() {
+        return rectangle;
     }
 
     public void updateProperties(double x, double y, double angle) {
@@ -87,6 +87,6 @@ public class HitBox implements Serializable {
         int y2 = (int) (yc - r2 * Math.sin(Math.toRadians(curAngle2)));
         int y3 = (int) (yc - r3 * Math.sin(Math.toRadians(curAngle3)));
         int y4 = (int) (yc - r4 * Math.sin(Math.toRadians(curAngle4)));
-        quadrangle = new Quadrangle(new Point(x1, y1), new Point(x2, y2), new Point(x3, y3), new Point(x4, y4));
+        rectangle = new Rectangle(new Point(x1, y1), new Point(x2, y2), new Point(x3, y3), new Point(x4, y4));
     }
 }

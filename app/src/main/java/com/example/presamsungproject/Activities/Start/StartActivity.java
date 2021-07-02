@@ -7,7 +7,6 @@ import android.util.Log;
 import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
-import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
@@ -15,14 +14,12 @@ import com.example.presamsungproject.Activities.Game.GameActivity;
 import com.example.presamsungproject.Activities.ProblemFragment;
 import com.example.presamsungproject.ConnectionObjects.Assistive.ExternalAddressFinder;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
-import com.example.presamsungproject.Models.Map;
+import com.example.presamsungproject.Models.GameOptions;
 import com.example.presamsungproject.Models.MySingletons;
 import com.example.presamsungproject.Models.MySoundEffects;
 import com.example.presamsungproject.MyInterfaces.StartActivityFragmentListener;
 import com.example.presamsungproject.MyInterfaces.StartActivityMessageListener;
 import com.example.presamsungproject.R;
-
-import java.util.HashMap;
 
 public class StartActivity extends AppCompatActivity
         implements StartActivityFragmentListener, StartActivityMessageListener {
@@ -124,16 +121,30 @@ public class StartActivity extends AppCompatActivity
     }
 
     @Override
-    public void notifyGameCreating(Map map, String name, int team) {
-        try {
-            String messageToAll = MessageManager.sendMapMessage(map);
-            MySingletons.getServer().broadcastMessage(messageToAll);
-            MySingletons.startGame(map, name, team);
-            gotoGameActivity();
-        } catch (Exception e) {
-            Log.d("MyTag", "Error during serializing map");
-            e.printStackTrace();
+    public void notifyGameStarting(String name, GameOptions gameOptions, boolean isLobby) {
+        MySingletons.startGame(name, gameOptions);
+        MySingletons.getGame().start();
+        MessageManager.setGame(MySingletons.getGame());
+        gotoGameActivity();
+        if (isLobby) {
+            try {
+                for (String address : serverFragment.getPlayers().keySet()) {
+                    if (!address.equals(MessageManager.EXTERNAL_ADDRESS)) {
+                        GameOptions versionForAnotherPlayer = gameOptions.getVersionForAnotherPlayer();
+                        String message = MessageManager.sendGameOptionsMessage(versionForAnotherPlayer);
+                        MySingletons.getServer().specificMessage(address, message);
+                    }
+                }
+            } catch (Exception e) {
+                Log.d("MyTag", "Error during serializing gameOptions");
+                e.printStackTrace();
+            }
         }
+    }
+
+    @Override
+    public void gameOptionsChanged(GameOptions gameOptions) {
+        serverFragment.setGameOptions(gameOptions);
     }
 
     @Override
@@ -148,8 +159,14 @@ public class StartActivity extends AppCompatActivity
     }
 
     @Override
-    public String serverGetNamesString() {
-        return serverFragment.getNamesString();
+    public void serverRemovePlayer(String address) {
+        serverFragment.removePlayer(address);
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                serverFragment.updateUI();
+            }
+        });
     }
 
     @Override
@@ -163,18 +180,7 @@ public class StartActivity extends AppCompatActivity
     }
 
     @Override
-    public HashMap<String, String> serverGetPlayers() {
-        return serverFragment.getPlayers();
-    }
-
-    @Override
-    public void clientStartGame(Map map) {
-        clientFragment.startGame(map);
-        gotoGameActivity();
-    }
-
-    @Override
-    public void clientSetTeam(int team) {
-        clientFragment.team = team;
+    public void clientStartGame(GameOptions gameOptions) {
+        clientFragment.startGame(gameOptions);
     }
 }

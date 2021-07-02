@@ -8,9 +8,7 @@ import android.widget.Button;
 import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
-import com.example.presamsungproject.Models.Map;
-import com.example.presamsungproject.Models.MySingletons;
-import com.example.presamsungproject.Models.MySoundEffects;
+import com.example.presamsungproject.Models.*;
 import com.example.presamsungproject.MyInterfaces.StartActivityFragmentListener;
 import com.example.presamsungproject.R;
 
@@ -21,10 +19,13 @@ public class ServerFragment extends Fragment {
     private final StartActivityFragmentListener SAFListener;
     private final HashMap<String, String> players = new HashMap<>();
     private TextView number, nicks;
+    private GameOptions gameOptions = null;
+    private final GameOptionsFragment gameOptionsFragment;
 
     public ServerFragment(StartActivityFragmentListener SAFListener, String name) {
         this.SAFListener = SAFListener;
         this.name = name;
+        gameOptionsFragment = new GameOptionsFragment(SAFListener, players);
     }
 
     @Override
@@ -35,16 +36,39 @@ public class ServerFragment extends Fragment {
         ip.setText(MessageManager.EXTERNAL_ADDRESS);
         number = v.findViewById(R.id.fls_number);
         nicks = v.findViewById(R.id.fls_nicks);
-        Button button = v.findViewById(R.id.fls_button);
-        button.setOnClickListener(new View.OnClickListener() {
+        Button startGame = v.findViewById(R.id.fls_button);
+        startGame.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 MySingletons.getMyResources().getSFXInterface().executeEffect(MySoundEffects.CLICK);
-                Map map = new Map(10, 10, 25, 25);
-                SAFListener.notifyGameCreating(map, name, 1);
+                if (gameOptions == null) {
+                    MapOptions mapOptions = new MapOptions(1, 15, 15, 25, 25, 20, 40);
+                    Map map = new Map(players.size(), mapOptions);
+                    gameOptions = new GameOptions(map, players.size(), 3, true, false);
+                }
+                SAFListener.notifyGameStarting(name, gameOptions, true);
             }
         });
-        addPlayer(MessageManager.EXTERNAL_ADDRESS, name);
+        Button back = v.findViewById(R.id.fls_back);
+        back.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MySingletons.getMyResources().getSFXInterface().executeEffect(MySoundEffects.CLICK);
+                SAFListener.removeFragment(ServerFragment.this);
+            }
+        });
+        Button params = v.findViewById(R.id.fls_params);
+        params.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                MySingletons.getMyResources().getSFXInterface().executeEffect(MySoundEffects.CLICK);
+                if (gameOptionsFragment.isAdded())
+                    SAFListener.removeFragment(gameOptionsFragment);
+                else
+                    SAFListener.addFragment(gameOptionsFragment);
+            }
+        });
+        players.put(MessageManager.EXTERNAL_ADDRESS, name);
         updateUI();
 
         MySingletons.createServer();
@@ -54,6 +78,8 @@ public class ServerFragment extends Fragment {
 
     @Override
     public void onDestroy() {
+        if (gameOptionsFragment.isAdded())
+            SAFListener.removeFragment(gameOptionsFragment);
         if (MySingletons.getServer() != null && MySingletons.getServer().isRunning()) {
             players.clear();
             updateUI();
@@ -73,6 +99,14 @@ public class ServerFragment extends Fragment {
 
     public void addPlayer(String address, String name) {
         players.put(address, name);
+        String messageToAll = MessageManager.namesListMessage(getNamesString());
+        MySingletons.getServer().broadcastMessage(messageToAll);
+    }
+
+    public void removePlayer(String address) {
+        players.remove(address);
+        String messageToAll = MessageManager.namesListMessage(getNamesString());
+        MySingletons.getServer().broadcastMessage(messageToAll);
     }
 
     public String getNamesString() {
@@ -85,5 +119,9 @@ public class ServerFragment extends Fragment {
 
     public HashMap<String, String> getPlayers() {
         return players;
+    }
+
+    public void setGameOptions(GameOptions gameOptions) {
+        this.gameOptions = gameOptions;
     }
 }

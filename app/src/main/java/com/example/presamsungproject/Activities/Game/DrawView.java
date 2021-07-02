@@ -19,7 +19,7 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            if (game.isEverybodyReady) {
+            if (game.isEverybodyReady) { //TODO: loading
                 drawThread.isTimeToUpdate = true;
             }
         }
@@ -38,10 +38,7 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            int fps = game.getFps();
-            MySingletons.getMyResources().getGUIUListener().updateUI(fps);
-            game.setLast_fps(fps);
-            game.setFps(0);
+            MySingletons.getMyResources().getGUIUListener().showFPS(game.updateFPS());
         }
 
         @Override
@@ -50,10 +47,10 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         }
     }
 
-    public DrawView(Context context, Game game) {
+    public DrawView(Context context) {
         super(context);
         getHolder().addCallback(this);
-        this.game = game;
+        game = MySingletons.getGame();
     }
 
     @Override

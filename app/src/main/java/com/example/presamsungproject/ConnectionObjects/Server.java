@@ -7,7 +7,7 @@ import java.util.HashMap;
 
 public class Server {
     public static final int serverPort = 4444;
-    private final int serverBacklog = 2;
+    private static final int serverBacklog = 1;
     private ServerThread serverThread = null;
     private final HashMap<String, Connection> connections = new HashMap<>();
 
@@ -19,11 +19,12 @@ public class Server {
     public void stop() {
         if (serverThread.isAlive())
             try {
+                broadcastMessage("end");
                 for (Connection connection : connections.values()) {
                     connection.stop();
                 }
                 serverThread.interrupt();
-                Log.d("MyTag", "Server closed");
+                Log.d("MyTag", "Server closed properly");
             } catch (Exception e) {
                 Log.d("MyTag", "Server error during closing");
                 e.printStackTrace();
@@ -56,9 +57,9 @@ public class Server {
     }
 
     public boolean isRunning() {
-        if(serverThread == null)
+        if (serverThread == null)
             return false;
-        return serverThread.isInterrupted();
+        return !serverThread.isInterrupted();
     }
 
 }

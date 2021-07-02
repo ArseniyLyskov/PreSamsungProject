@@ -9,6 +9,7 @@ import android.util.Log;
 import com.example.presamsungproject.GameObjects.Bullet;
 import com.example.presamsungproject.GameObjects.Tank;
 import com.example.presamsungproject.GameObjects.TankSight;
+import com.example.presamsungproject.Geometry.Point;
 
 import java.io.Serializable;
 import java.util.Arrays;
@@ -16,6 +17,8 @@ import java.util.HashSet;
 
 public class Map implements Serializable {
     private transient Paint paint;
+    private final transient HashSet<Point> startCoordinatesPoints;
+    private final transient int minCells;
     private transient int cellWidth;
     private transient int cellHeight;
     private transient int wallWidth;
@@ -23,13 +26,17 @@ public class Map implements Serializable {
     private transient int playableBitmapHeight;
     private transient int fullBitmapWidth;
     private transient int fullBitmapHeight;
+    private final transient MapOptions mapOptions;
 
     private MapCell[][] mapCells;
     private static final long serialVersionUID = 1L;
 
-    public Map(int min_width, int min_height, int max_width, int max_height) { //TODO: players quantity
-        int height_quantity = min_height + (int) (Math.random() * (max_height - min_height));
-        int width_quantity = min_width + (int) (Math.random() * (max_width - min_width));
+    public Map(int players_quantity, MapOptions mapOptions) {
+        minCells = Math.max(players_quantity, mapOptions.getMinCells());
+        this.mapOptions = mapOptions;
+        int height_quantity = mapOptions.getMin_height() + (int) (Math.random() * (mapOptions.getMax_height() - mapOptions.getMin_height()));
+        int width_quantity = mapOptions.getMin_width() + (int) (Math.random() * (mapOptions.getMax_width() - mapOptions.getMin_width()));
+        startCoordinatesPoints = new HashSet<>();
 
         mapCellsInit(width_quantity, height_quantity);
 
@@ -96,7 +103,8 @@ public class Map implements Serializable {
         for (int i = 9; i < 24; i++) {
             for (int j = 14; j < 29; j++) {
                 if ((j + 1) / (double) (i + 1) == best_scale_koeff) {
-                    map = new Map(j, i, j, i);
+                    MapOptions mapOptions = new MapOptions(1, j, i, j, i, 20, 40);
+                    map = new Map(1, mapOptions);
                 }
             }
         }
@@ -241,17 +249,18 @@ public class Map implements Serializable {
         for (int j = 0; j + 1 < mapCells.length; j++) {
             for (int i = 0; i + 1 < mapCells[0].length; i++) {
                 double random = Math.random() * 100;
-                if (random <= 50) {
-                    mapCells[j][i].isTextureA = true;
-                } else if (random <= 80) {
-                    mapCells[j][i].isTextureB = true;
-                } else {
+                if (random <= mapOptions.getMissingCellPercent()) {
                     mapCells[j][i].isTexture = false;
                     if (!isMapAvailable(mapCells)) {
                         mapCells[j][i].isTexture = true;
                         mapCells[j][i].isTextureA = true;
                         //Log.d("MyTag", "Returned cell: " + (i + 1) + " " + (j + 1));
                     }
+                } else if (random <= mapOptions.getMissingCellPercent() +
+                        (100 - mapOptions.getMissingCellPercent()) / 2f) {
+                    mapCells[j][i].isTextureA = true;
+                } else {
+                    mapCells[j][i].isTextureB = true;
                 }
             }
         }
@@ -305,7 +314,7 @@ public class Map implements Serializable {
             for (int i = 1; i + 1 < mapCells[0].length; i++) {
                 if (!mapCells[j][i].isVWall && mapCells[j][i].isTexture) {
                     double random = Math.random() * 100;
-                    if (random <= 40) {
+                    if (random <= mapOptions.getInnerWallPercent()) {
                         mapCells[j][i].isVWall = true;
                         if (!isMapAvailable(mapCells)) {
                             mapCells[j][i].isVWall = false;
@@ -316,7 +325,7 @@ public class Map implements Serializable {
 
                 if (!mapCells[j][i].isHWall && mapCells[j][i].isTexture) {
                     double random = Math.random() * 100;
-                    if (random <= 40) {
+                    if (random <= mapOptions.getInnerWallPercent()) {
                         mapCells[j][i].isHWall = true;
                         if (!isMapAvailable(mapCells)) {
                             mapCells[j][i].isHWall = false;
@@ -357,7 +366,7 @@ public class Map implements Serializable {
                 }
             }
         }
-        if (unavailableCells == check.length * check[0].length || x == -1)
+        if (unavailableCells >= check.length * check[0].length - minCells || x == -1)
             return false;
         boolean[][] availableCells = new boolean[check.length][check[0].length];
         fillBooleanArrayWithValue(availableCells, false);
@@ -458,17 +467,33 @@ public class Map implements Serializable {
         return wallsHitBox;
     }
 
-    public int[] getStartCoordinates() { //TODO: different coordinates
-        int[] coordinates = new int[4];
-        coordinates[2] = cellWidth;
-        coordinates[3] = cellHeight;
+    public Point getStartCoordinates() {
+        Point point;
+        int x;
+        int y;
         do {
-            coordinates[0] = (int) (Math.random() * (mapCells[0].length - 1));
-            coordinates[1] = (int) (Math.random() * (mapCells.length - 1));
-        } while (!mapCells[coordinates[1]][coordinates[0]].isTextureA && !mapCells[coordinates[1]][coordinates[0]].isTextureB);
-        coordinates[0] *= coordinates[2];
-        coordinates[1] *= coordinates[3];
-        return coordinates;
+            x = (int) (Math.random() * (mapCells[0].length - 1));
+            y = (int) (Math.random() * (mapCells.length - 1));
+            point = new Point(x, y);
+        } while (!mapCells[y][x].isTexture || isPointReserved(point));
+        startCoordinatesPoints.add(point);
+        x *= cellWidth;
+        y *= cellHeight;
+        x += (int) ((cellWidth - MySingletons.getMyResources().getBmp_greenHp().getWidth()) / 2f);
+        y += (int) ((cellHeight - MySingletons.getMyResources().getBmp_greenHp().getHeight()) / 2f);
+        point = new Point(x, y);
+        return point;
+    }
+
+    private boolean isPointReserved(Point point) {
+        boolean reserved = false;
+        for (Point p : startCoordinatesPoints) {
+            if (point.equalsTo(p)) {
+                reserved = true;
+                break;
+            }
+        }
+        return reserved;
     }
 
     public int getWidthQuantity() {
