@@ -11,7 +11,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.presamsungproject.Activities.Game.GameActivity;
-import com.example.presamsungproject.Activities.ProblemFragment;
+import com.example.presamsungproject.Activities.General.LoadingFragment;
+import com.example.presamsungproject.Activities.General.ProblemFragment;
 import com.example.presamsungproject.ConnectionObjects.Assistive.ExternalAddressFinder;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.Models.GameOptions;
@@ -26,6 +27,7 @@ public class StartActivity extends AppCompatActivity
     private Fragment aboutFragment;
     private ServerFragment serverFragment;
     private ClientFragment clientFragment;
+    private LoadingFragment loadingFragment;
     private FragmentTransaction fragmentTransaction;
 
     @Override
@@ -52,6 +54,7 @@ public class StartActivity extends AppCompatActivity
 
         Fragment startFragment = new StartFragment(this);
         aboutFragment = new AboutFragment(this);
+        loadingFragment = new LoadingFragment();
         addFragment(startFragment);
     }
 
@@ -121,11 +124,10 @@ public class StartActivity extends AppCompatActivity
     }
 
     @Override
-    public void notifyGameStarting(String name, GameOptions gameOptions, boolean isLobby) {
-        MySingletons.startGame(name, gameOptions);
-        MySingletons.getGame().start();
+    public void notifyGameCreating(String name, GameOptions gameOptions, boolean isLobby) {
+        addFragment(loadingFragment);
+        MySingletons.createGame(name, gameOptions);
         MessageManager.setGame(MySingletons.getGame());
-        gotoGameActivity();
         if (isLobby) {
             try {
                 for (String address : serverFragment.getPlayers().keySet()) {
@@ -138,6 +140,9 @@ public class StartActivity extends AppCompatActivity
             } catch (Exception e) {
                 Log.d("MyTag", "Error during serializing gameOptions");
                 e.printStackTrace();
+            }
+            if(MySingletons.getServer().getConnectionsQuantity() == 0) {
+                notifyGameStarting();
             }
         }
     }
@@ -170,6 +175,11 @@ public class StartActivity extends AppCompatActivity
     }
 
     @Override
+    public boolean serverIsLastPrepared(String address) {
+        return serverFragment.isLastPrepared(address);
+    }
+
+    @Override
     public void clientUpdateUI(String nicks, int players_quantity) {
         runOnUiThread(new Runnable() {
             @Override
@@ -180,7 +190,13 @@ public class StartActivity extends AppCompatActivity
     }
 
     @Override
-    public void clientStartGame(GameOptions gameOptions) {
-        clientFragment.startGame(gameOptions);
+    public void clientCreateGame(GameOptions gameOptions) {
+        clientFragment.createGame(gameOptions);
+    }
+
+    @Override
+    public void notifyGameStarting() {
+        removeFragment(loadingFragment);
+        gotoGameActivity();
     }
 }

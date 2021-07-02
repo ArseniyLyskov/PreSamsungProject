@@ -42,7 +42,7 @@ public class MySingletons {
         return client;
     }
 
-    public static void startGame(String name, GameOptions gameOptions) {
+    public static void createGame(String name, GameOptions gameOptions) {
         game = new Game(name, gameOptions);
     }
 

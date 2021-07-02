@@ -13,11 +13,13 @@ import com.example.presamsungproject.MyInterfaces.StartActivityFragmentListener;
 import com.example.presamsungproject.R;
 
 import java.util.HashMap;
+import java.util.HashSet;
 
 public class ServerFragment extends Fragment {
     private final String name;
     private final StartActivityFragmentListener SAFListener;
     private final HashMap<String, String> players = new HashMap<>();
+    private final HashSet<String> prepared = new HashSet<>();
     private TextView number, nicks;
     private GameOptions gameOptions = null;
     private final GameOptionsFragment gameOptionsFragment;
@@ -46,7 +48,8 @@ public class ServerFragment extends Fragment {
                     Map map = new Map(players.size(), mapOptions);
                     gameOptions = new GameOptions(map, players.size(), 3, true, false);
                 }
-                SAFListener.notifyGameStarting(name, gameOptions, true);
+                SAFListener.notifyGameCreating(name, gameOptions, true);
+                prepared.add(MessageManager.EXTERNAL_ADDRESS);
             }
         });
         Button back = v.findViewById(R.id.fls_back);
@@ -105,6 +108,7 @@ public class ServerFragment extends Fragment {
 
     public void removePlayer(String address) {
         players.remove(address);
+        prepared.remove(address);
         String messageToAll = MessageManager.namesListMessage(getNamesString());
         MySingletons.getServer().broadcastMessage(messageToAll);
     }
@@ -123,5 +127,10 @@ public class ServerFragment extends Fragment {
 
     public void setGameOptions(GameOptions gameOptions) {
         this.gameOptions = gameOptions;
+    }
+
+    public boolean isLastPrepared(String address) {
+        prepared.add(address);
+        return prepared.size() == players.size();
     }
 }

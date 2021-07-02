@@ -1,4 +1,4 @@
-package com.example.presamsungproject.Activities;
+package com.example.presamsungproject.Activities.General;
 
 import android.os.Bundle;
 import android.view.LayoutInflater;

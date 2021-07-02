@@ -21,7 +21,7 @@ public class MyTank extends Tank {
     private HitBox updatedHhb, updatedThb;
     private Bitmap bmp_hull, bmp_tower;
     private final double[] updatedHullIndents;
-    private boolean ricochetAble;
+    private final boolean ricochetAble;
 
     {
         speed = 800;
@@ -49,9 +49,6 @@ public class MyTank extends Tank {
 
     public void updateMyTankProperties() {
         double speed_koeff = 1f / game.getPreviousPFS();
-
-        if (!game.isEverybodyReady)
-            return;
 
         if (!checkIsAlive(speed_koeff))
             return;
@@ -252,10 +249,6 @@ public class MyTank extends Tank {
 
     public double getY() {
         return y;
-    }
-
-    public int getBulletsSize() {
-        return bullets.size();
     }
 
     public HitBox getUpdatedHhb() {

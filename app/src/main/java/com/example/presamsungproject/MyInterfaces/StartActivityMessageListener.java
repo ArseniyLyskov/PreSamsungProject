@@ -7,7 +7,11 @@ public interface StartActivityMessageListener {
 
     void serverRemovePlayer(String address);
 
+    boolean serverIsLastPrepared(String address);
+
     void clientUpdateUI(String nicks, int players_quantity);
 
-    void clientStartGame(GameOptions gameOptions);
+    void clientCreateGame(GameOptions gameOptions);
+
+    void notifyGameStarting();
 }

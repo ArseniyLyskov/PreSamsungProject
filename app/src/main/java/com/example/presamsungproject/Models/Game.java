@@ -3,23 +3,19 @@ package com.example.presamsungproject.Models;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
-import android.util.Log;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.GameObjects.Bullet;
 import com.example.presamsungproject.GameObjects.MyTank;
 import com.example.presamsungproject.GameObjects.Tank;
 import com.example.presamsungproject.Geometry.Point;
-import com.example.presamsungproject.MyInterfaces.GameUIUpdateListener;
 
 import java.util.HashMap;
 import java.util.HashSet;
 
 public class Game {
     public static final int MAX_FPS = 80;
-    public boolean isEverybodyReady = false;
 
     private final boolean DEBUG;
-    private GameUIUpdateListener GUIUListener;
     private final HashMap<String, Tank> otherTanks = new HashMap<>();
     private final Bitmap map_bitmap;
     private final HashSet<HitBox> walls;
@@ -44,21 +40,10 @@ public class Game {
         Point startCoordinates = gameOptions.getStartCoordinates();
         startCoordinates.scaleTo(getScale() / startCoordinatesScale);
         myTank = new MyTank(hp, team, startCoordinates.getX(), startCoordinates.getY(), name, ricochetAble, this);
-    }
 
-    public void start() {
         if (!MySingletons.isLobby()) {
-            try {
-                String message = MessageManager.sendTankMessage(myTank.getSimpleVersion());
-                MySingletons.getClient().sendMessage(message);
-            } catch (Exception e) {
-                Log.d("MyTag", "Sending tank error");
-                e.printStackTrace();
-            }
-        } else {
-            if (MySingletons.getServer().getConnectionsQuantity() == 0) {
-                isEverybodyReady = true;
-            }
+            String message = MessageManager.clientReadyMessage();
+            MySingletons.getClient().sendMessage(message);
         }
     }
 
@@ -248,9 +233,5 @@ public class Game {
 
     public HashMap<String, Tank> getOtherTanks() {
         return otherTanks;
-    }
-
-    public void setGUIUListener(GameUIUpdateListener GUIUListener) {
-        this.GUIUListener = GUIUListener;
     }
 }

@@ -95,7 +95,7 @@ public class ClientFragment extends Fragment {
         }
     }
 
-    public void startGame(GameOptions gameOptions) {
-        SAFListener.notifyGameStarting(name, gameOptions, false);
+    public void createGame(GameOptions gameOptions) {
+        SAFListener.notifyGameCreating(name, gameOptions, false);
     }
 }

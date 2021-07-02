@@ -2,6 +2,7 @@ package com.example.presamsungproject.Models;
 
 import android.content.Context;
 import android.graphics.*;
+import android.util.TypedValue;
 import androidx.core.content.res.ResourcesCompat;
 import com.example.presamsungproject.MyInterfaces.GameUIUpdateListener;
 import com.example.presamsungproject.MyInterfaces.SFXInterface;
@@ -14,6 +15,7 @@ public class MyResources {
     private final Bitmap bmp_mapCell1, bmp_mapCell2, bmp_mapCellBackground;
     private final Bitmap bmp_wallV, bmp_wallH, bmp_wallC;
     private final Bitmap bmp_bullet;
+    private final Bitmap panel_350_200, panel_350_300;
     private final Paint allyNickPaint;
     private final Paint enemyNickPaint;
     private final Paint hitBoxPaint;
@@ -34,17 +36,25 @@ public class MyResources {
         tankSightPaint.setColor(Color.RED);
         tankSightPaint.setStrokeWidth(3);
 
+        int nicksTextSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                13, context.getResources().getDisplayMetrics());
+        int defaultTextSize = (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP,
+                20, context.getResources().getDisplayMetrics());
+
         enemyNickPaint = new Paint();
-        enemyNickPaint.setTextSize(30);
+        enemyNickPaint.setTextSize(nicksTextSize);
         enemyNickPaint.setColor(Color.RED);
         enemyNickPaint.setTypeface(ResourcesCompat.getFont(context, R.font.minecraft_font));
 
         allyNickPaint = new Paint();
-        allyNickPaint.setTextSize(30);
+        allyNickPaint.setTextSize(nicksTextSize);
         allyNickPaint.setColor(Color.GREEN);
         allyNickPaint.setTypeface(ResourcesCompat.getFont(context, R.font.minecraft_font));
 
         defaultPaint = new Paint();
+        defaultPaint.setTextSize(defaultTextSize);
+        defaultPaint.setColor(Color.BLACK);
+        defaultPaint.setTypeface(ResourcesCompat.getFont(context, R.font.minecraft_font));
 
         bmp_greenHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.green_hp);
         bmp_greenTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.green_tp);
@@ -59,6 +69,9 @@ public class MyResources {
         bmp_blueDHp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_dhp);
         bmp_blueDTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_dtp);
         bmp_bullet = BitmapFactory.decodeResource(context.getResources(), R.drawable.bullet_p);
+
+        panel_350_200 = BitmapFactory.decodeResource(context.getResources(), R.drawable.panel_350_200);
+        panel_350_300 = BitmapFactory.decodeResource(context.getResources(), R.drawable.panel_350_300);
 
         bmp_mapCell1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_map);
         bmp_mapCell2 = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_map2);
@@ -175,6 +188,14 @@ public class MyResources {
 
     public Bitmap getBmp_bullet() {
         return bmp_bullet;
+    }
+
+    public Bitmap getPanel_350_200() {
+        return panel_350_200;
+    }
+
+    public Bitmap getPanel_350_300() {
+        return panel_350_300;
     }
 
     public GameUIUpdateListener getGUIUListener() {

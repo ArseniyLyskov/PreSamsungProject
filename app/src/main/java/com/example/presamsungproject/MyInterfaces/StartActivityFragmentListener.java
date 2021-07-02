@@ -12,7 +12,7 @@ public interface StartActivityFragmentListener {
 
     void startLobbyFragment(String name, boolean isLobbyCreator);
 
-    void notifyGameStarting(String name, GameOptions gameOptions, boolean isLobby);
+    void notifyGameCreating(String name, GameOptions gameOptions, boolean isLobby);
 
     void gameOptionsChanged(GameOptions gameOptions);
 }

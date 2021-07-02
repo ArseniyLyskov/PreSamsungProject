@@ -36,7 +36,7 @@ public class ConnectThread extends Thread {
         try {
             if (socket == null) {
                 socket = new Socket();
-                socket.connect(new InetSocketAddress(serverIP, Server.serverPort), 500);
+                socket.connect(new InetSocketAddress(serverIP, Server.serverPort), 1000);
             }
             Log.d("MyTag", "Connection between: " + socket.getLocalSocketAddress()
                     + " and " + socket.getRemoteSocketAddress());

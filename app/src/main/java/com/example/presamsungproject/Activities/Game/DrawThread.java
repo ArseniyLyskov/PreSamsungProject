@@ -13,6 +13,13 @@ public class DrawThread extends Thread {
     public volatile boolean isTimeToUpdate = false;
     private volatile boolean running = false;
 
+    private final Paint backgroundPaint = new Paint();
+
+    {
+        backgroundPaint.setColor(Color.WHITE);
+        backgroundPaint.setStyle(Paint.Style.FILL);
+    }
+
     public DrawThread(SurfaceHolder surfaceHolder, Game game) {
         this.surfaceHolder = surfaceHolder;
         this.game = game;
@@ -24,13 +31,6 @@ public class DrawThread extends Thread {
 
     public void setRunning(boolean run) {
         running = run;
-    }
-
-    private final Paint backgroundPaint = new Paint();
-
-    {
-        backgroundPaint.setColor(Color.WHITE);
-        backgroundPaint.setStyle(Paint.Style.FILL);
     }
 
     @Override

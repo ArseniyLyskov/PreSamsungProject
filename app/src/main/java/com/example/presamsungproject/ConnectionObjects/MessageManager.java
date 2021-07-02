@@ -18,7 +18,8 @@ public class MessageManager {
     private static final String NAMES_LIST_MESSAGE = "NAMES_LIST";
     private static final String SENDING_GAME_OPTIONS_MESSAGE = "SENDING_GAME_OPTIONS";
     private static final String SENDING_TANK_MESSAGE = "SENDING_TANK";
-    private static final String READY_MESSAGE = "READY";
+    private static final String CLIENT_READY_MESSAGE = "CLIENT_READY";
+    private static final String ALL_READY_MESSAGE = "ALL_READY";
     private static final String HIT_MESSAGE = "HIT";
     private static final String SFX_MESSAGE = "SFX";
     private static Game game;
@@ -63,6 +64,14 @@ public class MessageManager {
         return NAMES_LIST_MESSAGE + " " + namesString;
     }
 
+    public static String allReadyMessage() {
+        return ALL_READY_MESSAGE;
+    }
+
+    public static String clientReadyMessage() {
+        return CLIENT_READY_MESSAGE + " " + EXTERNAL_ADDRESS;
+    }
+
     public static void serverProcessMessage(String message) { //TODO: game ending
         String[] separated = message.split(" ");
         switch (separated[0]) {
@@ -71,18 +80,18 @@ public class MessageManager {
                 SAMListener.serverAddPlayer(separated[1], separated[2]);
                 break;
             }
+            case CLIENT_READY_MESSAGE: {
+                if(MySingletons.getMyResources().getSAMListener().serverIsLastPrepared(separated[1])) {
+                    MySingletons.getServer().broadcastMessage(allReadyMessage());
+                    MySingletons.getMyResources().getSAMListener().notifyGameStarting();
+                    sendMyTank();
+                }
+                break;
+            }
             case SENDING_TANK_MESSAGE: {
                 Tank deserializedTank = deserializeTank(message, separated[1]);
                 game.getOtherTanks().put(separated[1], deserializedTank);
-                if ((game.getOtherTanks().size()) == MySingletons.getServer().getConnectionsQuantity()) {
-                    if (!game.isEverybodyReady) {
-                        game.isEverybodyReady = true;
-                        serverBroadcastAllTanks();
-                        MySingletons.getServer().broadcastMessage(READY_MESSAGE);
-                    } else {
-                        MySingletons.getServer().broadcastMessage(message);
-                    }
-                }
+                MySingletons.getServer().broadcastMessage(message);
                 break;
             }
             case HIT_MESSAGE: {
@@ -114,7 +123,7 @@ public class MessageManager {
             }
             case SENDING_GAME_OPTIONS_MESSAGE: {
                 GameOptions deserializedGameOptions = deserializeGameOptions(message);
-                MySingletons.getMyResources().getSAMListener().clientStartGame(deserializedGameOptions);
+                MySingletons.getMyResources().getSAMListener().clientCreateGame(deserializedGameOptions);
                 break;
             }
             case SENDING_TANK_MESSAGE: {
@@ -124,8 +133,9 @@ public class MessageManager {
                 }
                 break;
             }
-            case READY_MESSAGE: {
-                game.isEverybodyReady = true;
+            case ALL_READY_MESSAGE: {
+                MySingletons.getMyResources().getSAMListener().notifyGameStarting();
+                sendMyTank();
                 break;
             }
             case HIT_MESSAGE: {

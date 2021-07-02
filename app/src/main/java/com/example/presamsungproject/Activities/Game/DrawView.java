@@ -2,6 +2,7 @@ package com.example.presamsungproject.Activities.Game;
 
 import android.content.Context;
 import android.os.CountDownTimer;
+import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import com.example.presamsungproject.Models.Game;
@@ -19,9 +20,7 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            if (game.isEverybodyReady) { //TODO: loading
-                drawThread.isTimeToUpdate = true;
-            }
+            drawThread.isTimeToUpdate = true;
         }
 
         @Override
@@ -62,6 +61,7 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
         threadTimer.start();
         SecTimer secTimer = new SecTimer(Integer.MAX_VALUE, 1000);
         secTimer.start();
+        Log.d("MyTag", "Drawing started");
     }
 
     @Override
