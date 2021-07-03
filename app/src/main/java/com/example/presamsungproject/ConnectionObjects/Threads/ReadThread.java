@@ -2,11 +2,12 @@ package com.example.presamsungproject.ConnectionObjects.Threads;
 
 import android.util.Log;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
-import com.example.presamsungproject.Models.MySingletons;
+import com.example.presamsungproject.Models.InfoSingleton;
 
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 
 public class ReadThread extends Thread {
     private final ConnectThread parentThread;
@@ -22,13 +23,16 @@ public class ReadThread extends Thread {
     @Override
     public void run() {
         while (!socket.isClosed()) {
-            String received = "";
+            String received;
             try {
-                received = in.readUTF();
-                if (received == null || received.equals("")) {
+                int receivedLength = in.readInt();
+                if (receivedLength == 0) {
                     Log.d("MyTraffic", "Received trash");
                     continue;
                 }
+                byte[] receivedBytes = new byte[receivedLength];
+                in.readFully(receivedBytes);
+                received = new String(receivedBytes, StandardCharsets.UTF_8);
             } catch (Exception e) {
                 Log.d("MyTraffic", "Receiving error\n" + e.toString());
                 e.printStackTrace();
@@ -40,7 +44,7 @@ public class ReadThread extends Thread {
                 parentThread.interrupt();
                 break;
             }
-            if (MySingletons.isLobby())
+            if (InfoSingleton.getInstance().isLobby())
                 MessageManager.serverProcessMessage(received);
             else
                 MessageManager.clientProcessMessage(received);

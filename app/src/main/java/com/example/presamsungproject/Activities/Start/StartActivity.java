@@ -1,10 +1,8 @@
 package com.example.presamsungproject.Activities.Start;
 
 import android.content.Intent;
-import android.content.pm.ActivityInfo;
 import android.os.Bundle;
 import android.util.Log;
-import android.view.View;
 import android.view.WindowManager;
 import android.widget.ImageView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -15,16 +13,12 @@ import com.example.presamsungproject.Activities.General.LoadingFragment;
 import com.example.presamsungproject.Activities.General.ProblemFragment;
 import com.example.presamsungproject.ConnectionObjects.Assistive.ExternalAddressFinder;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
-import com.example.presamsungproject.Models.GameOptions;
-import com.example.presamsungproject.Models.MySingletons;
-import com.example.presamsungproject.Models.MySoundEffects;
-import com.example.presamsungproject.MyInterfaces.StartActivityFragmentListener;
-import com.example.presamsungproject.MyInterfaces.StartActivityMessageListener;
+import com.example.presamsungproject.ConnectionObjects.Server;
+import com.example.presamsungproject.Models.*;
 import com.example.presamsungproject.R;
 
 public class StartActivity extends AppCompatActivity
         implements StartActivityFragmentListener, StartActivityMessageListener {
-    private Fragment aboutFragment;
     private ServerFragment serverFragment;
     private ClientFragment clientFragment;
     private LoadingFragment loadingFragment;
@@ -34,55 +28,39 @@ public class StartActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_start);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        if (savedInstanceState == null)
-            return;
-
-        MySingletons.createMyResources(getApplicationContext());
-
+        Resources.createInstance(getApplicationContext());
+        InfoSingleton.createInstance();
         ExternalAddressFinder.tryToFind(getApplicationContext());
-
-        MySingletons.getMyResources().getSFXInterface().executeEffect(MySoundEffects.MAIN_THEME);
-
-        MySingletons.getMyResources().setSAMListener(this);
+        SoundEffects.getInstance().executeEffect(SoundEffects.MAIN_THEME);
+        Resources.getInstance().setSAMListener(this);
 
         ImageView backgroundImage = findViewById(R.id.as_background_image);
-        backgroundImage.setImageBitmap(MySingletons.getMyResources().getPaintedWallPaper());
+        backgroundImage.setImageBitmap(Resources.getInstance().getPaintedWallPaper());
         backgroundImage.setScaleType(ImageView.ScaleType.FIT_XY);
 
-        Fragment startFragment = new StartFragment(this);
-        aboutFragment = new AboutFragment(this);
+        StartFragment startFragment = new StartFragment();
+        startFragment.setParams(this);
         loadingFragment = new LoadingFragment();
         addFragment(startFragment);
     }
 
     private void gotoGameActivity() {
-        MySingletons.getMyResources().getSFXInterface().stopEffect(MySoundEffects.MAIN_THEME);
+        SoundEffects.getInstance().stopEffect(SoundEffects.MAIN_THEME);
         Intent intent = new Intent(this, GameActivity.class);
         startActivity(intent);
-    }
-
-    public void aboutClick(View view) {
-        MySingletons.getMyResources().getSFXInterface().executeEffect(MySoundEffects.CLICK);
-        if (!aboutFragment.isAdded())
-            addFragment(aboutFragment);
-        else
-            removeFragment(aboutFragment);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        if (MySingletons.getMyResources() != null)
-            MySingletons.getMyResources().getSFXInterface().resumeEffects();
+        SoundEffects.getInstance().resumeEffects();
     }
 
     @Override
     protected void onPause() {
-        if (MySingletons.getMyResources() != null)
-            MySingletons.getMyResources().getSFXInterface().pauseEffects();
+        SoundEffects.getInstance().pauseEffects();
         super.onPause();
     }
 
@@ -115,10 +93,12 @@ public class StartActivity extends AppCompatActivity
     @Override
     public void startLobbyFragment(String name, boolean isLobbyCreator) {
         if (isLobbyCreator) {
-            serverFragment = new ServerFragment(this, name);
+            serverFragment = new ServerFragment();
+            serverFragment.setParams(this, name);
             addFragment(serverFragment);
         } else {
-            clientFragment = new ClientFragment(this, name);
+            clientFragment = new ClientFragment();
+            clientFragment.setParams(this, name);
             addFragment(clientFragment);
         }
     }
@@ -126,22 +106,22 @@ public class StartActivity extends AppCompatActivity
     @Override
     public void notifyGameCreating(String name, GameOptions gameOptions, boolean isLobby) {
         addFragment(loadingFragment);
-        MySingletons.createGame(name, gameOptions);
-        MessageManager.setGame(MySingletons.getGame());
+        Game game = new Game(name, gameOptions);
+        MessageManager.updateGame(game);
         if (isLobby) {
             try {
                 for (String address : serverFragment.getPlayers().keySet()) {
-                    if (!address.equals(MessageManager.EXTERNAL_ADDRESS)) {
+                    if (!address.equals(InfoSingleton.getInstance().getEXTERNAL_ADDRESS())) {
                         GameOptions versionForAnotherPlayer = gameOptions.getVersionForAnotherPlayer();
                         String message = MessageManager.sendGameOptionsMessage(versionForAnotherPlayer);
-                        MySingletons.getServer().specificMessage(address, message);
+                        Server.getInstance().specificMessage(address, message);
                     }
                 }
             } catch (Exception e) {
                 Log.d("MyTag", "Error during serializing gameOptions");
                 e.printStackTrace();
             }
-            if(MySingletons.getServer().getConnectionsQuantity() == 0) {
+            if (Server.getInstance().getConnectionsQuantity() == 0) {
                 notifyGameStarting();
             }
         }

@@ -5,6 +5,7 @@ import android.util.Log;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
 
 public class WriteThread extends Thread {
@@ -27,9 +28,13 @@ public class WriteThread extends Thread {
                 continue;
 
             String toSend = messageQueue.pollFirst();
+            if (toSend == null || toSend.equals(""))
+                continue;
+            byte[] bytesToSend = toSend.getBytes(StandardCharsets.UTF_8);
 
             try {
-                out.writeUTF(toSend);
+                out.writeInt(bytesToSend.length);
+                out.write(bytesToSend);
                 out.flush();
             } catch (Exception e) {
                 Log.d("MyTraffic", "Sending error\n" + e.toString());

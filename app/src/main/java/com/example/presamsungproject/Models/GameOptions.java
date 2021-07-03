@@ -15,7 +15,6 @@ public class GameOptions implements Serializable {
     private final int hp;
     private final boolean ricochetAble;
     private final boolean DEBUG;
-    private static final long serialVersionUID = 9L;
 
     public GameOptions(Map map, int team_quantity, int hp, boolean ricochetAble, boolean DEBUG) {
         this.map = map;

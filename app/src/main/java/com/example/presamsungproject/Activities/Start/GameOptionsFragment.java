@@ -6,22 +6,24 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import androidx.fragment.app.Fragment;
-import com.example.presamsungproject.Models.*;
-import com.example.presamsungproject.MyInterfaces.StartActivityFragmentListener;
+import com.example.presamsungproject.Models.GameOptions;
+import com.example.presamsungproject.Models.Map;
+import com.example.presamsungproject.Models.MapOptions;
+import com.example.presamsungproject.Models.SoundEffects;
 import com.example.presamsungproject.R;
 
 import java.util.HashMap;
 
 public class GameOptionsFragment extends Fragment {
-    private final StartActivityFragmentListener SAFListener;
-    private final HashMap<String, String> players;
+    private StartActivityFragmentListener SAFListener;
+    private HashMap<String, String> players;
     private Spinner spinner;
     private CheckBox teamBattle, ricochets, debug;
     private TextView teamText, widthText, heightText;
     private EditText teamNumber, hpNumber;
     private EditText width, height, min_cells, empty_cell, creating_wall;
 
-    public GameOptionsFragment(StartActivityFragmentListener SAFListener, HashMap<String, String> players) {
+    public void setParams(StartActivityFragmentListener SAFListener, HashMap<String, String> players) {
         this.SAFListener = SAFListener;
         this.players = players;
     }
@@ -88,7 +90,7 @@ public class GameOptionsFragment extends Fragment {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MySingletons.getMyResources().getSFXInterface().executeEffect(MySoundEffects.CLICK);
+                SoundEffects.getInstance().executeEffect(SoundEffects.CLICK);
                 SAFListener.removeFragment(GameOptionsFragment.this);
             }
         });
@@ -96,7 +98,7 @@ public class GameOptionsFragment extends Fragment {
         apply.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MySingletons.getMyResources().getSFXInterface().executeEffect(MySoundEffects.CLICK);
+                SoundEffects.getInstance().executeEffect(SoundEffects.CLICK);
                 if (!isParamsCorrect())
                     return;
                 SAFListener.gameOptionsChanged(getEnteredGameOptions());

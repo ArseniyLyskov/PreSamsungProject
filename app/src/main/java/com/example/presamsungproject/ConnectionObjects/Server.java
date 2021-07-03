@@ -6,29 +6,39 @@ import com.example.presamsungproject.ConnectionObjects.Threads.ServerThread;
 import java.util.HashMap;
 
 public class Server {
+    private static Server instance = null;
     public static final int serverPort = 4444;
     private static final int serverBacklog = 1;
-    private ServerThread serverThread = null;
+    private final ServerThread serverThread;
     private final HashMap<String, Connection> connections = new HashMap<>();
 
-    public void start() {
+    public static void createInstance() {
+        if (instance != null) {
+            instance.stop();
+        }
+        instance = new Server();
+    }
+
+    public static Server getInstance() {
+        return instance;
+    }
+
+    public Server() {
         serverThread = new ServerThread(serverPort, serverBacklog, connections);
         serverThread.start();
     }
 
     public void stop() {
-        if (serverThread.isAlive())
-            try {
-                broadcastMessage("end");
-                for (Connection connection : connections.values()) {
-                    connection.stop();
-                }
-                serverThread.interrupt();
-                Log.d("MyTag", "Server closed properly");
-            } catch (Exception e) {
-                Log.d("MyTag", "Server error during closing");
-                e.printStackTrace();
-            }
+        if (serverThread.isInterrupted())
+            return;
+        try {
+            broadcastMessage("end");
+            serverThread.interrupt();
+            Log.d("MyTag", "Server closed properly");
+        } catch (Exception e) {
+            Log.d("MyTag", "Server error during closing");
+            e.printStackTrace();
+        }
     }
 
     public void broadcastMessage(String message) {
@@ -44,23 +54,12 @@ public class Server {
         }
     }
 
-    public void removeConnection(Connection connection) {
-        connections.remove(connection);
-    }
-
-    public boolean containsAddress(String address) {
-        return connections.containsKey(address);
+    public void removeConnection(String address) {
+        connections.remove(address);
     }
 
     public int getConnectionsQuantity() {
         return connections.size();
     }
-
-    public boolean isRunning() {
-        if (serverThread == null)
-            return false;
-        return !serverThread.isInterrupted();
-    }
-
 }
 

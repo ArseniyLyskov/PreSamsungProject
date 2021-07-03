@@ -9,20 +9,19 @@ import android.widget.EditText;
 import android.widget.TextView;
 import androidx.fragment.app.Fragment;
 import com.example.presamsungproject.ConnectionObjects.Assistive.ConnectionToServerTester;
+import com.example.presamsungproject.ConnectionObjects.Client;
 import com.example.presamsungproject.Models.GameOptions;
-import com.example.presamsungproject.Models.MySingletons;
-import com.example.presamsungproject.Models.MySoundEffects;
-import com.example.presamsungproject.MyInterfaces.StartActivityFragmentListener;
+import com.example.presamsungproject.Models.SoundEffects;
 import com.example.presamsungproject.R;
 
 public class ClientFragment extends Fragment {
-    private final String name;
-    private final StartActivityFragmentListener SAFListener;
+    private String name;
+    private StartActivityFragmentListener SAFListener;
     private TextView upper_text, number, nicks;
     private EditText editText;
     private Button button;
 
-    public ClientFragment(StartActivityFragmentListener SAFListener, String name) {
+    public void setParams(StartActivityFragmentListener SAFListener, String name) {
         this.SAFListener = SAFListener;
         this.name = name;
     }
@@ -39,7 +38,7 @@ public class ClientFragment extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MySingletons.getMyResources().getSFXInterface().executeEffect(MySoundEffects.CLICK);
+                SoundEffects.getInstance().executeEffect(SoundEffects.CLICK);
                 if (button.getText().toString().equals("Connect to lobby via ip")) {
                     String serverIP = editText.getText().toString();
                     if (serverIP.equals("")) {
@@ -48,7 +47,7 @@ public class ClientFragment extends Fragment {
                     }
                     ConnectionToServerTester.testConnection(serverIP, true, name, SAFListener);
                 } else if (button.getText().toString().equals("Disconnect from lobby")) {
-                    MySingletons.getClient().stop();
+                    Client.getInstance().stop();
                 }
             }
         });
@@ -56,7 +55,7 @@ public class ClientFragment extends Fragment {
         back.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MySingletons.getMyResources().getSFXInterface().executeEffect(MySoundEffects.CLICK);
+                SoundEffects.getInstance().executeEffect(SoundEffects.CLICK);
                 SAFListener.removeFragment(ClientFragment.this);
             }
         });
@@ -66,10 +65,8 @@ public class ClientFragment extends Fragment {
 
     @Override
     public void onDestroy() {
-        if (MySingletons.getClient() != null) {
-            updateUI("", 0);
-            MySingletons.getClient().stop();
-        }
+        updateUI("", 0);
+        Client.getInstance().stop();
         super.onDestroy();
     }
 

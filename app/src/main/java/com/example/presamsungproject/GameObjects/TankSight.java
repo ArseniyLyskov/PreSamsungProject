@@ -5,7 +5,7 @@ import com.example.presamsungproject.Geometry.GeometryMethods;
 import com.example.presamsungproject.Geometry.Point;
 import com.example.presamsungproject.Geometry.Segment;
 import com.example.presamsungproject.Models.HitBox;
-import com.example.presamsungproject.Models.MySingletons;
+import com.example.presamsungproject.Models.Resources;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -13,12 +13,11 @@ import java.util.HashSet;
 public class TankSight implements Serializable {
     private boolean isSighting;
     private Segment segment;
-    private static final long serialVersionUID = 3L;
 
     public void draw(Canvas canvas) {
         canvas.drawLine(segment.getP1().getX(), segment.getP1().getY(),
                 segment.getP2().getX(), segment.getP2().getY(),
-                MySingletons.getMyResources().getTankSightPaint());
+                Resources.getInstance().getTankSightPaint());
     }
 
     public void scaleTo(double koeff) {
@@ -38,11 +37,6 @@ public class TankSight implements Serializable {
             }
         }
         segment = new Segment(segmentStart, segmentEnd);
-    }
-
-    public TankSight(boolean isSighting, Segment segment) {
-        this.isSighting = isSighting;
-        this.segment = segment;
     }
 
     public TankSight() {

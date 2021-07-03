@@ -2,10 +2,11 @@ package com.example.presamsungproject.Models;
 
 import android.content.Context;
 import android.media.MediaPlayer;
-import com.example.presamsungproject.MyInterfaces.SFXInterface;
+import android.util.Log;
 import com.example.presamsungproject.R;
 
-public class MySoundEffects implements SFXInterface {
+public class SoundEffects {
+    private static SoundEffects instance = null;
     public static final int MAIN_THEME = 11;
     public static final int TRACK = 12;
     public static final int CLICK = 21;
@@ -17,7 +18,20 @@ public class MySoundEffects implements SFXInterface {
     private final MediaPlayer click;
     private final MediaPlayer shoot, ricochet, hit, explosion;
 
-    public MySoundEffects(Context context) {
+    public static void createInstance(Context context) {
+        if (instance == null)
+            instance = new SoundEffects(context);
+        else
+            Log.d("MyTag", "SoundEffects instance already created!");
+    }
+
+    public static SoundEffects getInstance() {
+        if (instance == null)
+            Log.d("MyTag", "SoundEffects instance not created yet!");
+        return instance;
+    }
+
+    private SoundEffects(Context context) {
         mainTheme = MediaPlayer.create(context, R.raw.ost_tankz_main_theme);
         mainTheme.setLooping(true);
         mainTheme.setVolume(0.5f, 0.5f);
@@ -44,11 +58,6 @@ public class MySoundEffects implements SFXInterface {
         explosion.setVolume(1, 1);
     }
 
-    public SFXInterface getInterface() {
-        return this;
-    }
-
-    @Override
     public void executeEffect(int effect) {
         switch (effect) {
             case MAIN_THEME: {
@@ -101,7 +110,6 @@ public class MySoundEffects implements SFXInterface {
         }
     }
 
-    @Override
     public void stopEffect(int effect) {
         switch (effect) {
             case MAIN_THEME: {
@@ -119,7 +127,6 @@ public class MySoundEffects implements SFXInterface {
         }
     }
 
-    @Override
     public void resumeEffects() {
         if (mainTheme.getCurrentPosition() != 0)
             mainTheme.start();
@@ -129,7 +136,6 @@ public class MySoundEffects implements SFXInterface {
             track2.start();
     }
 
-    @Override
     public void pauseEffects() {
         if (mainTheme.isPlaying())
             mainTheme.pause();

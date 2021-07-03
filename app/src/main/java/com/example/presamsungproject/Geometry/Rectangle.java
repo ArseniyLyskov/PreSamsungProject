@@ -7,7 +7,6 @@ public class Rectangle implements Serializable {
     private final Point p2;
     private final Point p3;
     private final Point p4;
-    private static final long serialVersionUID = 7L;
 
     public Rectangle(Point p1, Point p2, Point p3, Point p4) {
         this.p1 = p1;

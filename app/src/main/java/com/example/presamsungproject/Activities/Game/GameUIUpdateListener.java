@@ -1,4 +1,4 @@
-package com.example.presamsungproject.MyInterfaces;
+package com.example.presamsungproject.Activities.Game;
 
 public interface GameUIUpdateListener {
     void showFPS(int fps);

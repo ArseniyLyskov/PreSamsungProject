@@ -4,7 +4,7 @@ import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Paint;
 import com.example.presamsungproject.Models.HitBox;
-import com.example.presamsungproject.Models.MySingletons;
+import com.example.presamsungproject.Models.Resources;
 
 import java.io.Serializable;
 import java.util.HashSet;
@@ -21,7 +21,6 @@ public class Tank implements Serializable {
     HashSet<Bullet> bullets;
     HitBox hullHitBox, towerHitBox;
     double[] hullIndents, towerIndents;
-    private static final long serialVersionUID = 2L;
 
     {
         hullIndents = new double[4];
@@ -80,7 +79,7 @@ public class Tank implements Serializable {
         canvas.drawText(playerName, (int) (x + hWidth / 2 - (int) paint.measureText(playerName) / 2), (int) (y - 10), paint);
 
         HashSet<Bullet> temp = new HashSet<>(bullets);
-        Bitmap bmp_bullet = MySingletons.getMyResources().getBmp_bullet();
+        Bitmap bmp_bullet = Resources.getInstance().getBmp_bullet();
         for (Bullet b : temp) {
             canvas.drawBitmap(bmp_bullet,
                     (int) (b.getPoint().getX() - bmp_bullet.getWidth() / 2),

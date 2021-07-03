@@ -1,6 +1,5 @@
 package com.example.presamsungproject.Activities.Game;
 
-import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.VibrationEffect;
@@ -9,10 +8,10 @@ import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
+import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.Models.Game;
-import com.example.presamsungproject.Models.MySingletons;
-import com.example.presamsungproject.Models.MySoundEffects;
-import com.example.presamsungproject.MyInterfaces.GameUIUpdateListener;
+import com.example.presamsungproject.Models.Resources;
+import com.example.presamsungproject.Models.SoundEffects;
 import com.example.presamsungproject.R;
 import io.github.controlwear.virtual.joystick.android.JoystickView;
 
@@ -28,17 +27,13 @@ public class GameActivity extends AppCompatActivity
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_game);
-        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
         getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_FULLSCREEN);
 
-        if (savedInstanceState == null)
-            return;
-
-        game = MySingletons.getGame();
+        game = MessageManager.getCurrentGame();
 
         drawActivity();
 
-        MySingletons.getMyResources().getSFXInterface().executeEffect(MySoundEffects.TRACK);
+        SoundEffects.getInstance().executeEffect(SoundEffects.TRACK);
 
         jstickL.setOnMoveListener(new JoystickView.OnMoveListener() {
             @Override
@@ -61,14 +56,12 @@ public class GameActivity extends AppCompatActivity
     @Override
     protected void onResume() {
         super.onResume();
-        if (MySingletons.getMyResources() != null)
-            MySingletons.getMyResources().getSFXInterface().resumeEffects();
+        SoundEffects.getInstance().resumeEffects();
     }
 
     @Override
     protected void onPause() {
-        if (MySingletons.getMyResources() != null)
-            MySingletons.getMyResources().getSFXInterface().pauseEffects();
+        SoundEffects.getInstance().pauseEffects();
         super.onPause();
     }
 
@@ -96,7 +89,7 @@ public class GameActivity extends AppCompatActivity
 
         fps_tv = findViewById(R.id.ag_fps_tv);
 
-        MySingletons.getMyResources().setGUIUListener(this);
+        Resources.getInstance().setGUIUListener(this);
     }
 
     @Override

@@ -7,9 +7,8 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
 import androidx.fragment.app.Fragment;
-import com.example.presamsungproject.Models.MySingletons;
-import com.example.presamsungproject.Models.MySoundEffects;
-import com.example.presamsungproject.MyInterfaces.StartActivityFragmentListener;
+import com.example.presamsungproject.Models.SoundEffects;
+import com.example.presamsungproject.Activities.Start.StartActivityFragmentListener;
 import com.example.presamsungproject.R;
 
 public class ProblemFragment extends Fragment {
@@ -31,7 +30,7 @@ public class ProblemFragment extends Fragment {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MySingletons.getMyResources().getSFXInterface().executeEffect(MySoundEffects.CLICK);
+                SoundEffects.getInstance().executeEffect(SoundEffects.CLICK);
                 SAFListener.removeFragment(ProblemFragment.this);
             }
         });

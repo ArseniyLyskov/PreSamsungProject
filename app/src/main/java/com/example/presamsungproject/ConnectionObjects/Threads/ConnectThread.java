@@ -3,7 +3,8 @@ package com.example.presamsungproject.ConnectionObjects.Threads;
 import android.util.Log;
 import com.example.presamsungproject.ConnectionObjects.Connection;
 import com.example.presamsungproject.ConnectionObjects.Server;
-import com.example.presamsungproject.Models.MySingletons;
+import com.example.presamsungproject.Models.InfoSingleton;
+import com.example.presamsungproject.Models.Resources;
 
 import java.io.DataInputStream;
 import java.io.DataOutputStream;
@@ -60,10 +61,10 @@ public class ConnectThread extends Thread {
             writeThread.interrupt();
         if (socket != null) {
             try {
-                if (MySingletons.isLobby()) {
-                    MySingletons.getMyResources().getSAMListener().serverRemovePlayer(connection.getClientAddress());
+                if (InfoSingleton.getInstance().isLobby()) {
+                    Resources.getInstance().getSAMListener().serverRemovePlayer(connection.getClientAddress());
                 } else {
-                    MySingletons.getMyResources().getSAMListener().clientUpdateUI("", 0);
+                    Resources.getInstance().getSAMListener().clientUpdateUI("", 0);
                 }
                 socket.close();
                 Log.d("MyTag", "Socket closed properly");
@@ -73,7 +74,7 @@ public class ConnectThread extends Thread {
             }
         }
         if (connection != null)
-            MySingletons.getServer().removeConnection(connection);
+            Server.getInstance().removeConnection(connection.getClientAddress());
         super.interrupt();
     }
 }

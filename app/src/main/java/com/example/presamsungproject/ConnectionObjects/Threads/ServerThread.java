@@ -8,6 +8,7 @@ import java.net.InetSocketAddress;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Objects;
 
 public class ServerThread extends Thread {
     private final int serverPort;
@@ -31,13 +32,12 @@ public class ServerThread extends Thread {
 
             while (!server.isClosed()) {
                 Socket client = server.accept();
-                /*if (connections.containsKey(client.getInetAddress().getHostAddress())) {
-                    connections.get(client.getInetAddress().getHostAddress()).sendMessage("end");
-                }*/
                 Connection connection = new Connection(client);
                 connections.put(client.getInetAddress().getHostAddress(), connection);
             }
         } catch (Exception e) {
+            if(Objects.requireNonNull(e.getMessage()).equals("Socket closed"))
+                return;
             Log.d("MyTag", "Server error during running " + e.getMessage());
             e.printStackTrace();
             if (!(server == null)) {

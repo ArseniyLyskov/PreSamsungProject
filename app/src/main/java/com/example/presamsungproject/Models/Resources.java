@@ -2,31 +2,46 @@ package com.example.presamsungproject.Models;
 
 import android.content.Context;
 import android.graphics.*;
+import android.util.DisplayMetrics;
+import android.util.Log;
 import android.util.TypedValue;
 import androidx.core.content.res.ResourcesCompat;
-import com.example.presamsungproject.MyInterfaces.GameUIUpdateListener;
-import com.example.presamsungproject.MyInterfaces.SFXInterface;
-import com.example.presamsungproject.MyInterfaces.StartActivityMessageListener;
+import com.example.presamsungproject.Activities.Game.GameUIUpdateListener;
+import com.example.presamsungproject.Activities.Start.StartActivityMessageListener;
 import com.example.presamsungproject.R;
 
-public class MyResources {
+public class Resources {
+    private static Resources instance = null;
     private final Bitmap bmp_greenHp, bmp_greenTp, bmp_redHp, bmp_redTp, bmp_blueHp, bmp_blueTp;
     private final Bitmap bmp_greenDHp, bmp_greenDTp, bmp_redDHp, bmp_redDTp, bmp_blueDHp, bmp_blueDTp;
     private final Bitmap bmp_mapCell1, bmp_mapCell2, bmp_mapCellBackground;
     private final Bitmap bmp_wallV, bmp_wallH, bmp_wallC;
     private final Bitmap bmp_bullet;
-    private final Bitmap panel_350_200, panel_350_300;
     private final Paint allyNickPaint;
     private final Paint enemyNickPaint;
     private final Paint hitBoxPaint;
     private final Paint tankSightPaint;
     private final Paint defaultPaint;
+    private int displayWidth, displayHeight;
     private Bitmap paintedWallpaper;
-    private final SFXInterface sfxInterface;
     private StartActivityMessageListener SAMListener;
     private GameUIUpdateListener GUIUListener;
 
-    public MyResources(Context context) {
+    public static void createInstance(Context context) {
+        if (instance == null) {
+            instance = new Resources(context);
+            instance.generateWallpaper();
+        } else
+            Log.d("MyTag", "Resources instance already created!");
+    }
+
+    public static Resources getInstance() {
+        if (instance == null)
+            Log.d("MyTag", "Resources instance not created yet!");
+        return instance;
+    }
+
+    private Resources(Context context) {
         hitBoxPaint = new Paint();
         hitBoxPaint.setColor(Color.CYAN);
         hitBoxPaint.setStrokeWidth(3);
@@ -70,9 +85,6 @@ public class MyResources {
         bmp_blueDTp = BitmapFactory.decodeResource(context.getResources(), R.drawable.blue_dtp);
         bmp_bullet = BitmapFactory.decodeResource(context.getResources(), R.drawable.bullet_p);
 
-        panel_350_200 = BitmapFactory.decodeResource(context.getResources(), R.drawable.panel_350_200);
-        panel_350_300 = BitmapFactory.decodeResource(context.getResources(), R.drawable.panel_350_300);
-
         bmp_mapCell1 = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_map);
         bmp_mapCell2 = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_map2);
         bmp_mapCellBackground = BitmapFactory.decodeResource(context.getResources(), R.drawable.texture_background_map);
@@ -83,11 +95,16 @@ public class MyResources {
         canvas.drawBitmap(bmp_wallV, 0, 0, defaultPaint);
         bmp_wallC = Bitmap.createBitmap(bmp_wallV, 0, 0, bmp_wallV.getWidth(), bmp_wallV.getWidth());
 
-        sfxInterface = new MySoundEffects(context).getInterface();
-    }
+        DisplayMetrics displaymetrics = context.getResources().getDisplayMetrics();
+        displayWidth = displaymetrics.widthPixels;
+        displayHeight = displaymetrics.heightPixels;
+        if(displayWidth < displayHeight) {
+            int temp = displayWidth;
+            displayWidth = displayHeight;
+            displayHeight = temp;
+        }
 
-    public void createWallpaper(Context context) {
-        paintedWallpaper = Map.getWallpaperMap(context);
+        SoundEffects.createInstance(context);
     }
 
     public Paint getHitBoxPaint() {
@@ -190,12 +207,8 @@ public class MyResources {
         return bmp_bullet;
     }
 
-    public Bitmap getPanel_350_200() {
-        return panel_350_200;
-    }
-
-    public Bitmap getPanel_350_300() {
-        return panel_350_300;
+    public void generateWallpaper() {
+        paintedWallpaper = Map.getWallpaperMap(displayWidth, displayHeight);
     }
 
     public GameUIUpdateListener getGUIUListener() {
@@ -212,9 +225,5 @@ public class MyResources {
 
     public void setSAMListener(StartActivityMessageListener SAMListener) {
         this.SAMListener = SAMListener;
-    }
-
-    public SFXInterface getSFXInterface() {
-        return sfxInterface;
     }
 }

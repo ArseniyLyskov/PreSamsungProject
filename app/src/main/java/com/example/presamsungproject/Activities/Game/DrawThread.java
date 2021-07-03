@@ -24,8 +24,6 @@ public class DrawThread extends Thread {
         this.surfaceHolder = surfaceHolder;
         this.game = game;
         Canvas canvas = surfaceHolder.lockCanvas();
-        game.setFrameWidth(canvas.getWidth());
-        game.setFrameHeight(canvas.getHeight());
         surfaceHolder.unlockCanvasAndPost(canvas);
     }
 

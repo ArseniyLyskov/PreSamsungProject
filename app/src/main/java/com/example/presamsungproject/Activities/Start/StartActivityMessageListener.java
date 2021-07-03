@@ -1,4 +1,4 @@
-package com.example.presamsungproject.MyInterfaces;
+package com.example.presamsungproject.Activities.Start;
 
 import com.example.presamsungproject.Models.GameOptions;
 

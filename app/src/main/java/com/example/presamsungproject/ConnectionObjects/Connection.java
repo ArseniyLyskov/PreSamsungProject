@@ -20,30 +20,15 @@ public class Connection {
         connectThread.start();
     }
 
-    private void closeEverything() {
-        if (connectThread.isInterrupted())
-            return;
-        connectThread.interrupt();
-    }
-
     public String getClientAddress() {
         return clientAddress;
     }
 
     public void sendMessage(String toSend) {
-        if (toSend == null || toSend.equals("")) {
-            Log.d("MyTraffic", "Sending trash");
-            return;
-        }
         messageQueue.addLast(toSend);
         if (messageQueue.size() > 5)
             Log.d("MyTraffic", "Connection too many messages");
     }
-
-    public void stop() {
-        closeEverything();
-    }
-
 }
 
 

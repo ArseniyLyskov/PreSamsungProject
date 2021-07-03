@@ -2,10 +2,8 @@ package com.example.presamsungproject.ConnectionObjects;
 
 import android.util.Log;
 import com.example.presamsungproject.GameObjects.Tank;
-import com.example.presamsungproject.Models.Game;
-import com.example.presamsungproject.Models.GameOptions;
-import com.example.presamsungproject.Models.MySingletons;
-import com.example.presamsungproject.MyInterfaces.StartActivityMessageListener;
+import com.example.presamsungproject.Models.*;
+import com.example.presamsungproject.Activities.Start.StartActivityMessageListener;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -22,19 +20,18 @@ public class MessageManager {
     private static final String ALL_READY_MESSAGE = "ALL_READY";
     private static final String HIT_MESSAGE = "HIT";
     private static final String SFX_MESSAGE = "SFX";
-    private static Game game;
-    public static String EXTERNAL_ADDRESS = null;
+    private static Game currentGame;
 
     public static String connectMessage(String name) {
-        return CONNECT_MESSAGE + " " + EXTERNAL_ADDRESS + " " + name;
+        return CONNECT_MESSAGE + " " + InfoSingleton.getInstance().getEXTERNAL_ADDRESS() + " " + name;
     }
 
     public static void sendSFX(int effect) {
-        if (MySingletons.isLobby()) {
-            MySingletons.getMyResources().getSFXInterface().executeEffect(effect);
-            MySingletons.getServer().broadcastMessage(SFX_MESSAGE + " " + effect);
+        if (InfoSingleton.getInstance().isLobby()) {
+            SoundEffects.getInstance().executeEffect(effect);
+            Server.getInstance().broadcastMessage(SFX_MESSAGE + " " + effect);
         } else {
-            MySingletons.getClient().sendMessage(SFX_MESSAGE + " " + effect);
+            Client.getInstance().sendMessage(SFX_MESSAGE + " " + effect);
         }
     }
 
@@ -53,7 +50,7 @@ public class MessageManager {
         ObjectOutputStream oos = new ObjectOutputStream(baos);
         oos.writeObject(tank);
         serializedTank = Arrays.toString(baos.toByteArray());
-        return SENDING_TANK_MESSAGE + " " + EXTERNAL_ADDRESS + " " + serializedTank;
+        return SENDING_TANK_MESSAGE + " " + InfoSingleton.getInstance().getEXTERNAL_ADDRESS() + " " + serializedTank;
     }
 
     public static String hitMessage(String address) {
@@ -69,42 +66,42 @@ public class MessageManager {
     }
 
     public static String clientReadyMessage() {
-        return CLIENT_READY_MESSAGE + " " + EXTERNAL_ADDRESS;
+        return CLIENT_READY_MESSAGE + " " + InfoSingleton.getInstance().getEXTERNAL_ADDRESS();
     }
 
     public static void serverProcessMessage(String message) { //TODO: game ending
         String[] separated = message.split(" ");
         switch (separated[0]) {
             case CONNECT_MESSAGE: {
-                StartActivityMessageListener SAMListener = MySingletons.getMyResources().getSAMListener();
+                StartActivityMessageListener SAMListener = Resources.getInstance().getSAMListener();
                 SAMListener.serverAddPlayer(separated[1], separated[2]);
                 break;
             }
             case CLIENT_READY_MESSAGE: {
-                if(MySingletons.getMyResources().getSAMListener().serverIsLastPrepared(separated[1])) {
-                    MySingletons.getServer().broadcastMessage(allReadyMessage());
-                    MySingletons.getMyResources().getSAMListener().notifyGameStarting();
-                    sendMyTank();
+                if (Resources.getInstance().getSAMListener().serverIsLastPrepared(separated[1])) {
+                    Server.getInstance().broadcastMessage(allReadyMessage());
+                    Resources.getInstance().getSAMListener().notifyGameStarting();
+                    sendControlledTank();
                 }
                 break;
             }
             case SENDING_TANK_MESSAGE: {
                 Tank deserializedTank = deserializeTank(message, separated[1]);
-                game.getOtherTanks().put(separated[1], deserializedTank);
-                MySingletons.getServer().broadcastMessage(message);
+                currentGame.getOtherTanks().put(separated[1], deserializedTank);
+                Server.getInstance().broadcastMessage(message);
                 break;
             }
             case HIT_MESSAGE: {
-                if (separated[1].equals(EXTERNAL_ADDRESS)) {
-                    game.getMyTank().minusHealth();
-                    sendMyTank();
+                if (separated[1].equals(InfoSingleton.getInstance().getEXTERNAL_ADDRESS())) {
+                    currentGame.getControlledTank().minusHealth();
+                    sendControlledTank();
                 } else
-                    MySingletons.getServer().specificMessage(separated[1], hitMessage(separated[1]));
+                    Server.getInstance().specificMessage(separated[1], hitMessage(separated[1]));
                 break;
             }
             case SFX_MESSAGE: {
-                MySingletons.getMyResources().getSFXInterface().executeEffect(Integer.parseInt(separated[1]));
-                MySingletons.getServer().broadcastMessage(message);
+                SoundEffects.getInstance().executeEffect(Integer.parseInt(separated[1]));
+                Server.getInstance().broadcastMessage(message);
                 break;
             }
         }
@@ -114,49 +111,49 @@ public class MessageManager {
         String[] separated = message.split(" ");
         switch (separated[0]) {
             case NAMES_LIST_MESSAGE: {
-                String namesText = "";
+                StringBuilder namesText = new StringBuilder();
                 for (int i = 1; i < separated.length; i++) {
-                    namesText += separated[i] + "\n";
+                    namesText.append(separated[i]).append("\n");
                 }
-                MySingletons.getMyResources().getSAMListener().clientUpdateUI(namesText, separated.length - 1);
+                Resources.getInstance().getSAMListener().clientUpdateUI(namesText.toString(), separated.length - 1);
                 break;
             }
             case SENDING_GAME_OPTIONS_MESSAGE: {
                 GameOptions deserializedGameOptions = deserializeGameOptions(message);
-                MySingletons.getMyResources().getSAMListener().clientCreateGame(deserializedGameOptions);
+                Resources.getInstance().getSAMListener().clientCreateGame(deserializedGameOptions);
                 break;
             }
             case SENDING_TANK_MESSAGE: {
-                if (!separated[1].equals(EXTERNAL_ADDRESS)) {
+                if (!separated[1].equals(InfoSingleton.getInstance().getEXTERNAL_ADDRESS())) {
                     Tank deserializedTank = deserializeTank(message, separated[1]);
-                    game.getOtherTanks().put(separated[1], deserializedTank);
+                    currentGame.getOtherTanks().put(separated[1], deserializedTank);
                 }
                 break;
             }
             case ALL_READY_MESSAGE: {
-                MySingletons.getMyResources().getSAMListener().notifyGameStarting();
-                sendMyTank();
+                Resources.getInstance().getSAMListener().notifyGameStarting();
+                sendControlledTank();
                 break;
             }
             case HIT_MESSAGE: {
-                if (separated[1].equals(EXTERNAL_ADDRESS)) {
-                    game.getMyTank().minusHealth();
-                    sendMyTank();
+                if (separated[1].equals(InfoSingleton.getInstance().getEXTERNAL_ADDRESS())) {
+                    currentGame.getControlledTank().minusHealth();
+                    sendControlledTank();
                 }
                 break;
             }
             case SFX_MESSAGE: {
-                MySingletons.getMyResources().getSFXInterface().executeEffect(Integer.parseInt(separated[1]));
+                SoundEffects.getInstance().executeEffect(Integer.parseInt(separated[1]));
             }
         }
     }
 
-    public static void sendMyTank() {
+    public static void sendControlledTank() {
         try {
-            if (MySingletons.isLobby()) {
-                MySingletons.getServer().broadcastMessage(MessageManager.sendTankMessage(game.getMyTank().getSimpleVersion()));
+            if (InfoSingleton.getInstance().isLobby()) {
+                Server.getInstance().broadcastMessage(MessageManager.sendTankMessage(currentGame.getControlledTank().getSimpleVersion()));
             } else {
-                MySingletons.getClient().sendMessage(MessageManager.sendTankMessage(game.getMyTank().getSimpleVersion()));
+                Client.getInstance().sendMessage(MessageManager.sendTankMessage(currentGame.getControlledTank().getSimpleVersion()));
             }
         } catch (Exception e) {
             Log.d("MyTag", "Sending myTank error");
@@ -164,20 +161,12 @@ public class MessageManager {
         }
     }
 
-    private static void serverBroadcastAllTanks() {
-        try {
-            for (Tank tank : game.getOtherTanks().values()) {
-                MySingletons.getServer().broadcastMessage(sendTankMessage(tank));
-            }
-            MySingletons.getServer().broadcastMessage(sendTankMessage(game.getMyTank().getSimpleVersion()));
-        } catch (Exception e) {
-            Log.d("MyTag", "Server sending tank error");
-            e.printStackTrace();
-        }
+    public static void updateGame(Game game) {
+        MessageManager.currentGame = game;
     }
 
-    public static void setGame(Game game) {
-        MessageManager.game = game;
+    public static Game getCurrentGame() {
+        return currentGame;
     }
 
     private static GameOptions deserializeGameOptions(String message) {
@@ -214,7 +203,7 @@ public class MessageManager {
         try {
             ois = new ObjectInputStream(bais);
             deserializedTank = (Tank) ois.readObject();
-            deserializedTank.scaleTo(game.getScale() / (float) deserializedTank.getScale());
+            deserializedTank.scaleTo(currentGame.getScale() / (float) deserializedTank.getScale());
             return deserializedTank;
         } catch (Exception e) {
             Log.d("MyTag", "Deserializing tank error");

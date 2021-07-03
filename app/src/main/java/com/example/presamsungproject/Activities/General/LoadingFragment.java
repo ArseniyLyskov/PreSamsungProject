@@ -1,7 +1,10 @@
 package com.example.presamsungproject.Activities.General;
 
 import android.content.Context;
-import android.graphics.*;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Paint;
+import android.graphics.PixelFormat;
 import android.os.Bundle;
 import android.os.CountDownTimer;
 import android.view.*;
@@ -9,7 +12,7 @@ import android.widget.FrameLayout;
 import androidx.fragment.app.Fragment;
 import com.example.presamsungproject.GameObjects.Tank;
 import com.example.presamsungproject.GameObjects.TankSight;
-import com.example.presamsungproject.Models.MySingletons;
+import com.example.presamsungproject.Models.Resources;
 import com.example.presamsungproject.R;
 
 import java.util.HashSet;
@@ -74,7 +77,7 @@ public class LoadingFragment extends Fragment {
                 this.surfaceHolder = surfaceHolder;
                 Canvas canvas = surfaceHolder.lockCanvas();
                 surfaceHolder.unlockCanvasAndPost(canvas);
-                paint = MySingletons.getMyResources().getDefaultPaint();
+                paint = Resources.getInstance().getDefaultPaint();
             }
 
             public void setRunning(boolean run) {
@@ -89,8 +92,8 @@ public class LoadingFragment extends Fragment {
                         if (canvas != null) {
                             try {
                                 //
-                                Bitmap hull = MySingletons.getMyResources().getBmp_greenHp();
-                                Bitmap tower = MySingletons.getMyResources().getBmp_greenTp();
+                                Bitmap hull = Resources.getInstance().getBmp_greenHp();
+                                Bitmap tower = Resources.getInstance().getBmp_greenTp();
                                 if (x == -1) {
                                     x = (canvas.getWidth() - hull.getHeight()) / 2f;
                                     y = canvas.getHeight() - hull.getWidth();

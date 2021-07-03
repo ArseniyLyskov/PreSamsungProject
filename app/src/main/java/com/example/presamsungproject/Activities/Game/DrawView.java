@@ -5,8 +5,9 @@ import android.os.CountDownTimer;
 import android.util.Log;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
+import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.Models.Game;
-import com.example.presamsungproject.Models.MySingletons;
+import com.example.presamsungproject.Models.Resources;
 
 public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     private DrawThread drawThread;
@@ -37,7 +38,7 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
 
         @Override
         public void onTick(long millisUntilFinished) {
-            MySingletons.getMyResources().getGUIUListener().showFPS(game.updateFPS());
+            Resources.getInstance().getGUIUListener().showFPS(game.updateFPS());
         }
 
         @Override
@@ -49,7 +50,7 @@ public class DrawView extends SurfaceView implements SurfaceHolder.Callback {
     public DrawView(Context context) {
         super(context);
         getHolder().addCallback(this);
-        game = MySingletons.getGame();
+        game = MessageManager.getCurrentGame();
     }
 
     @Override

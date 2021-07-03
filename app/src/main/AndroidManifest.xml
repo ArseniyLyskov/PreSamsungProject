@@ -1,6 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="com.example.presamsungproject">
+<manifest
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        package="com.example.presamsungproject">
+
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.CHANGE_WIFI_MULTICAST_STATE"/>
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"/>
@@ -18,15 +20,23 @@
             android:theme="@style/Theme.AppCompat.Light.NoActionBar"
             android:isGame="true">
 
-        <activity android:name=".Activities.Game.GameActivity"/>
+        <activity
+                android:name=".Activities.Game.GameActivity"
+                android:screenOrientation="landscape"
+        />
 
-        <activity android:name=".Activities.Start.StartActivity">
+        <activity
+                android:name=".Activities.Start.StartActivity"
+                android:screenOrientation="landscape">
+
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
 
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+
         </activity>
+
     </application>
 
 </manifest>

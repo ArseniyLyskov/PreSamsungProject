@@ -8,18 +8,19 @@ import android.widget.Button;
 import android.widget.EditText;
 import androidx.fragment.app.Fragment;
 import com.example.presamsungproject.ConnectionObjects.Assistive.ExternalAddressFinder;
-import com.example.presamsungproject.ConnectionObjects.MessageManager;
-import com.example.presamsungproject.Models.MySingletons;
-import com.example.presamsungproject.Models.MySoundEffects;
-import com.example.presamsungproject.MyInterfaces.StartActivityFragmentListener;
+import com.example.presamsungproject.Models.InfoSingleton;
+import com.example.presamsungproject.Models.SoundEffects;
 import com.example.presamsungproject.R;
 
 public class StartFragment extends Fragment {
-    private final StartActivityFragmentListener SAFListener;
+    private StartActivityFragmentListener SAFListener;
+    private AboutFragment aboutFragment;
     private EditText editText;
 
-    public StartFragment(StartActivityFragmentListener SAFListener) {
+    public void setParams(StartActivityFragmentListener SAFListener) {
         this.SAFListener = SAFListener;
+        aboutFragment = new AboutFragment();
+        aboutFragment.setParams(SAFListener);
     }
 
     @Override
@@ -29,26 +30,38 @@ public class StartFragment extends Fragment {
         editText = v.findViewById(R.id.fs_edittext);
         Button joinButton = v.findViewById(R.id.fs_join_button);
         Button createButton = v.findViewById(R.id.fs_create_button);
+        Button aboutButton = v.findViewById(R.id.fs_about_button);
 
         joinButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MySingletons.getMyResources().getSFXInterface().executeEffect(MySoundEffects.CLICK);
+                SoundEffects.getInstance().executeEffect(SoundEffects.CLICK);
                 if (!isNickNameEntered() || !isConnectedToLocalNetwork())
                     return;
                 SAFListener.startLobbyFragment(editText.getText().toString(), false);
-                MySingletons.setLobby(false);
+                InfoSingleton.getInstance().setLobby(false);
             }
         });
 
         createButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                MySingletons.getMyResources().getSFXInterface().executeEffect(MySoundEffects.CLICK);
+                SoundEffects.getInstance().executeEffect(SoundEffects.CLICK);
                 if (!isNickNameEntered() || !isConnectedToLocalNetwork())
                     return;
                 SAFListener.startLobbyFragment(editText.getText().toString(), true);
-                MySingletons.setLobby(true);
+                InfoSingleton.getInstance().setLobby(true);
+            }
+        });
+
+        aboutButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SoundEffects.getInstance().executeEffect(SoundEffects.CLICK);
+                if (!aboutFragment.isAdded())
+                    SAFListener.addFragment(aboutFragment);
+                else
+                    SAFListener.removeFragment(aboutFragment);
             }
         });
 
@@ -67,9 +80,9 @@ public class StartFragment extends Fragment {
 
     private boolean isConnectedToLocalNetwork() {
         boolean connected = false;
-        if (MessageManager.EXTERNAL_ADDRESS != null)
-            connected = MessageManager.EXTERNAL_ADDRESS.length() > 4
-                    && MessageManager.EXTERNAL_ADDRESS.length() < 16;
+        if (InfoSingleton.getInstance().getEXTERNAL_ADDRESS() != null)
+            connected = InfoSingleton.getInstance().getEXTERNAL_ADDRESS().length() > 4
+                    && InfoSingleton.getInstance().getEXTERNAL_ADDRESS().length() < 16;
         if (!connected) {
             SAFListener.showProblem("Error. Check your connection to Wi-Fi.");
             ExternalAddressFinder.tryToFind(getContext());

@@ -7,42 +7,38 @@ import java.net.Socket;
 import java.util.LinkedList;
 
 public class Client {
+    private static Client instance = null;
     private String serverIP = "";
     private Socket socket = null;
     private ConnectThread connectThread = null;
     private final LinkedList<String> messageQueue = new LinkedList<>();
 
-    public void sendMessage(String toSend) {
-        if (toSend == null || toSend.equals("")) {
-            Log.d("MyTraffic", "Sending trash");
-            return;
+    public static void createInstance(String serverIP) {
+        if (instance != null) {
+            instance.stop();
         }
-        messageQueue.addLast(toSend);
-        if (messageQueue.size() > 5)
-            Log.d("MyTraffic", "Client too many messages");
+        instance = new Client(serverIP);
     }
 
-    public void start(String serverIP) {
-        this.serverIP = serverIP;
+    public static Client getInstance() {
+        return instance;
+    }
 
+    private Client(String serverIP) {
+        this.serverIP = serverIP;
         connectThread = new ConnectThread(serverIP, socket, messageQueue);
         connectThread.start();
     }
 
-    private void closeEverything() {
+    public void stop() {
         if (connectThread.isInterrupted())
             return;
         sendMessage("end");
     }
 
-    public boolean isConnected() {
-        if (socket == null)
-            return false;
-        return socket.isConnected();
+    public void sendMessage(String toSend) {
+        messageQueue.addLast(toSend);
+        if (messageQueue.size() > 5)
+            Log.d("MyTraffic", "Client too many messages");
     }
-
-    public void stop() {
-        closeEverything();
-    }
-
 }

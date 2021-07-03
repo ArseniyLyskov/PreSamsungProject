@@ -14,7 +14,6 @@ public class HitBox implements Serializable {
     private transient final double r1, r2, r3, r4;
 
     private Rectangle rectangle;
-    private static final long serialVersionUID = 5L;
 
     public HitBox(double x, double y, double angle, int bmp_width, int bmp_height,
                   double[] indents) {
@@ -64,7 +63,7 @@ public class HitBox implements Serializable {
         path.lineTo(rectangle.getP3().getX(), rectangle.getP3().getY());
         path.lineTo(rectangle.getP4().getX(), rectangle.getP4().getY());
         path.lineTo(rectangle.getP1().getX(), rectangle.getP1().getY());
-        canvas.drawPath(path, MySingletons.getMyResources().getHitBoxPaint());
+        canvas.drawPath(path, Resources.getInstance().getHitBoxPaint());
     }
 
     public Rectangle getRectangle() {
@@ -75,18 +74,18 @@ public class HitBox implements Serializable {
         this.x = x;
         this.y = y;
         double xc = this.x + bmp_width / 2f, yc = this.y + bmp_height / 2f;
-        double curAngle1 = angle1 - angle;
-        double curAngle2 = angle2 - angle;
-        double curAngle3 = angle3 - angle;
-        double curAngle4 = angle4 - angle;
-        int x1 = (int) (xc + r1 * Math.cos(Math.toRadians(curAngle1)));
-        int x2 = (int) (xc + r2 * Math.cos(Math.toRadians(curAngle2)));
-        int x3 = (int) (xc + r3 * Math.cos(Math.toRadians(curAngle3)));
-        int x4 = (int) (xc + r4 * Math.cos(Math.toRadians(curAngle4)));
-        int y1 = (int) (yc - r1 * Math.sin(Math.toRadians(curAngle1)));
-        int y2 = (int) (yc - r2 * Math.sin(Math.toRadians(curAngle2)));
-        int y3 = (int) (yc - r3 * Math.sin(Math.toRadians(curAngle3)));
-        int y4 = (int) (yc - r4 * Math.sin(Math.toRadians(curAngle4)));
+        double radCurAngle1 = Math.toRadians(angle1 - angle);
+        double radCurAngle2 = Math.toRadians(angle2 - angle);
+        double radCurAngle3 = Math.toRadians(angle3 - angle);
+        double radCurAngle4 = Math.toRadians(angle4 - angle);
+        int x1 = (int) (xc + r1 * Math.cos(radCurAngle1));
+        int x2 = (int) (xc + r2 * Math.cos(radCurAngle2));
+        int x3 = (int) (xc + r3 * Math.cos(radCurAngle3));
+        int x4 = (int) (xc + r4 * Math.cos(radCurAngle4));
+        int y1 = (int) (yc - r1 * Math.sin(radCurAngle1));
+        int y2 = (int) (yc - r2 * Math.sin(radCurAngle2));
+        int y3 = (int) (yc - r3 * Math.sin(radCurAngle3));
+        int y4 = (int) (yc - r4 * Math.sin(radCurAngle4));
         rectangle = new Rectangle(new Point(x1, y1), new Point(x2, y2), new Point(x3, y3), new Point(x4, y4));
     }
 }
