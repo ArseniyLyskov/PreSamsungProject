@@ -87,7 +87,8 @@ public class ServerFragment extends Fragment {
         }
         players.clear();
         updateUI();
-        Server.getInstance().stop();
+        if(Server.getInstance() != null)
+            Server.getInstance().stop();
         super.onDestroy();
     }
 

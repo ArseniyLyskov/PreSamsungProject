@@ -3,7 +3,6 @@ package com.example.presamsungproject.ConnectionObjects.Threads;
 import android.util.Log;
 
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedList;
@@ -38,24 +37,12 @@ public class WriteThread extends Thread {
                 out.flush();
             } catch (Exception e) {
                 Log.d("MyTraffic", "Sending error\n" + e.toString());
+                messageQueue.addFirst(toSend);
                 e.printStackTrace();
-            }
-
-            if (toSend.equalsIgnoreCase("end")) {
-                parentThread.interrupt();
+                if (!socket.isClosed())
+                    parentThread.close(true);
                 break;
             }
         }
-    }
-
-    @Override
-    public void interrupt() {
-        try {
-            out.close();
-        } catch (IOException e) {
-            Log.d("MyTag", "Oops...");
-            e.printStackTrace();
-        }
-        super.interrupt();
     }
 }

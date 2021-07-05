@@ -7,6 +7,7 @@ import android.util.Log;
 import android.util.TypedValue;
 import androidx.core.content.res.ResourcesCompat;
 import com.example.presamsungproject.Activities.Game.GameUIUpdateListener;
+import com.example.presamsungproject.Activities.General.ProblemListener;
 import com.example.presamsungproject.Activities.Start.StartActivityMessageListener;
 import com.example.presamsungproject.R;
 
@@ -22,10 +23,12 @@ public class Resources {
     private final Paint hitBoxPaint;
     private final Paint tankSightPaint;
     private final Paint defaultPaint;
+    private final double pixelsDensity;
     private int displayWidth, displayHeight;
     private Bitmap paintedWallpaper;
     private StartActivityMessageListener SAMListener;
     private GameUIUpdateListener GUIUListener;
+    private ProblemListener PListener;
 
     public static void createInstance(Context context) {
         if (instance == null) {
@@ -98,6 +101,7 @@ public class Resources {
         DisplayMetrics displaymetrics = context.getResources().getDisplayMetrics();
         displayWidth = displaymetrics.widthPixels;
         displayHeight = displaymetrics.heightPixels;
+        pixelsDensity = displaymetrics.density;
         if(displayWidth < displayHeight) {
             int temp = displayWidth;
             displayWidth = displayHeight;
@@ -207,6 +211,10 @@ public class Resources {
         return bmp_bullet;
     }
 
+    public double getPixelsDensity() {
+        return pixelsDensity;
+    }
+
     public void generateWallpaper() {
         paintedWallpaper = Map.getWallpaperMap(displayWidth, displayHeight);
     }
@@ -225,5 +233,13 @@ public class Resources {
 
     public void setSAMListener(StartActivityMessageListener SAMListener) {
         this.SAMListener = SAMListener;
+    }
+
+    public ProblemListener getPListener() {
+        return PListener;
+    }
+
+    public void setPListener(ProblemListener PListener) {
+        this.PListener = PListener;
     }
 }

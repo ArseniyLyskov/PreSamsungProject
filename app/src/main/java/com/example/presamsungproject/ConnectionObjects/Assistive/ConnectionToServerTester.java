@@ -1,24 +1,21 @@
 package com.example.presamsungproject.ConnectionObjects.Assistive;
 
 import com.example.presamsungproject.ConnectionObjects.Client;
-import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.ConnectionObjects.Server;
-import com.example.presamsungproject.Activities.Start.StartActivityFragmentListener;
+import com.example.presamsungproject.Models.InfoSingleton;
+import com.example.presamsungproject.Models.Resources;
 
-import java.io.DataOutputStream;
+import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 
 public class ConnectionToServerTester {
     private static ConnectionTestThread connectionTestThread = null;
 
-    public static void testConnection(String serverIP, boolean startClientIfSuccess,
-                                      String name, StartActivityFragmentListener SAFListener) {
+    public static void testConnection(String serverIP, String name, int timeout, boolean startClientIfSuccess) {
         if (connectionTestThread != null)
-            if (!connectionTestThread.isInterrupted())
-                connectionTestThread.interrupt();
-        connectionTestThread = new ConnectionTestThread(serverIP, startClientIfSuccess, name, SAFListener);
+            connectionTestThread.close();
+        connectionTestThread = new ConnectionTestThread(serverIP, name, timeout, startClientIfSuccess);
         connectionTestThread.start();
     }
 
@@ -26,36 +23,40 @@ public class ConnectionToServerTester {
         private final String serverIP;
         private final boolean startClientIfSuccess;
         private final String name;
-        private final StartActivityFragmentListener SAFListener;
+        private final int timeout;
+        private Socket socket;
 
-        public ConnectionTestThread(String serverIP, boolean startClientIfSuccess,
-                                    String name, StartActivityFragmentListener SAFListener) {
+        public ConnectionTestThread(String serverIP, String name, int timeout, boolean startClientIfSuccess) {
             this.serverIP = serverIP;
             this.startClientIfSuccess = startClientIfSuccess;
+            this.timeout = timeout;
             this.name = name;
-            this.SAFListener = SAFListener;
         }
 
         @Override
         public void run() {
             try {
-                Socket socket = new Socket();
-                socket.connect(new InetSocketAddress(serverIP, Server.serverPort), 1000);
-                DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-                String message = "end";
-                byte[] bytesToSend = message.getBytes(StandardCharsets.UTF_8);
-                out.writeInt(bytesToSend.length);
-                out.write(bytesToSend);
-                out.flush();
+                socket = new Socket();
+                socket.connect(new InetSocketAddress(serverIP, Server.serverPort), timeout);
                 socket.close();
                 if (startClientIfSuccess) {
                     sleep(1000);
-                    Client.createInstance(serverIP);
-                    Client.getInstance().sendMessage(MessageManager.connectMessage(name));
+                    Client.createInstance(serverIP, name);
                 }
             } catch (Exception e) {
-                SAFListener.showProblem("Error during connection. Possibly a typo in the IP " +
-                        "or there is no lobby in the local network.");
+                Resources.getInstance().getPListener().showProblem("Connection error.\n\n Possibly reasons:\n " +
+                        "1) There is no lobby with such IP in the local network\n2) Lobby creator interrupted session");
+                if (!InfoSingleton.getInstance().isLobby())
+                    if (Client.getInstance() != null)
+                        Client.getInstance().stop();
+                e.printStackTrace();
+            }
+        }
+
+        public void close() {
+            try {
+                socket.close();
+            } catch (IOException e) {
                 e.printStackTrace();
             }
         }

@@ -6,10 +6,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import androidx.fragment.app.Fragment;
-import com.example.presamsungproject.Models.GameOptions;
-import com.example.presamsungproject.Models.Map;
-import com.example.presamsungproject.Models.MapOptions;
-import com.example.presamsungproject.Models.SoundEffects;
+import com.example.presamsungproject.Activities.General.ProblemListener;
+import com.example.presamsungproject.ConnectionObjects.Client;
+import com.example.presamsungproject.Models.*;
 import com.example.presamsungproject.R;
 
 import java.util.HashMap;
@@ -91,6 +90,7 @@ public class GameOptionsFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 SoundEffects.getInstance().executeEffect(SoundEffects.CLICK);
+                Client.getInstance().stop();
                 SAFListener.removeFragment(GameOptionsFragment.this);
             }
         });
@@ -110,65 +110,67 @@ public class GameOptionsFragment extends Fragment {
     }
 
     private boolean isParamsCorrect() {
+        ProblemListener PListener = Resources.getInstance().getPListener();
+
         if (teamBattle.isChecked()) {
             if (teamNumber.getText().toString().equals("")) {
-                SAFListener.showProblem("You didn't enter number of teams");
+                PListener.showProblem("You didn't enter number of teams");
                 return false;
             }
             if (teamNumber.getText().toString().equals("0")) {
-                SAFListener.showProblem("Number of teams can't be 0");
+                PListener.showProblem("Number of teams can't be 0");
                 return false;
             }
         }
         if (hpNumber.getText().toString().equals("")) {
-            SAFListener.showProblem("You didn't enter tanks hp");
+            PListener.showProblem("You didn't enter tanks hp");
             return false;
         }
         if (hpNumber.getText().toString().equals("0")) {
-            SAFListener.showProblem("Tanks hp can't be 0");
+            PListener.showProblem("Tanks hp can't be 0");
             return false;
         }
         if (spinner.getSelectedItemPosition() == 4) {
             if (width.getText().toString().equals("")) {
-                SAFListener.showProblem("You didn't enter map width");
+                PListener.showProblem("You didn't enter map width");
                 return false;
             }
             if (height.getText().toString().equals("")) {
-                SAFListener.showProblem("You didn't enter map height");
+                PListener.showProblem("You didn't enter map height");
                 return false;
             }
             if (Integer.parseInt(width.getText().toString()) < 8) {
-                SAFListener.showProblem("Entered map width is too small");
+                PListener.showProblem("Entered map width is too small");
                 return false;
             }
             if (Integer.parseInt(height.getText().toString()) < 8) {
-                SAFListener.showProblem("Entered map height is too small");
+                PListener.showProblem("Entered map height is too small");
                 return false;
             }
-            if (Integer.parseInt(width.getText().toString()) > 50) {
-                SAFListener.showProblem("Entered map width is too big");
+            if (Integer.parseInt(width.getText().toString()) > 40) {
+                PListener.showProblem("Entered map width is too big");
                 return false;
             }
-            if (Integer.parseInt(height.getText().toString()) > 50) {
-                SAFListener.showProblem("Entered map height is too big");
+            if (Integer.parseInt(height.getText().toString()) > 40) {
+                PListener.showProblem("Entered map height is too big");
                 return false;
             }
         }
         if (min_cells.getText().toString().equals("")) {
-            SAFListener.showProblem("You didn't enter minimum of available cells");
+            PListener.showProblem("You didn't enter minimum of available cells");
             return false;
         }
         if (empty_cell.getText().toString().equals("")) {
-            SAFListener.showProblem("You didn't enter chance of an empty cell");
+            PListener.showProblem("You didn't enter chance of an empty cell");
             return false;
         }
         if (creating_wall.getText().toString().equals("")) {
-            SAFListener.showProblem("You didn't enter chance of creating a wall");
+            PListener.showProblem("You didn't enter chance of creating a wall");
             return false;
         }
         if (Integer.parseInt(empty_cell.getText().toString()) > 100
                 || Integer.parseInt(creating_wall.getText().toString()) > 100) {
-            SAFListener.showProblem("Percentage cannot be more than 100");
+            PListener.showProblem("Percentage cannot be more than 100");
             return false;
         }
         return true;
@@ -190,24 +192,24 @@ public class GameOptionsFragment extends Fragment {
             max_height = Integer.parseInt(height.getText().toString());
         } else if (spinner.getSelectedItemPosition() == 0) {
             min_width = 8;
-            max_width = 15;
+            max_width = 13;
             min_height = 8;
-            max_height = 15;
+            max_height = 13;
         } else if (spinner.getSelectedItemPosition() == 1) {
-            min_width = 15;
-            max_width = 25;
-            min_height = 15;
-            max_height = 25;
+            min_width = 13;
+            max_width = 20;
+            min_height = 13;
+            max_height = 20;
         } else if (spinner.getSelectedItemPosition() == 2) {
-            min_width = 25;
-            max_width = 35;
-            min_height = 25;
-            max_height = 35;
+            min_width = 20;
+            max_width = 30;
+            min_height = 20;
+            max_height = 30;
         } else if (spinner.getSelectedItemPosition() == 3) {
-            min_width = 35;
-            max_width = 50;
-            min_height = 35;
-            max_height = 50;
+            min_width = 30;
+            max_width = 40;
+            min_height = 30;
+            max_height = 40;
         }
         int min_cells = Integer.parseInt(this.min_cells.getText().toString());
         int empty_cell = Integer.parseInt(this.empty_cell.getText().toString());

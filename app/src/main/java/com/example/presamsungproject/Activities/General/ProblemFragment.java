@@ -12,11 +12,11 @@ import com.example.presamsungproject.Activities.Start.StartActivityFragmentListe
 import com.example.presamsungproject.R;
 
 public class ProblemFragment extends Fragment {
-    private final StartActivityFragmentListener SAFListener;
+    private final FragmentListener FListener;
     private final String message;
 
-    public ProblemFragment(StartActivityFragmentListener SAFListener, String message) {
-        this.SAFListener = SAFListener;
+    public ProblemFragment(FragmentListener FListener, String message) {
+        this.FListener = FListener;
         this.message = message;
     }
 
@@ -31,7 +31,7 @@ public class ProblemFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 SoundEffects.getInstance().executeEffect(SoundEffects.CLICK);
-                SAFListener.removeFragment(ProblemFragment.this);
+                FListener.removeFragment(ProblemFragment.this);
             }
         });
 

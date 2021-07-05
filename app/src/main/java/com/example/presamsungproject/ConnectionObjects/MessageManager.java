@@ -1,9 +1,9 @@
 package com.example.presamsungproject.ConnectionObjects;
 
 import android.util.Log;
+import com.example.presamsungproject.Activities.Start.StartActivityMessageListener;
 import com.example.presamsungproject.GameObjects.Tank;
 import com.example.presamsungproject.Models.*;
-import com.example.presamsungproject.Activities.Start.StartActivityMessageListener;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -12,10 +12,10 @@ import java.io.ObjectOutputStream;
 import java.util.Arrays;
 
 public class MessageManager {
+    public static final String SENDING_TANK_MESSAGE = "SENDING_TANK";
     private static final String CONNECT_MESSAGE = "CONNECTED";
     private static final String NAMES_LIST_MESSAGE = "NAMES_LIST";
     private static final String SENDING_GAME_OPTIONS_MESSAGE = "SENDING_GAME_OPTIONS";
-    private static final String SENDING_TANK_MESSAGE = "SENDING_TANK";
     private static final String CLIENT_READY_MESSAGE = "CLIENT_READY";
     private static final String ALL_READY_MESSAGE = "ALL_READY";
     private static final String HIT_MESSAGE = "HIT";
@@ -75,6 +75,9 @@ public class MessageManager {
             case CONNECT_MESSAGE: {
                 StartActivityMessageListener SAMListener = Resources.getInstance().getSAMListener();
                 SAMListener.serverAddPlayer(separated[1], separated[2]);
+                if(currentGame != null)
+                    if(currentGame.getControlledTank() != null)
+                        broadcastAllTanks();
                 break;
             }
             case CLIENT_READY_MESSAGE: {
@@ -156,9 +159,21 @@ public class MessageManager {
                 Client.getInstance().sendMessage(MessageManager.sendTankMessage(currentGame.getControlledTank().getSimpleVersion()));
             }
         } catch (Exception e) {
-            Log.d("MyTag", "Sending myTank error");
+            Log.d("MyTag", "Sending controlled tank error");
             e.printStackTrace();
         }
+    }
+
+    private static void broadcastAllTanks() {
+        for (Tank tank : currentGame.getOtherTanks().values()) {
+            try {
+                Server.getInstance().broadcastMessage(sendTankMessage(tank));
+            } catch (Exception e) {
+                Log.d("MyTag", "Sending tank error");
+                e.printStackTrace();
+            }
+        }
+        sendControlledTank();
     }
 
     public static void updateGame(Game game) {

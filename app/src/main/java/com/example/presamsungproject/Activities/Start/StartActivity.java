@@ -9,16 +9,19 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 import com.example.presamsungproject.Activities.Game.GameActivity;
+import com.example.presamsungproject.Activities.General.FragmentListener;
 import com.example.presamsungproject.Activities.General.LoadingFragment;
 import com.example.presamsungproject.Activities.General.ProblemFragment;
+import com.example.presamsungproject.Activities.General.ProblemListener;
 import com.example.presamsungproject.ConnectionObjects.Assistive.ExternalAddressFinder;
+import com.example.presamsungproject.ConnectionObjects.Client;
 import com.example.presamsungproject.ConnectionObjects.MessageManager;
 import com.example.presamsungproject.ConnectionObjects.Server;
 import com.example.presamsungproject.Models.*;
 import com.example.presamsungproject.R;
 
 public class StartActivity extends AppCompatActivity
-        implements StartActivityFragmentListener, StartActivityMessageListener {
+        implements StartActivityFragmentListener, StartActivityMessageListener, ProblemListener {
     private ServerFragment serverFragment;
     private ClientFragment clientFragment;
     private LoadingFragment loadingFragment;
@@ -35,6 +38,7 @@ public class StartActivity extends AppCompatActivity
         ExternalAddressFinder.tryToFind(getApplicationContext());
         SoundEffects.getInstance().executeEffect(SoundEffects.MAIN_THEME);
         Resources.getInstance().setSAMListener(this);
+        Resources.getInstance().setPListener(this);
 
         ImageView backgroundImage = findViewById(R.id.as_background_image);
         backgroundImage.setImageBitmap(Resources.getInstance().getPaintedWallPaper());
@@ -56,12 +60,20 @@ public class StartActivity extends AppCompatActivity
     protected void onResume() {
         super.onResume();
         SoundEffects.getInstance().resumeEffects();
+        if(Client.getInstance() != null)
+            Client.getInstance().restart();
+        if(Server.getInstance() != null)
+            Server.getInstance().recreate();
     }
 
     @Override
     protected void onPause() {
-        SoundEffects.getInstance().pauseEffects();
         super.onPause();
+        SoundEffects.getInstance().pauseEffects();
+        if(Client.getInstance() != null)
+            Client.getInstance().pause();
+        if(Server.getInstance() != null)
+            Server.getInstance().pause();
     }
 
     @Override
@@ -76,18 +88,6 @@ public class StartActivity extends AppCompatActivity
         fragmentTransaction = getSupportFragmentManager().beginTransaction();
         fragmentTransaction.remove(fragment);
         fragmentTransaction.commit();
-    }
-
-    @Override
-    public void showProblem(String text) {
-        StartActivityFragmentListener SAFListener = this;
-        runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ProblemFragment problemFragment = new ProblemFragment(SAFListener, text);
-                addFragment(problemFragment);
-            }
-        });
     }
 
     @Override
@@ -178,5 +178,17 @@ public class StartActivity extends AppCompatActivity
     public void notifyGameStarting() {
         removeFragment(loadingFragment);
         gotoGameActivity();
+    }
+
+    @Override
+    public void showProblem(String text) {
+        StartActivityFragmentListener SAFListener = this;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ProblemFragment problemFragment = new ProblemFragment(SAFListener, text);
+                addFragment(problemFragment);
+            }
+        });
     }
 }

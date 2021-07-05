@@ -6,7 +6,7 @@
         game networking takes place on the local network. The device that dispenses Wi-fi cannot be a player :(.
         \n    One of players creates a game lobby, the IP of his device will be shown on his screen. This person
         can configure the settings for the generation of the map and the upcoming game and, after waiting for the
-        connection of other players, start it.
+        serverConnection of other players, start it.
         \n    Other people, wishing to connect to the lobby creator, have to enter IP of his device.
     </string>
     <string name="how_to_play">

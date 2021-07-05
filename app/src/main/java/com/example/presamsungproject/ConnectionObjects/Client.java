@@ -1,44 +1,77 @@
 package com.example.presamsungproject.ConnectionObjects;
 
 import android.util.Log;
+import com.example.presamsungproject.ConnectionObjects.Assistive.ConnectionToServerTester;
 import com.example.presamsungproject.ConnectionObjects.Threads.ConnectThread;
 
-import java.net.Socket;
 import java.util.LinkedList;
 
 public class Client {
     private static Client instance = null;
-    private String serverIP = "";
-    private Socket socket = null;
-    private ConnectThread connectThread = null;
+    private final String serverIP;
+    private final String name;
+    private final ConnectThread connectThread;
     private final LinkedList<String> messageQueue = new LinkedList<>();
 
-    public static void createInstance(String serverIP) {
+    public static void createInstance(String serverIP, String name) {
         if (instance != null) {
             instance.stop();
         }
-        instance = new Client(serverIP);
+        instance = new Client(serverIP, name);
     }
 
     public static Client getInstance() {
         return instance;
     }
 
-    private Client(String serverIP) {
+    public void restart() {
+        if (instance != null)
+            ConnectionToServerTester.testConnection(serverIP, name, 5000, true);
+    }
+
+    private Client(String serverIP, String name) {
         this.serverIP = serverIP;
-        connectThread = new ConnectThread(serverIP, socket, messageQueue);
+        this.name = name;
+        connectThread = new ConnectThread(this);
         connectThread.start();
+        sendMessage(MessageManager.connectMessage(name));
+        if(MessageManager.getCurrentGame() != null) {
+            try {
+                sendMessage(MessageManager.sendTankMessage(MessageManager.getCurrentGame().getControlledTank().getSimpleVersion()));
+            } catch (Exception e) {
+                Log.d("MyTag", "Sending tank error");
+                e.printStackTrace();
+            }
+        }
+    }
+
+    public void pause() {
+        connectThread.close(false);
     }
 
     public void stop() {
-        if (connectThread.isInterrupted())
-            return;
-        sendMessage("end");
+        instance = null;
+        connectThread.close(false);
     }
 
     public void sendMessage(String toSend) {
-        messageQueue.addLast(toSend);
-        if (messageQueue.size() > 5)
+        if (messageQueue.size() > 5) {
             Log.d("MyTraffic", "Client too many messages");
+            if (toSend.split(" ")[0].equals(MessageManager.SENDING_TANK_MESSAGE))
+                return;
+        }
+        messageQueue.addLast(toSend);
+    }
+
+    public String getServerIP() {
+        return serverIP;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public LinkedList<String> getMessageQueue() {
+        return messageQueue;
     }
 }

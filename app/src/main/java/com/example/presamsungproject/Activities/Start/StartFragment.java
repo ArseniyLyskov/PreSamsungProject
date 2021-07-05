@@ -9,6 +9,7 @@ import android.widget.EditText;
 import androidx.fragment.app.Fragment;
 import com.example.presamsungproject.ConnectionObjects.Assistive.ExternalAddressFinder;
 import com.example.presamsungproject.Models.InfoSingleton;
+import com.example.presamsungproject.Models.Resources;
 import com.example.presamsungproject.Models.SoundEffects;
 import com.example.presamsungproject.R;
 
@@ -70,10 +71,10 @@ public class StartFragment extends Fragment {
 
     private boolean isNickNameEntered() {
         if (editText.getText().toString().equals("")) {
-            SAFListener.showProblem("You didn't enter your nickname");
+            Resources.getInstance().getPListener().showProblem("You didn't enter your nickname");
             return false;
         } else if (editText.getText().toString().contains(" ")) {
-            SAFListener.showProblem("Your nickname mustn't contain a spaces");
+            Resources.getInstance().getPListener().showProblem("Your nickname mustn't contain a spaces");
             return false;
         } else return true;
     }
@@ -84,7 +85,7 @@ public class StartFragment extends Fragment {
             connected = InfoSingleton.getInstance().getEXTERNAL_ADDRESS().length() > 4
                     && InfoSingleton.getInstance().getEXTERNAL_ADDRESS().length() < 16;
         if (!connected) {
-            SAFListener.showProblem("Error. Check your connection to Wi-Fi.");
+            Resources.getInstance().getPListener().showProblem("Error. Check your connection to Wi-Fi.");
             ExternalAddressFinder.tryToFind(getContext());
         }
         return connected;

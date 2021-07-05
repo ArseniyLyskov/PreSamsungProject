@@ -23,8 +23,6 @@ public class Game {
     private final ControlledTank controlledTank;
     private double lJangle, lJstrength, rJangle, rJstrength;
     private int fps = MAX_FPS, previousPFS = MAX_FPS;
-    private int frameWidth, frameHeight;
-    private final double scaleKoeff;
 
 
     public Game(String name, GameOptions gameOptions) {
@@ -39,7 +37,7 @@ public class Game {
 
         double startCoordinatesScale = gameOptions.getStartCoordinatesScale();
         Point startCoordinates = gameOptions.getStartCoordinates();
-        scaleKoeff = getScale() / startCoordinatesScale;
+        double scaleKoeff = getScale() / startCoordinatesScale;
         startCoordinates.scaleTo(scaleKoeff);
         controlledTank = new ControlledTank(hp, team, startCoordinates.getX(), startCoordinates.getY(), name, ricochetAble, this);
 
@@ -50,10 +48,15 @@ public class Game {
     }
 
     public void drawAll(Canvas canvas) {
-        frameWidth = canvas.getWidth();
-        frameHeight = canvas.getHeight();
-        canvas.scale(1 / (float) scaleKoeff, 1 / (float) scaleKoeff, frameWidth / 2f, frameHeight / 2f);
-        canvas.translate(getTranslateCanvasX(), getTranslateCanvasY()); //TODO: учесть scale
+        canvas.save();
+
+        float scale = (float) (2.625f / Resources.getInstance().getPixelsDensity());
+        float scaleWidth = canvas.getWidth() * scale / 1920f;
+        float scaleHeight = canvas.getHeight() * scale / 1080f;
+        canvas.translate(getTranslateCanvasX(canvas.getWidth(), scaleWidth),
+                getTranslateCanvasY(canvas.getHeight(), scaleHeight));
+        canvas.scale(scaleWidth, scaleHeight,
+                canvas.getWidth() / 2f, canvas.getHeight() / 2f);
 
         canvas.drawBitmap(map_bitmap,
                 -Resources.getInstance().getBmp_mapCellBackground().getWidth(),
@@ -97,6 +100,8 @@ public class Game {
 
         if (DEBUG)
             drawAllHitBoxes(canvas);
+
+        canvas.restore();
     }
 
     private void drawAllHitBoxes(Canvas canvas) {
@@ -135,26 +140,46 @@ public class Game {
         return hitBoxes;
     }
 
-    private int getTranslateCanvasX() {
+    private int getTranslateCanvasX(double canvasWidth, double scaleWidth) {
         int cellWidth = Resources.getInstance().getBmp_mapCellBackground().getWidth();
-        int tankWidth = Resources.getInstance().getBmp_blueHp().getWidth();
-        if (frameWidth >= map_bitmap.getWidth())
-            return cellWidth;
-        int translation = -(int) (controlledTank.getX() - frameWidth / 2f + tankWidth / 2f);
-        if (translation > cellWidth)
-            return cellWidth;
-        return Math.max(translation, -(map_bitmap.getWidth() - cellWidth - frameWidth));
+        int tankWidth = Resources.getInstance().getBmp_greenHp().getWidth();
+        double rightMargin = map_bitmap.getWidth() - cellWidth - controlledTank.getX() - tankWidth;
+        double leftMargin = map_bitmap.getWidth() - tankWidth - rightMargin;
+        double minimumMargin = (canvasWidth - tankWidth) / 2f;
+        double translation = -(controlledTank.getX() - (canvasWidth - tankWidth) / 2f);
+
+        if (leftMargin * scaleWidth < minimumMargin) {
+            double leftDeficit = minimumMargin - leftMargin * scaleWidth;
+            return (int) (translation * scaleWidth - leftDeficit);
+        } else {
+            if (rightMargin * scaleWidth < minimumMargin) {
+                double rightDeficit = minimumMargin - rightMargin * scaleWidth;
+                return (int) (translation * scaleWidth + rightDeficit);
+            } else {
+                return (int) (translation * scaleWidth);
+            }
+        }
     }
 
-    private int getTranslateCanvasY() {
+    private int getTranslateCanvasY(double canvasHeight, double scaleHeight) {
         int cellHeight = Resources.getInstance().getBmp_mapCellBackground().getHeight();
-        int tankHeight = Resources.getInstance().getBmp_blueHp().getHeight();
-        if (frameHeight >= map_bitmap.getHeight())
-            return cellHeight;
-        int translation = -(int) (controlledTank.getY() - frameHeight / 2f + tankHeight / 2f);
-        if (translation > cellHeight)
-            return cellHeight;
-        return Math.max(translation, -(map_bitmap.getHeight() - cellHeight - frameHeight));
+        int tankHeight = Resources.getInstance().getBmp_greenHp().getHeight();
+        double bottomMargin = map_bitmap.getHeight() - cellHeight - controlledTank.getY() - tankHeight;
+        double topMargin = map_bitmap.getHeight() - tankHeight - bottomMargin;
+        double minimumMargin = (canvasHeight - tankHeight) / 2f;
+        double translation = -(controlledTank.getY() - (canvasHeight - tankHeight) / 2f);
+
+        if (topMargin * scaleHeight < minimumMargin) {
+            double topDeficit = minimumMargin - topMargin * scaleHeight;
+            return (int) (translation * scaleHeight - topDeficit);
+        } else {
+            if (bottomMargin * scaleHeight < minimumMargin) {
+                double bottomDeficit = minimumMargin - bottomMargin * scaleHeight;
+                return (int) (translation * scaleHeight + bottomDeficit);
+            } else {
+                return (int) (translation * scaleHeight);
+            }
+        }
     }
 
     public int getScale() {

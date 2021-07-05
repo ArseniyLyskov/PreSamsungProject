@@ -11,6 +11,7 @@ import androidx.fragment.app.Fragment;
 import com.example.presamsungproject.ConnectionObjects.Assistive.ConnectionToServerTester;
 import com.example.presamsungproject.ConnectionObjects.Client;
 import com.example.presamsungproject.Models.GameOptions;
+import com.example.presamsungproject.Models.Resources;
 import com.example.presamsungproject.Models.SoundEffects;
 import com.example.presamsungproject.R;
 
@@ -42,10 +43,10 @@ public class ClientFragment extends Fragment {
                 if (button.getText().toString().equals("Connect to lobby via ip")) {
                     String serverIP = editText.getText().toString();
                     if (serverIP.equals("")) {
-                        SAFListener.showProblem("You didn't enter server IP");
+                        Resources.getInstance().getPListener().showProblem("You didn't enter server IP");
                         return;
                     }
-                    ConnectionToServerTester.testConnection(serverIP, true, name, SAFListener);
+                    ConnectionToServerTester.testConnection(serverIP, name, 500, true);
                 } else if (button.getText().toString().equals("Disconnect from lobby")) {
                     Client.getInstance().stop();
                 }
@@ -66,7 +67,8 @@ public class ClientFragment extends Fragment {
     @Override
     public void onDestroy() {
         updateUI("", 0);
-        Client.getInstance().stop();
+        if(Client.getInstance() != null)
+            Client.getInstance().pause();
         super.onDestroy();
     }
 
